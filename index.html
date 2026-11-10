@@ -1031,6 +1031,27 @@ main{overflow-x:clip}
 .sy-say.on{background:var(--ink);color:#fff}
 .sy-say.on .ti{color:rgba(255,255,255,.7)}
 .sy-say.on svg{fill:#fff;stroke:#fff}
+
+/* ---------- pattern lab, guided: five numbered steps; the bar on top ticks off what you've done and points at what's next ---------- */
+.lab-steps{list-style:none;margin:2rem 0 0;padding:0;display:grid;grid-template-columns:repeat(5,1fr);gap:.4rem;counter-reset:none}
+.lab-steps a{display:flex;align-items:center;gap:.5rem;padding:.55rem .6rem;border-radius:12px;color:var(--muted);text-decoration:none;font-size:.82rem;font-weight:700;line-height:1.2;background:rgba(255,255,255,.55);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);box-shadow:inset 0 0 0 1px rgba(57,53,54,.08);transition:background .25s,color .25s}
+.lab-steps .ti{font-weight:400;font-size:.66rem}
+.lab-steps i{flex:none;width:1.6rem;height:1.6rem;border-radius:50%;display:grid;place-items:center;font-style:normal;font-family:var(--en);font-size:.78rem;background:var(--dot);color:var(--ink);transition:background .25s,color .25s}
+.lab-steps li.done i{background:var(--teal);color:#fff;font-size:0}
+.lab-steps li.done i::before{content:"✓";font-size:.8rem}
+.lab-steps li.now a{background:#fff;color:var(--ink);box-shadow:inset 0 0 0 1.5px var(--pink)}
+.lab-steps li.now i{background:var(--pink);color:#fff}
+.lab .st-h{display:flex;align-items:center;gap:.65rem;margin:1.6rem 0 .7rem;scroll-margin-top:110px}
+.lab .panel>.st-h:first-child{margin-top:0}
+.st-h i{flex:none;width:2rem;height:2rem;border-radius:50%;display:grid;place-items:center;font-style:normal;font-family:var(--en);font-weight:700;font-size:.9rem;background:var(--ink);color:#fff;transition:background .3s}
+.st-h b{display:block;font-size:1.02rem;line-height:1.25}
+.st-h .ti{font-size:.72rem;color:var(--muted)}
+.st-h.done i{background:var(--teal)}
+.st-h.now i{background:var(--pink);animation:stpulse 1.8s ease-in-out infinite}
+@keyframes stpulse{50%{box-shadow:0 0 0 6px color-mix(in srgb,var(--pink) 18%,transparent)}}
+.st-tip{margin:-.3rem 0 .6rem;font-size:.8rem;color:var(--muted);line-height:1.4}
+@media (max-width:600px){.lab-steps{gap:.25rem}.lab-steps a{flex-direction:column;gap:.25rem;padding:.5rem .2rem;text-align:center;font-size:.72rem}.lab-steps .ti{display:none}}
+@media (prefers-reduced-motion:reduce){.st-h.now i{animation:none}}
 </style>
 
 <header class="hdr" id="hdr">
@@ -1306,8 +1327,16 @@ main{overflow-x:clip}
     <h2 class="sec rv">注音印花實驗室<small>Arrange one tile, watch it repeat</small></h2>
     <p class="lead rv" style="margin-top:1rem">在左邊的格子裡拖曳注音，排出一格圖案；右邊會即時把它變成連續印花，並套到商品上預覽。<span class="te">Drag Zhuyin into the cell on the left to design one tile; the right side repeats it into a pattern and previews it on products.</span></p>
 
+    <ol class="lab-steps rv" id="labSteps" aria-label="製作步驟 Steps">
+      <li data-s="1"><a href="#step1"><i>1</i><span>排圖案<span class="ti">Arrange</span></span></a></li>
+      <li data-s="2"><a href="#step2"><i>2</i><span>排列方式<span class="ti">Repeat</span></span></a></li>
+      <li data-s="3"><a href="#step3"><i>3</i><span>配色<span class="ti">Colour</span></span></a></li>
+      <li data-s="4"><a href="#step4"><i>4</i><span>大小間距<span class="ti">Size</span></span></a></li>
+      <li data-s="5"><a href="#step5"><i>5</i><span>完成<span class="ti">Finish</span></span></a></li>
+    </ol>
     <div class="lab">
       <div class="panel">
+        <div class="st-h" id="step1"><i>1</i><span><b>先排出一格圖案</b><span class="ti">Design one tile</span></span></div>
         <div class="mode-tabs" role="group" aria-label="圖案來源">
           <button id="mCustom" aria-pressed="true">自己排<span class="ti">Make your own</span></button>
           <button id="mMotif" aria-pressed="false">BOPOMOFO 怎麼排？<span class="ti">Our motifs</span></button>
@@ -1333,18 +1362,15 @@ main{overflow-x:clip}
           <div class="motif-pick" id="motifPick"></div>
         </div>
 
-        <span class="lbl">排列方式<span class="ti">Repeat</span></span>
+        <div class="st-h" id="step2"><i>2</i><span><b>選一種排列方式</b><span class="ti">Choose how it repeats</span></span></div>
         <div class="swatches" id="symBtns" style="gap:.4rem"></div>
       </div>
 
       <div class="panel pv">
         <canvas id="pv" aria-label="印花預覽"></canvas>
         <div class="pv-tabs" id="pvTabs"></div>
-        <span class="lbl">圖案大小<span class="ti">Scale</span></span>
-        <div class="range"><span style="font-size:.8rem">小<span class="ti">S</span></span><input type="range" id="scale" min="40" max="200" value="96" aria-label="圖案大小"><span style="font-size:.8rem">大<span class="ti">L</span></span></div>
-        <span class="lbl">單位間距<span class="ti">Spacing</span></span>
-        <div class="range"><span style="font-size:.8rem">窄<span class="ti">Tight</span></span><input type="range" id="gap" min="60" max="180" value="100" aria-label="單位間距"><span style="font-size:.8rem">寬<span class="ti">Loose</span></span></div>
-        <span class="lbl">配色<span class="ti">Colour</span><small style="font-weight:400;margin-left:.5rem">點色塊可任選顏色 · Tap a swatch to pick any colour</small></span>
+        <div class="st-h" id="step3"><i>3</i><span><b>幫它配色</b><span class="ti">Pick the colours</span></span></div>
+        <p class="st-tip">點色塊可任選顏色，或直接用下面的快速配色<span class="ti">Tap a swatch for any colour, or use a preset below</span></p>
         <div class="pickers">
           <label class="pk"><input type="color" id="pkInk" value="#da1884" aria-label="圖案色"><span class="pk-sw" id="pkInkSw"></span><span class="pk-t"><b>圖案色<span class="ti">Pattern</span></b><em id="pkInkV">#DA1884</em></span></label>
           <button class="pk-swap" id="pkSwap" type="button" aria-label="圖案色與底色對調" title="對調">⇄</button>
@@ -1352,7 +1378,13 @@ main{overflow-x:clip}
         </div>
         <span class="lbl">快速配色<span class="ti">Presets</span></span>
         <div class="presets" id="colorBtns"></div>
+        <div class="st-h" id="step4"><i>4</i><span><b>調整大小與間距</b><span class="ti">Fine-tune size & spacing</span></span></div>
+        <span class="lbl">圖案大小<span class="ti">Scale</span></span>
+        <div class="range"><span style="font-size:.8rem">小<span class="ti">S</span></span><input type="range" id="scale" min="40" max="200" value="96" aria-label="圖案大小"><span style="font-size:.8rem">大<span class="ti">L</span></span></div>
+        <span class="lbl">單位間距<span class="ti">Spacing</span></span>
+        <div class="range"><span style="font-size:.8rem">窄<span class="ti">Tight</span></span><input type="range" id="gap" min="60" max="180" value="100" aria-label="單位間距"><span style="font-size:.8rem">寬<span class="ti">Loose</span></span></div>
         <div class="stamp" id="stamp" aria-hidden="true"><span>BOPOMOFO<b>已儲存</b><i>SAVED</i></span></div>
+        <div class="st-h" id="step5"><i>5</i><span><b>完成！存下來或分享</b><span class="ti">Save or share it</span></span></div>
         <div class="pv-acts">
           <button class="sbtn" id="pSave" type="button">儲存圖片<span class="te">Save</span></button>
           <button class="sbtn" id="pShare" type="button">分享<span class="te">Share</span></button>
@@ -2975,6 +3007,25 @@ C.merch.forEach((p, i) => {
   if (TTS) { speechSynthesis.getVoices(); speechSynthesis.addEventListener && speechSynthesis.addEventListener('voiceschanged', () => {}); }
   else document.querySelector('.sy-says').innerHTML = '<p class="sy-py">這個瀏覽器不支援朗讀<span class="ti">Read-aloud isn’t supported in this browser</span></p>';
   render();
+})();
+
+/* ---------- LAB STEPS: tick a step once you've touched its controls; the first unticked one is "now" ---------- */
+(() => {
+  const bar = document.getElementById('labSteps'); if (!bar) return;
+  const done = new Set();
+  const paint = () => { let now = 0; for (let k = 1; k <= 5; k++) if (!done.has(k)) { now = k; break; }
+    for (let k = 1; k <= 5; k++) { const li = bar.querySelector(`[data-s="${k}"]`), h = document.getElementById('step' + k);
+      [li, h].forEach(e => { if (!e) return; e.classList.toggle('done', done.has(k)); e.classList.toggle('now', k === now); }); } };
+  const mark = k => () => { if (!done.has(k)) { done.add(k); paint(); } };
+  const on = (sel, ev, k) => document.querySelectorAll(sel).forEach(e => e.addEventListener(ev, mark(k), {passive: true}));
+  on('#palette', 'click', 1); on('#ed', 'pointerdown', 1); on('#motifPick', 'click', 1); on('#tShuffle', 'click', 1);
+  on('#symBtns', 'click', 2);
+  on('#pkInk', 'input', 3); on('#pkBg', 'input', 3); on('#pkSwap', 'click', 3); on('#colorBtns', 'click', 3);
+  on('#scale', 'input', 4); on('#gap', 'input', 4);
+  on('#pSave', 'click', 5); on('#pShare', 'click', 5); on('#pPost', 'click', 5);
+  // the step bar scrolls to a step without the page-wide paper transition
+  bar.querySelectorAll('a').forEach(a => a.addEventListener('click', e => { e.preventDefault(); e.stopImmediatePropagation(); document.querySelector(a.getAttribute('href')).scrollIntoView({behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start'}); }, true));
+  paint();
 })();
 </script>
 
