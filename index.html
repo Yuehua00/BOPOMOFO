@@ -1,4 +1,4 @@
-<!doctype html><html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta property="og:title" content="BOPOMOFO 臺灣注音印花設計"><meta property="og:description" content="Visual Translation of Taiwanese Zhuyin — 國立臺灣師範大學 圖文傳播學系 畢業製作"><meta property="og:image" content="assets/book/00.jpg"><style>[hidden]{display:none!important}body{margin:0}</style></head><body>
+<!doctype html><html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta property="og:title" content="BOPOMOFO 臺灣注音印花設計"><meta property="og:description" content="Visual Translation of Taiwanese Zhuyin — 國立臺灣師範大學 圖文傳播學系 畢業製作"><meta property="og:image" content="assets/merch/book-cover.webp"><style>[hidden]{display:none!important}body{margin:0}</style></head><body>
 <title>BOPOMOFO</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <meta name="description" content="BOPOMOFO — Visual Translation of Taiwanese Zhuyin. Explore Taiwanese culture through Bopomofo.">
@@ -837,7 +837,7 @@ main>section.pre-rule::before{--rule:0}
 .dr-hero .py{font-family:var(--en);font-size:.95rem;font-style:italic;color:var(--c);letter-spacing:.03em;margin:.15rem 0 .1rem}
 
 /* preview stays in view while you adjust the controls below it */
-#pv{position:sticky;top:calc(72px + env(safe-area-inset-top,0px));z-index:6;box-shadow:0 10px 24px -18px rgba(57,53,54,.45)}
+#pv{position:sticky;top:calc(72px + env(safe-area-inset-top,0px));z-index:6;border-radius:14px;box-shadow:0 10px 24px -18px rgba(57,53,54,.45)}
 @media (max-width:900px){#pv{top:calc(62px + env(safe-area-inset-top,0px));aspect-ratio:16/10}}
 
 /* pull-down-to-close for every pop-up card: a small grab bar hints at it */
@@ -1000,6 +1000,30 @@ main{overflow-x:clip}
 .sy-say svg{position:absolute;left:.7rem;top:50%;width:18px;height:18px;transform:translateY(-50%);fill:var(--ink);stroke:var(--ink);stroke-width:1.6;stroke-linecap:round}
 .sy-say.on svg{animation:hpop .5s ease infinite}
 @media (max-width:600px){.sy-out{padding:1.2rem 1rem}}
+
+/* ---------- tarot fan, restyled: each card is a white-framed print with its number at the foot ---------- */
+.mv-strip{overflow-x:clip;overflow-y:visible;height:clamp(470px,120vw,650px)}
+.mv-card{background:#fff;aspect-ratio:auto;padding:7px 7px 0;border-radius:18px;box-shadow:0 1px 0 rgba(255,255,255,.9) inset,0 0 0 1px rgba(57,53,54,.06),0 18px 34px -20px rgba(57,53,54,.55);filter:none!important}
+.mv-card video{aspect-ratio:9/16;height:auto;border-radius:12px;background:#fff}
+.mv-card .no{position:static;display:block;text-align:center;padding:.45rem 0 .55rem;color:var(--muted);font-size:.68rem;letter-spacing:.22em}
+.mv-card:not(.cur) video{opacity:.78}
+.mv-card.cur{box-shadow:0 0 0 1px rgba(57,53,54,.05),0 30px 50px -22px rgba(57,53,54,.55),0 0 0 6px rgba(255,255,255,.55)}
+.mv-card.cur .no{color:var(--pink);font-weight:700}
+.mv-card .pl{right:.9rem;top:.9rem;border-radius:50%;width:32px;height:32px}
+.fan-ctl .mt-btn2{width:42px;height:42px;border-radius:50%;border:0;padding:0;display:grid;place-items:center;font-size:1rem;color:var(--ink);background:rgba(255,255,255,.6);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);box-shadow:inset 0 0 0 1px rgba(57,53,54,.1),0 8px 18px -12px rgba(57,53,54,.5);cursor:pointer;transition:background .2s,transform .25s var(--spring)}
+.fan-ctl .mt-btn2:hover{background:#fff;transform:translateY(-2px)}
+.fan-ctl #fanN{min-width:4.5em;text-align:center;letter-spacing:.12em}
+
+/* ---------- shop shelf: book spans two columns, every card shares one height, so two even rows on wide screens ---------- */
+.shelf{grid-template-columns:repeat(3,1fr);grid-template-rows:none;align-items:start}
+.prod:first-child{grid-row:auto;grid-column:span 2}
+.prod:nth-child(3){margin-top:0}
+.prod .vw,.prod:first-child .vw{aspect-ratio:4/5}
+.prod:first-child .vw{aspect-ratio:calc(8 / 5 + .06)}
+.prod .vw .v{opacity:0;transform:scale(1.04)}
+.prod .vw .v.on{opacity:1;transform:none}
+.prod .views.one{display:none}
+@media (max-width:820px){.shelf{grid-template-columns:1fr 1fr}.prod:first-child .vw{aspect-ratio:4/3}}
 </style>
 
 <header class="hdr" id="hdr">
@@ -1033,7 +1057,7 @@ main{overflow-x:clip}
       <p class="en">Explore Taiwanese culture through Bopomofo: 37 symbols, 4 tones, 60 words of food, places and everyday objects.</p>
       <div class="hero-cta">
         <a class="btn" href="#explore"><span>探索更多臺灣的文化故事<span class="te">Discover more stories of Taiwan</span></span> <span aria-hidden="true">→</span></a>
-        <a class="btn ghost" href="#lab"><span>玩印花<span class="te">Play with patterns</span></span></a>
+        <a class="btn ghost" href="#lab"><span>玩印花<span class="te">Play with patterns</span></span> <span aria-hidden="true">→</span></a>
       </div>
     </div>
     <div class="island" id="island" aria-label="以注音圖騰拼成的臺灣島主視覺（移動滑鼠或捲動試試看）"></div>
@@ -2178,19 +2202,22 @@ if ('ResizeObserver' in window) new ResizeObserver(() => drawAll()).observe(ed);
 const shelf = $('#shelf');
 C.merch.forEach((p, i) => {
   const d = el('div','prod rv'); d.style.setProperty('--c', COL[toneCols[(i + 2) % 4]]); d.style.setProperty('--m', motifURL([7,3,9,1,5][i % 5]));
-  const views = p.images.length ? p.images.map((s, j) => `<img class="${j ? 'b' : 'a'}" src="${s}" alt="${p.name} 視角 ${j + 1}" loading="lazy">`).join('')
-    : `<div class="ph a"><div class="t"><b>商品照待補 · 視角 1<span class="te">Photo coming · view 1</span></b>${p.en}</div></div><div class="ph b"><div class="t"><b>商品照待補 · 視角 2<span class="te">Photo coming · view 2</span></b>情境／細節 · In use / detail</div></div>`;
-  d.innerHTML = `<div class="card" tabindex="0" aria-label="${p.name}，按 Enter 切換視角"><div class="views"><i class="on"></i><i></i></div><div class="vw">${views}</div></div>
+  // views: every photo given, padded with placeholders up to two (shot 1 / in-use detail)
+  const ph = (k, t, sub) => `<div class="ph v"><div class="t"><b>商品照待補 · 視角 ${k}<span class="te">Photo coming · view ${k}</span></b>${sub}</div></div>`;
+  const vs = p.images.map((s, j) => `<img class="v" src="${s}" alt="${p.name} 視角 ${j + 1}" loading="lazy">`);
+  if (vs.length < 1) vs.push(ph(1, '', p.en)); if (vs.length < 2) vs.push(ph(2, '', '情境／細節 · In use / detail'));
+  d.innerHTML = `<div class="card" tabindex="0" aria-label="${p.name}，按 Enter 切換視角"><div class="views${vs.length < 2 ? ' one' : ''}">${vs.map(() => '<i></i>').join('')}</div><div class="vw">${vs.join('')}</div></div>
     <div class="meta"><h3>${p.name}</h3><span class="en">${p.en}</span></div><p class="note">${p.note}${p.noteEn ? `<span class="te">${p.noteEn}</span>` : ''}</p>`;
-  const card = d.querySelector('.card'), dots = d.querySelectorAll('.views i');
-  const set = a => { d.classList.toggle('alt', a); dots[0].classList.toggle('on', !a); dots[1].classList.toggle('on', a); };
+  const card = d.querySelector('.card'), dots = [...d.querySelectorAll('.views i')], imgs = [...d.querySelectorAll('.vw .v')];
+  let cur = 0; const set = k => { cur = (k + imgs.length) % imgs.length; imgs.forEach((v, j) => v.classList.toggle('on', j === cur)); dots.forEach((v, j) => v.classList.toggle('on', j === cur)); };
+  set(0);
   if (FINE) {
-    card.addEventListener('pointerenter', () => set(true));
-    card.addEventListener('pointerleave', () => { set(false); card.style.setProperty('--rx','0deg'); card.style.setProperty('--ry','0deg'); });
+    card.addEventListener('pointerenter', () => set(1));
+    card.addEventListener('pointerleave', () => { set(0); card.style.setProperty('--rx','0deg'); card.style.setProperty('--ry','0deg'); });
     if (!RM) card.addEventListener('pointermove', e => { const r = card.getBoundingClientRect(); card.style.setProperty('--rx', ((e.clientX - r.left) / r.width - .5) * 14 + 'deg'); card.style.setProperty('--ry', -((e.clientY - r.top) / r.height - .5) * 14 + 'deg'); });
   }
-  card.addEventListener('click', () => { if (!FINE) set(!d.classList.contains('alt')); });
-  card.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); set(!d.classList.contains('alt')); } });
+  card.addEventListener('click', () => set(cur + 1));   // tap or click steps through every view
+  card.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); set(cur + 1); } });
   shelf.appendChild(d);
 });
 })();
@@ -2705,7 +2732,7 @@ C.merch.forEach((p, i) => {
   const bx = bg.getContext('2d'), ix = ink.getContext('2d');
   let si = 0, tool = 'pencil', strokes = [], cur = null, W = 0, H = 0, dpr = 1, G = null;
   // geometry: columns of [big square | narrow zhuyin strip], read right-to-left like a real exercise book
-  function geo() { const w = bg.parentElement.clientWidth, cols = w < 420 ? 3 : w < 640 ? 4 : 5, P = w / cols, S = P * .72, N = P - S, rows = cols === 3 ? 5 : 6;
+  function geo() { const w = bg.parentElement.clientWidth, cols = w < 420 ? 3 : w < 640 ? 4 : 5, P = w / cols, S = P * .72, N = P - S, rows = 3;   // one printed model + two tracing copies per column, then blank columns
     return {w, cols, rows, P, S, N, h: Math.round(S * rows)}; }
   // a column's big square, counted from the right
   const sq = (c, r) => ({x: G.w - (c + 1) * G.P, y: r * G.S});
