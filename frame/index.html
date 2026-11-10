@@ -334,7 +334,7 @@ a.btn:hover{color:#fff}
   // ---- say the symbol out loud (browser speech, Taiwan Mandarin when available) ----
   // each symbol is spoken as one common character that has exactly that sound (symbol -> character, pinyin)
   var SAY={'ㄅ':'波','ㄆ':'坡','ㄇ':'摸','ㄈ':'佛','ㄉ':'得','ㄊ':'特','ㄋ':'呢','ㄌ':'勒','ㄍ':'哥','ㄎ':'渴','ㄏ':'喝','ㄐ':'雞','ㄑ':'七','ㄒ':'西','ㄓ':'知','ㄔ':'吃','ㄕ':'詩','ㄖ':'日','ㄗ':'資','ㄘ':'詞','ㄙ':'思','ㄧ':'衣','ㄨ':'烏','ㄩ':'魚','ㄚ':'啊','ㄛ':'喔','ㄜ':'鵝','ㄝ':'耶','ㄞ':'哀','ㄟ':'欸','ㄠ':'熬','ㄡ':'歐','ㄢ':'安','ㄣ':'恩','ㄤ':'昂','ㄥ':'鞥','ㄦ':'兒'};
-  var PY={'ㄅ':'bo','ㄆ':'po','ㄇ':'mo','ㄈ':'fo','ㄉ':'de','ㄊ':'te','ㄋ':'ne','ㄌ':'le','ㄍ':'ge','ㄎ':'ke','ㄏ':'he','ㄐ':'ji','ㄑ':'qi','ㄒ':'xi','ㄓ':'zhi','ㄔ':'chi','ㄕ':'shi','ㄖ':'ri','ㄗ':'zi','ㄘ':'ci','ㄙ':'si','ㄧ':'yi','ㄨ':'wu','ㄩ':'yu','ㄚ':'a','ㄛ':'o','ㄜ':'e','ㄝ':'ê','ㄞ':'ai','ㄟ':'ei','ㄠ':'ao','ㄡ':'ou','ㄢ':'an','ㄣ':'en','ㄤ':'ang','ㄥ':'eng','ㄦ':'er'};
+  var PINYIN={'ㄅ':'bo','ㄆ':'po','ㄇ':'mo','ㄈ':'fo','ㄉ':'de','ㄊ':'te','ㄋ':'ne','ㄌ':'le','ㄍ':'ge','ㄎ':'ke','ㄏ':'he','ㄐ':'ji','ㄑ':'qi','ㄒ':'xi','ㄓ':'zhi','ㄔ':'chi','ㄕ':'shi','ㄖ':'ri','ㄗ':'zi','ㄘ':'ci','ㄙ':'si','ㄧ':'yi','ㄨ':'wu','ㄩ':'yu','ㄚ':'a','ㄛ':'o','ㄜ':'e','ㄝ':'ê','ㄞ':'ai','ㄟ':'ei','ㄠ':'ao','ㄡ':'ou','ㄢ':'an','ㄣ':'en','ㄤ':'ang','ㄥ':'eng','ㄦ':'er'};
   var voice=null;
   function pickVoice(){var vs=(window.speechSynthesis&&speechSynthesis.getVoices())||[];
     voice=null;for(var i=0;i<vs.length;i++){var l=(vs[i].lang||'').replace('_','-').toLowerCase();if(l==='zh-tw'||l==='zh-hant-tw'){voice=vs[i];break;}}
@@ -342,7 +342,7 @@ a.btn:hover{color:#fff}
   if('speechSynthesis' in window){pickVoice();speechSynthesis.onvoiceschanged=pickVoice;}
   function speak(ch){
     if(!('speechSynthesis' in window)||!SAY[ch])return;
-    var sm=$('sayMsg');if(sm)sm.textContent=ch+'　'+(PY[ch]||'');try{speechSynthesis.cancel();var u=new SpeechSynthesisUtterance(SAY[ch]);u.lang='zh-TW';u.rate=.8;u.pitch=1;if(voice)u.voice=voice;speechSynthesis.speak(u);}catch(e){}
+    var sm=$('sayMsg');if(sm)sm.textContent=ch+'　'+(PINYIN[ch]||'');try{speechSynthesis.cancel();var u=new SpeechSynthesisUtterance(SAY[ch]);u.lang='zh-TW';u.rate=.8;u.pitch=1;if(voice)u.voice=voice;speechSynthesis.speak(u);}catch(e){}
   }  function fillChart(id,str,c,k0){var el=$(id);str.split('').forEach(function(ch,i){var s=document.createElement('span');s.textContent=ch;s.style.setProperty('--c',c);s.style.setProperty('--k',k0+i);
     s.addEventListener('click',function(){s.classList.remove('hit');void s.offsetWidth;s.classList.add('hit');var r=s.getBoundingClientRect();floatUp(ch,r.left+r.width/2,r.top,c);speak(ch);});
     el.appendChild(s);});}
