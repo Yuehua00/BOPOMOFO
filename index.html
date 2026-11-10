@@ -1024,6 +1024,13 @@ main{overflow-x:clip}
 .prod .vw .v.on{opacity:1;transform:none}
 .prod .views.one{display:none}
 @media (max-width:820px){.shelf{grid-template-columns:1fr 1fr}.prod:first-child .vw{aspect-ratio:4/3}}
+
+.sy-says{display:flex;flex-wrap:wrap;gap:.5rem;margin-top:1rem}
+.sy-says .sy-say{margin-top:0}
+.sy-say:disabled{opacity:.4;cursor:default}
+.sy-say.on{background:var(--ink);color:#fff}
+.sy-say.on .ti{color:rgba(255,255,255,.7)}
+.sy-say.on svg{fill:#fff;stroke:#fff}
 </style>
 
 <header class="hdr" id="hdr">
@@ -1222,7 +1229,7 @@ main{overflow-x:clip}
         <div class="sy-zy" id="syZy"></div>
         <p class="sy-py" id="syPy"></p>
         <p class="sy-en" id="syEn"></p>
-        <button type="button" class="sy-say" id="sySay" hidden aria-label="唸出來 Read aloud"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4z"/><path d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12" fill="none"/></svg>唸給我聽<span class="ti">Read aloud</span></button>
+        <div class="sy-says"><button type="button" class="sy-say" id="sySay" disabled><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4z"/><path d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12" fill="none"/></svg>唸中文給我聽<span class="ti">Read Chinese aloud</span></button><button type="button" class="sy-say" id="sySayEn" disabled><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4z"/><path d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12" fill="none"/></svg>唸英文給我聽<span class="ti">Read English aloud</span></button></div>
       </div>
     </div>
   </div>
@@ -2865,7 +2872,7 @@ C.merch.forEach((p, i) => {
 /* ---------- SAY: type → zhuyin (pinyin-pro, loaded on first use) + English (Claude on claude.ai, a free translation service elsewhere) ---------- */
 (() => {
   const inp = document.getElementById('syIn'); if (!inp) return;
-  const zyEl = document.getElementById('syZy'), pyEl = document.getElementById('syPy'), enEl = document.getElementById('syEn'), sayBtn = document.getElementById('sySay');
+  const zyEl = document.getElementById('syZy'), pyEl = document.getElementById('syPy'), enEl = document.getElementById('syEn'), sayBtn = document.getElementById('sySay'), sayEn = document.getElementById('sySayEn'), TTS = 'speechSynthesis' in window && typeof SpeechSynthesisUtterance === 'function';
   const TRY = ['臺灣的豆花很好吃', '珍珠奶茶', '謝謝你', '我們一起去夜市', '注音符號'];
   const tryBox = document.getElementById('syTry');
   TRY.forEach(t => { const b = document.createElement('button'); b.type = 'button'; b.textContent = t; b.onclick = () => { inp.value = t; clearTimeout(t2); lastEn = t; translate(); }; tryBox.appendChild(b); });
@@ -2901,7 +2908,7 @@ C.merch.forEach((p, i) => {
   const isHan = c => /\p{Script=Han}/u.test(c);
   async function render() {
     const text = inp.value.trim(); enEl.textContent = ''; enEl.classList.remove('wait');
-    if (!text) { zyEl.innerHTML = '<span class="ph">在上面打字看看<span class="ti" style="font-size:.4em">Start typing above</span></span>'; pyEl.textContent = ''; sayBtn.hidden = true; return; }
+    if (!text) { zyEl.innerHTML = '<span class="ph">在上面打字看看<span class="ti" style="font-size:.4em">Start typing above</span></span>'; pyEl.textContent = ''; sayBtn.disabled = true; sayEn.disabled = true; return; }
     const P = await load().catch(() => null); if (!P || inp.value.trim() !== text) return;
     const chars = [...text], simp = P.toSimp(text);
     const num = P.pinyin(simp, {toneType: 'num', type: 'array', toneSandhi: false, nonZh: 'consecutive'});
@@ -2921,7 +2928,7 @@ C.merch.forEach((p, i) => {
     }
     zyEl.innerHTML = html; zyEl.setAttribute('aria-label', text);
     pyEl.textContent = pys.join(' ');
-    sayBtn.hidden = !('speechSynthesis' in window);
+    sayBtn.disabled = !TTS;
   }
   // English: Claude when the page runs on claude.ai, otherwise the free MyMemory service
   let sampler, seq = 0;
@@ -2944,6 +2951,7 @@ C.merch.forEach((p, i) => {
     if (!en && !standalone) { try { en = await viaMyMemory(text); } catch (e) {} }
     if (my !== seq) return;
     enEl.classList.remove('wait');
+    sayEn.disabled = !(en && TTS);
     if (en) enEl.textContent = en; else { enEl.classList.add('wait'); enEl.innerHTML = '暫時翻譯不了，稍後再試<span class="ti">Translation unavailable right now</span>'; }
   }
   let t = 0;
@@ -2953,9 +2961,19 @@ C.merch.forEach((p, i) => {
   inp.addEventListener('input', e => { clearTimeout(t); t = setTimeout(render, 120); clearTimeout(t2); if (!e.isComposing) t2 = setTimeout(autoEn, 1000); });
   inp.addEventListener('compositionend', () => { clearTimeout(t2); t2 = setTimeout(autoEn, 1000); });
   inp.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.isComposing) { e.preventDefault(); clearTimeout(t2); lastEn = inp.value.trim(); translate(); } });
-  sayBtn.onclick = () => { const u = new SpeechSynthesisUtterance(inp.value.trim()); u.lang = 'zh-TW'; u.rate = .85;
-    const v = speechSynthesis.getVoices().find(v => /zh[-_]TW/i.test(v.lang)); if (v) u.voice = v;
-    sayBtn.classList.add('on'); u.onend = u.onerror = () => sayBtn.classList.remove('on'); speechSynthesis.cancel(); speechSynthesis.speak(u); };
+  // read aloud with the device's own voices: Taiwanese Mandarin for the Chinese, English for the translation
+  function speak(btn, text, lang, re) {
+    if (!TTS || !text) return;
+    if (btn.classList.contains('on')) { speechSynthesis.cancel(); return; }   // tap again to stop
+    const u = new SpeechSynthesisUtterance(text); u.lang = lang; u.rate = .85;
+    const vs = speechSynthesis.getVoices(), v = vs.find(v => re.test(v.lang)) || vs.find(v => v.lang.startsWith(lang.slice(0, 2))); if (v) u.voice = v;
+    document.querySelectorAll('.sy-say.on').forEach(b => b.classList.remove('on'));
+    btn.classList.add('on'); u.onend = u.onerror = () => btn.classList.remove('on'); speechSynthesis.cancel(); speechSynthesis.speak(u);
+  }
+  sayBtn.onclick = () => speak(sayBtn, inp.value.trim(), 'zh-TW', /zh[-_]TW/i);
+  sayEn.onclick = () => speak(sayEn, enEl.classList.contains('wait') ? '' : enEl.textContent.trim(), 'en-US', /en[-_]US/i);
+  if (TTS) { speechSynthesis.getVoices(); speechSynthesis.addEventListener && speechSynthesis.addEventListener('voiceschanged', () => {}); }
+  else document.querySelector('.sy-says').innerHTML = '<p class="sy-py">這個瀏覽器不支援朗讀<span class="ti">Read-aloud isn’t supported in this browser</span></p>';
   render();
 })();
 </script>
