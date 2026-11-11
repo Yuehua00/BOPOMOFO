@@ -10,7 +10,7 @@
    symbols that pop when tapped, a five-style card you can swipe, and a tone-coloured confetti burst on finish. */
 :root{
   color-scheme:light;
-  --ink:#393536; --grey:#929399; --teal:#239088; --pink:#DA1884; --gold:#B8882F;
+  --ink:#393536; --grey:#929399; --teal:#00A99F; --pink:#DA1884; --gold:#B49154;
   --paper:#FBFBFB; --card:#FFFFFF; --line:#DCDBDC; --dot:#F4F4F4; --muted:#6E6B6D; --tray:#F3F2F2;
   --zh:"Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif;
   --en:"Poppins","Noto Sans TC",system-ui,sans-serif;
@@ -25,9 +25,8 @@ button{font:inherit;color:inherit;cursor:pointer}
 a{color:var(--ink);text-underline-offset:3px}a:hover{color:var(--pink)}
 :focus-visible{outline:3px solid var(--teal);outline-offset:3px}
 .float{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
-.float span{position:absolute;bottom:0;left:var(--l);font-weight:900;font-size:var(--s);color:var(--c);opacity:.16;animation:rise var(--d) linear var(--dl) infinite,sway var(--w) ease-in-out var(--dl) infinite;will-change:transform}
-@keyframes rise{from{transform:translateY(20vh)}to{transform:translateY(-120vh)}}
-@keyframes sway{0%,100%{translate:-22px 0;rotate:-5deg}25%{translate:0 0;rotate:0deg}50%{translate:22px 0;rotate:5deg}75%{translate:0 0;rotate:0deg}}
+.float span{position:absolute;top:var(--tp);left:var(--l);font-weight:900;font-size:var(--s);color:var(--c);opacity:.16;animation:fadeIn 1.4s ease both,bob var(--w) ease-in-out var(--dl) infinite;will-change:translate}
+@keyframes bob{0%,100%{translate:-12px 0;rotate:-4deg}25%{translate:0 -16px;rotate:0deg}50%{translate:12px 0;rotate:4deg}75%{translate:0 16px;rotate:0deg}}
 .wrap{position:relative;z-index:1;max-width:520px;margin:0 auto;padding-block:20px 40px;display:grid;gap:22px}
 .rv{animation:rv .7s var(--ease) both;animation-delay:calc(var(--i,0)*110ms)}
 @keyframes rv{from{opacity:0;transform:translateY(22px)}}
@@ -146,13 +145,13 @@ textarea{width:100%;min-height:84px;border:1px solid var(--line);padding:.6rem .
 .steps-ig{margin:0;padding-left:1.2rem;font-size:.9rem;color:var(--muted)}
 #conf{position:fixed;inset:0;width:100%;height:100%;z-index:70;pointer-events:none}
 body{overflow-x:clip}
-a.btn{display:inline-flex;align-items:center;justify-content:center;text-decoration:none;color:#fff}
+a.btn{display:inline-flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;text-decoration:none;color:#fff}
 a.btn:hover{color:#fff}
 .foot{position:relative;z-index:1;margin-left:calc(50% - 50vw);width:100vw;background:#262324;color:#b9b5b7;padding:40px max(16px,env(safe-area-inset-right,0px)) calc(44px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));font-size:.8rem;line-height:1.7}
 .foot-in{max-width:520px;margin:0 auto;display:grid;gap:16px}
-.foot .dots4{display:flex;gap:10px;justify-content:center;height:22px;align-items:flex-end}
-.foot .dots4 i{width:14px;height:14px;border-radius:50%;background:var(--c);animation:bnc 1.6s ease-in-out infinite;animation-delay:var(--dl)}
-@keyframes bnc{0%,100%{transform:translateY(0)}35%{transform:translateY(-14px)}60%{transform:translateY(0) scaleY(.8)}}
+.foot .dots4{display:flex;gap:8px;justify-content:center;height:17px;align-items:flex-end}
+.foot .dots4 i{width:10.5px;height:10.5px;border-radius:50%;background:var(--c);animation:bnc 1.6s ease-in-out infinite;animation-delay:var(--dl)}
+@keyframes bnc{0%,100%{transform:translateY(0)}35%{transform:translateY(-10px)}60%{transform:translateY(0) scaleY(.8)}}
 .foot .links{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px}
 .foot a.site small{display:block;font-family:var(--en);font-weight:400;font-size:.68rem;opacity:.8;line-height:1.25}
 .foot a.site{flex-direction:column;display:flex;align-items:center;justify-content:center;text-align:center;min-height:48px;font-weight:700;color:#fff;padding:.55rem 1.1rem;background:rgba(255,255,255,.12);text-decoration:none;transition:background .15s,transform .25s var(--spring)}
@@ -181,7 +180,39 @@ a.btn:hover{color:#fff}
 .mus.off:hover{background:#DEDEDF}
 .mus-tip{position:absolute;right:0;bottom:50px;background:var(--ink);color:#fff;padding:.2rem .6rem;font-size:.72rem;white-space:nowrap;opacity:0;transition:opacity .3s;pointer-events:none}
 .mus-tip.show{opacity:1}
-@keyframes eq{0%,100%{height:25%}50%{height:100%}}@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}.float{display:none}}
+@keyframes eq{0%,100%{height:25%}50%{height:100%}}
+/* footer top edge: the same drifting wave as the BOPOMOFO site */
+.foot{margin-top:46px}
+.foot::before{content:"";position:absolute;left:0;right:0;top:-45px;height:46px;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='46' viewBox='0 0 240 46' preserveAspectRatio='none'%3E%3Cpath d='M0 46 L0 23 Q60 0 120 23 T240 23 L240 46 Z' fill='%23262324'/%3E%3C/svg%3E") 0 0/240px 46px repeat-x;pointer-events:none;animation:waveDriftL 26s linear infinite}
+@keyframes waveDriftL{to{background-position-x:-240px}}[hidden]{display:none!important}
+/* ---- responsive: small phones, large phones / tablets, desktop (preview sticks beside the steps) ---- */
+@media (max-width:380px){
+  .row.eq{grid-template-columns:1fr}
+  .tools{justify-content:flex-start}
+  h1{font-size:1.75rem}
+}
+@media (min-width:600px){
+  .wrap{max-width:640px;padding-block:32px 48px;gap:26px}
+  .card{padding:22px 22px 24px}
+  .chart span{width:2.2rem;height:2.2rem}
+  .cvs{width:min(100%,340px)}
+  .foot-in{max-width:640px}
+}
+@media (min-width:960px){
+  .wrap{max-width:1120px;grid-template-columns:minmax(0,1fr) minmax(0,460px);column-gap:32px;row-gap:26px;align-items:start;padding-block:40px 56px}
+  .top{grid-column:1/-1;max-width:none}
+  .top .lead{max-width:36em}
+  #c1{grid-column:1;grid-row:2}
+  #c2{grid-column:1;grid-row:3}
+  #c3{grid-column:2;grid-row:2/4;position:sticky;top:20px}
+  .cvs{width:min(100%,360px)}
+  .foot-in{max-width:1120px;grid-template-columns:1fr 1fr;column-gap:40px}
+  .foot-in .dots4,.foot-in .links,.foot-in hr{grid-column:1/-1}
+}
+@media (min-width:1400px){
+  .wrap{max-width:1240px;grid-template-columns:minmax(0,1fr) minmax(0,500px)}
+  .foot-in{max-width:1240px}
+}@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}.float{display:none}}
 </style>
 
 <div class="float" id="float" aria-hidden="true"></div>
@@ -286,7 +317,7 @@ a.btn:hover{color:#fff}
   var IG_URL='https://www.instagram.com/bopomofo.ntnu/';
   var TAGS='#BOPOMOFO #注音 #臺灣注音';
   var CAPTION='我的名字，用注音寫出來了！\nMy name, written in Zhuyin!\n'+TAGS+' '+HANDLE;
-  var COL={grey:'#929399',teal:'#239088',pink:'#DA1884',gold:'#B8882F',ink:'#393536'};
+  var COL={grey:'#929399',teal:'#00A99F',pink:'#DA1884',gold:'#B49154',ink:'#393536'};
   var TONES=[COL.grey,COL.teal,COL.pink,COL.gold];
   var W=1080,H=1920,PW=1200,PH=400,BS=360,GAP=(PW-3*BS)/2,PY=20;
   var STYLES=[['簡約白','Minimal white'],['墨色','Ink'],['畫框','Gallery'],['單色','Mono'],['置中','Centred']];
@@ -303,7 +334,7 @@ a.btn:hover{color:#fff}
     var fl=$('float');
     for(var i=0;i<16;i++){var s=document.createElement('span');s.textContent=GL.charAt((i*7)%GL.length);
       s.style.setProperty('--l',(4+Math.round((i*61)%92))+'%');s.style.setProperty('--s',(17+((i*13)%46)/2)+'px');
-      s.style.setProperty('--c',TONES[i%4]);s.style.setProperty('--d',(30+(i*5)%16)+'s');s.style.setProperty('--w',(6+(i%4))+'s');s.style.setProperty('--dl','-'+((i*3.7)%20).toFixed(1)+'s');s.style.setProperty('--r',((i%2?1:-1)*(120+i*12))+'deg');fl.appendChild(s);}
+      s.style.setProperty('--c',TONES[i%4]);s.style.setProperty('--tp',(5+Math.round((i*37)%88))+'%');s.style.setProperty('--w',(7+(i%5))+'s');s.style.setProperty('--dl','-'+((i*3.7)%20).toFixed(1)+'s');s.style.setProperty('--r',((i%2?1:-1)*(120+i*12))+'deg');fl.appendChild(s);}
   })();
 
   // ---- text motion: title wave, typed copy, headings that tighten ----
