@@ -1052,8 +1052,33 @@ main{overflow-x:clip}
 .st-tip{margin:-.3rem 0 .6rem;font-size:.8rem;color:var(--muted);line-height:1.4}
 @media (max-width:600px){.lab-steps{gap:.25rem}.lab-steps a{flex-direction:column;gap:.25rem;padding:.5rem .2rem;text-align:center;font-size:.72rem}.lab-steps .ti{display:none}}
 @media (prefers-reduced-motion:reduce){.st-h.now i{animation:none}}
+
+/* ---------- INTRO (2s): symbols 0–.8s → wordmark .8–1.5s → curtain lifts 1.5–2s ---------- */
+.intro{position:fixed;inset:0;z-index:9999;background:#fff;display:grid;place-items:center;cursor:pointer;animation:inLift .5s cubic-bezier(.7,0,.2,1) 1.5s forwards}
+.intro.skip{animation:inLift .35s cubic-bezier(.7,0,.2,1) forwards}
+.in-sym,.in-mark{grid-area:1/1}
+.in-sym{display:flex;gap:clamp(.6rem,3vw,1.4rem);animation:inOut .3s ease .7s forwards}
+.in-sym b{font-size:clamp(2.6rem,11vw,5rem);font-weight:900;line-height:1;opacity:0;transform:translateY(-28px);animation:inDrop .45s cubic-bezier(.3,1.5,.5,1) forwards}
+.in-sym b:nth-child(1){color:var(--grey);animation-delay:.05s}   /* same order as the wordmark's four O's */
+.in-sym b:nth-child(2){color:var(--teal);animation-delay:.17s}
+.in-sym b:nth-child(3){color:var(--pink);animation-delay:.29s}
+.in-sym b:nth-child(4){color:var(--gold);animation-delay:.41s}
+.in-mark{display:flex;flex-direction:column;align-items:center;gap:.9rem;opacity:0;transform:scale(.94);animation:inMark .55s cubic-bezier(.2,.8,.2,1) .85s forwards}
+.in-mark img{width:min(64vw,360px);height:auto}
+.in-mark span{font-family:var(--en);font-size:clamp(.66rem,2.4vw,.82rem);letter-spacing:.24em;text-transform:uppercase;color:var(--muted)}
+@keyframes inDrop{to{opacity:1;transform:none}}
+@keyframes inOut{to{opacity:0;transform:scale(.8)}}
+@keyframes inMark{to{opacity:1;transform:none}}
+@keyframes inLift{to{transform:translateY(-100%);visibility:hidden}}
+html.intro-on{overflow:hidden}
+@media (prefers-reduced-motion:reduce){.intro{animation:inFade .4s ease .9s forwards}.in-sym{display:none}.in-mark{animation:none;opacity:1;transform:none}@keyframes inFade{to{opacity:0;visibility:hidden}}}
 </style>
 
+<!-- ============ INTRO: a two-second opening — ㄅㄆㄇㄈ drop in, become the wordmark, the curtain lifts ============ -->
+<div class="intro" id="intro" aria-hidden="true">
+  <div class="in-sym"><b>ㄅ</b><b>ㄆ</b><b>ㄇ</b><b>ㄈ</b></div>
+  <div class="in-mark"><img src="assets/brand/wordmark-color.png" alt=""><span>Visual Translation of Taiwanese Zhuyin</span></div>
+</div>
 <header class="hdr" id="hdr">
   <div class="wrap">
     <a class="logo" href="#home" aria-label="BOPOMOFO 首頁"><img src="assets/brand/logo-h.png" alt="BOPOMOFO Taiwanese Pattern Design"></a>
@@ -3026,6 +3051,16 @@ C.merch.forEach((p, i) => {
   // the step bar scrolls to a step without the page-wide paper transition
   bar.querySelectorAll('a').forEach(a => a.addEventListener('click', e => { e.preventDefault(); e.stopImmediatePropagation(); document.querySelector(a.getAttribute('href')).scrollIntoView({behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start'}); }, true));
   paint();
+})();
+
+/* ---------- INTRO: lock scrolling while it plays; tap to skip; remove once the curtain is up ---------- */
+(() => {
+  const el = document.getElementById('intro'); if (!el) return;
+  const root = document.documentElement; root.classList.add('intro-on');
+  const done = () => { root.classList.remove('intro-on'); el.remove(); };
+  el.addEventListener('animationend', e => { if (e.target === el) done(); });
+  el.addEventListener('click', () => el.classList.add('skip'));
+  setTimeout(() => el.isConnected && done(), 2600);   // safety net if animations don't run
 })();
 </script>
 
