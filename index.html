@@ -13,9 +13,9 @@
   color-scheme: light;
   --ink:#393536;      /* CIS dark */
   --grey:#929399;     /* 平 — BO */
-  --teal:#00A99F;     /* 上 — PO  / 景 */
-  --pink:#DA1884;     /* 去 — MO  / 食 */
-  --gold:#B49154;     /* 入 — FO  / 物 */
+  --teal:#007864;     /* PANTONE 3295 C · 上 — PO  / 景 */
+  --pink:#DA1884;     /* PANTONE 219 C · 去 — MO  / 食 */
+  --gold:#866D4B;     /* PANTONE 873 C · 入 — FO  / 物 */
   --paper:#FFFFFF;
   --ground:#F8F8F8;
   --dot:#ECECEC;
@@ -485,7 +485,7 @@ body.grid-on .grid-bg{opacity:1}
 .ed .quad span{display:none!important;position:absolute;right:6px;bottom:4px;font-size:.7rem;color:var(--pink);font-weight:700;background:rgba(255,255,255,.85);padding:0 .3rem}
 .tok{position:absolute;translate:-50% -50%;border:0;background:transparent;color:transparent;font-weight:900;font-size:calc(var(--s)*18cqw);line-height:1;padding:.08em .12em;cursor:grab;touch-action:none;border-radius:6px;transform:rotate(var(--r))}
 .tok:hover{outline:1.5px dashed var(--grey)}
-.tok.sel{outline:2px solid var(--teal);background:rgba(0,169,159,.06)}
+.tok.sel{outline:2px solid var(--teal);background:rgba(0,120,100,.06)}
 .tok:active{cursor:grabbing}
 .ed-ctl{display:grid;grid-template-columns:repeat(6,1fr);gap:.4rem;margin-top:.75rem}
 .ed-ctl .sbtn{width:100%;justify-content:center;text-align:center;padding-inline:.4rem;white-space:nowrap}
@@ -1540,7 +1540,7 @@ main{overflow-x:clip}
 const C = window.BPMF_CONTENT;
 const RM = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const FINE = matchMedia('(hover:hover) and (pointer:fine)').matches;
-const COL = {grey:'#929399', teal:'#00A99F', pink:'#DA1884', gold:'#B49154', ink:'#393536'};
+const COL = {grey:'#929399', teal:'#007864', pink:'#DA1884', gold:'#866D4B', ink:'#393536'};
 const motifURL = id => `url("assets/motifs/m${id}.png")`;
 const motifForLetter = {};
 C.motifs.forEach(m => m.letters.forEach(l => motifForLetter[l] = m.id));
@@ -2658,7 +2658,7 @@ C.merch.forEach((p, i) => {
 /* ---------- BUBBLES: a handful of small soft circles drifting upward ---------- */
 (() => {
   const cv = document.getElementById('bubbles'); if (!cv || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-  const x = cv.getContext('2d'), COLS = ['160,180,200', '0,169,159', '218,24,132', '146,147,153', '180,145,84'];
+  const x = cv.getContext('2d'), COLS = ['160,180,200', '0,120,100', '218,24,132', '146,147,153', '134,109,75'];
   let W, H, dpr, bs = [], running = true, last = 0;
   const rnd = (a, b) => a + Math.random() * (b - a);
   const make = (y) => ({x: rnd(0, W), y: y ?? rnd(0, H), r: rnd(4, 15), vy: rnd(5, 13), sw: rnd(10, 26), ph: rnd(0, 6.28), sp: rnd(.25, .55), c: COLS[Math.floor(Math.random() * COLS.length)], a: rnd(.14, .24)});
