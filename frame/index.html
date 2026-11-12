@@ -115,7 +115,7 @@ h1 small{display:block;font-family:var(--en);font-weight:400;font-size:.42em;col
 .ib:hover{background:#DEDEDF;transform:translateY(-2px)}
 .ib:active{background:var(--pink);color:#fff;transform:scale(.95)}
 /* ---- preview + style swipe ---- */
-.stage{position:relative;display:grid;place-items:center;background:#ECECEE;padding:18px 12px;perspective:900px;overflow:hidden;touch-action:pan-y;user-select:none}
+.stage{position:relative;display:grid;place-items:center;background:transparent;padding:8px 0;perspective:900px;overflow:visible;touch-action:pan-y;user-select:none}
 .cvs{width:min(100%,300px);justify-self:center;margin-inline:auto;transition:transform .28s var(--ease),opacity .28s;transform:translateX(var(--dx,0px));opacity:var(--op,1)}
 .cvs.no-tr{transition:none}
 .cvs.in-l{animation:inl .4s var(--ease)}.cvs.in-r{animation:inr .4s var(--ease)}
@@ -134,6 +134,12 @@ h1 small{display:block;font-family:var(--en);font-weight:400;font-size:.42em;col
 .dots5{display:flex;justify-content:center;gap:8px}
 .dots5 button{width:10px;height:10px;border-radius:5px;border:0;padding:0;background:var(--line);transition:width .3s var(--spring),background .2s}
 .dots5 button[aria-current="true"]{width:28px;background:var(--pink)}
+.adj{display:grid;gap:12px;padding:0;margin:0;width:100%}
+.adj .btn{width:100%}
+.adj label{display:grid;grid-template-columns:7.5em minmax(0,1fr);align-items:center;gap:10px;font-weight:700;font-size:.85rem;line-height:1.25}
+.adj label small{display:block;font-family:var(--en);font-weight:400;font-size:.68rem;color:var(--muted)}
+.adj input[type=range]{display:block;width:calc(100% + 10px);margin:0 -10px 0 0;padding:0;accent-color:var(--pink);min-width:0;box-sizing:border-box}
+.adj label{overflow:visible}
 .swipehint{text-align:center;margin:0;font-size:.8rem;color:var(--muted)}
 .swipehint b{display:inline-block;animation:nudge 1.6s ease-in-out infinite}
 @keyframes nudge{50%{transform:translateX(6px)}}
@@ -247,6 +253,7 @@ a.btn:hover{color:#fff}
       <p>介音・韻母 Medials & Finals</p><div id="chFin"></div>
     </div>
     <p class="hint" id="sayMsg" aria-live="polite" style="min-height:1.7em;color:var(--ink);font-weight:700"></p>
+    <button class="btn alt sm" id="sayMode" type="button" style="justify-self:start">念法：標準注音<small>Reading: standard Zhuyin (tap to switch)</small></button>
     <div class="pad" id="pad"><canvas id="guides" width="1200" height="400"></canvas><canvas id="ink" class="ink" width="1200" height="400" aria-label="手寫區"></canvas></div>
     <div class="tools">
       <div class="grp"><span class="lbl">筆色 Pen colour</span><div class="pens" id="pens" role="group" aria-label="筆色"></div></div>
@@ -267,18 +274,25 @@ a.btn:hover{color:#fff}
       <button class="ib" id="stNext" type="button" aria-label="下一個樣式">›</button>
     </div>
     <div class="dots5" id="dots5" role="group" aria-label="樣式"></div>
+    <div class="adj" id="adj" hidden>
+      <label for="pzZoom">照片縮放<small>Zoom</small><input id="pzZoom" type="range" min="100" max="300" value="100"></label>
+      <label for="pzX">左右移動<small>Move left / right</small><input id="pzX" type="range" min="-100" max="100" value="0"></label>
+      <label for="pzY">上下移動<small>Move up / down</small><input id="pzY" type="range" min="-100" max="100" value="0"></label>
+      <button class="btn alt sm" id="pzReset" type="button">重設照片位置<small>Reset photo</small></button>
+    </div>
     <p class="swipehint"><b>‹</b> 在預覽上左右滑動，換一種樣式 <b>›</b><span class="en2">Swipe the preview left or right to change style</span></p>
     <div class="row"><button class="btn big" id="btnMake" type="button">完成，產生圖片<small>Create my image</small></button></div>
     <div class="result" id="result" hidden>
       <img id="resImg" alt="完成的限時動態圖片">
       <p class="hint"><strong>長按圖片，選「儲存到相簿」</strong>，再打開 Instagram 限時動態上傳。<span class="en2">Long-press the image, choose “Save to Photos”, then upload it to an Instagram story.</span></p>
       <ol class="steps-ig">
-        <li>按下方「前往 Instagram」，開啟限時動態，選剛存的這張照片。<span class="en2">Tap “Go to Instagram” below, open Stories and pick the photo you just saved.</span></li>
+        <li>按下方「開啟我的 Instagram」，進入你自己的限時動態，選剛存的這張照片。<span class="en2">Tap Open my Instagram Stories below to reach your own story camera, then pick the photo you just saved.</span></li>
         <li>貼上下方的貼文文字，標註 <span id="handleTxt"></span>。<span class="en2">Paste the caption below and tag us.</span></li>
       </ol>
       <textarea id="cap" readonly aria-label="貼文文字"></textarea>
       <button class="btn alt" id="btnCopy" type="button">複製貼文文字<small>Copy caption</small></button>
-      <a class="btn" id="btnIG" href="https://www.instagram.com/bopomofo.ntnu/" target="_blank" rel="noopener" style="background:var(--pink)">前往 Instagram 發限時動態<small>Post to Instagram Stories</small></a>
+      <a class="btn" id="btnIG" href="instagram://story-camera" style="background:var(--pink)">開啟我的 Instagram 限時動態<small>Open my Instagram Stories</small></a>
+      <p class="hint">沒有跳轉到 Instagram？<a href="https://www.instagram.com/" target="_blank" rel="noopener">改開 Instagram 網頁</a><span class="en2">Nothing happened? Open Instagram on the web instead.</span></p>
       <p class="hint" id="copyMsg" aria-live="polite"></p>
     </div>
   </section>
@@ -364,17 +378,30 @@ a.btn:hover{color:#fff}
   }
   // ---- say the symbol out loud (browser speech, Taiwan Mandarin when available) ----
   // each symbol is spoken as one common character that has exactly that sound (symbol -> character, pinyin)
-  var SAY={'ㄅ':'波','ㄆ':'坡','ㄇ':'摸','ㄈ':'佛','ㄉ':'得','ㄊ':'特','ㄋ':'呢','ㄌ':'勒','ㄍ':'哥','ㄎ':'渴','ㄏ':'喝','ㄐ':'雞','ㄑ':'七','ㄒ':'西','ㄓ':'知','ㄔ':'吃','ㄕ':'詩','ㄖ':'日','ㄗ':'資','ㄘ':'詞','ㄙ':'思','ㄧ':'衣','ㄨ':'烏','ㄩ':'魚','ㄚ':'啊','ㄛ':'喔','ㄜ':'鵝','ㄝ':'耶','ㄞ':'哀','ㄟ':'欸','ㄠ':'熬','ㄡ':'歐','ㄢ':'安','ㄣ':'恩','ㄤ':'昂','ㄥ':'鞥','ㄦ':'兒'};
+  var SAY={'ㄅ':'波','ㄆ':'坡','ㄇ':'摸','ㄈ':'佛','ㄉ':'嘚','ㄊ':'特','ㄋ':'訥','ㄌ':'勒','ㄍ':'哥','ㄎ':'科','ㄏ':'喝','ㄐ':'雞','ㄑ':'七','ㄒ':'西','ㄓ':'知','ㄔ':'吃','ㄕ':'詩','ㄖ':'日','ㄗ':'資','ㄘ':'詞','ㄙ':'思','ㄧ':'衣','ㄨ':'烏','ㄩ':'迂','ㄚ':'啊','ㄛ':'喔','ㄜ':'鵝','ㄝ':'耶','ㄞ':'哀','ㄟ':'欸','ㄠ':'熬','ㄡ':'歐','ㄢ':'安','ㄣ':'恩','ㄤ':'昂','ㄥ':'鞥','ㄦ':'兒'};
   var PINYIN={'ㄅ':'bo','ㄆ':'po','ㄇ':'mo','ㄈ':'fo','ㄉ':'de','ㄊ':'te','ㄋ':'ne','ㄌ':'le','ㄍ':'ge','ㄎ':'ke','ㄏ':'he','ㄐ':'ji','ㄑ':'qi','ㄒ':'xi','ㄓ':'zhi','ㄔ':'chi','ㄕ':'shi','ㄖ':'ri','ㄗ':'zi','ㄘ':'ci','ㄙ':'si','ㄧ':'yi','ㄨ':'wu','ㄩ':'yu','ㄚ':'a','ㄛ':'o','ㄜ':'e','ㄝ':'ê','ㄞ':'ai','ㄟ':'ei','ㄠ':'ao','ㄡ':'ou','ㄢ':'an','ㄣ':'en','ㄤ':'ang','ㄥ':'eng','ㄦ':'er'};
   var voice=null;
   function pickVoice(){var vs=(window.speechSynthesis&&speechSynthesis.getVoices())||[];
     voice=null;for(var i=0;i<vs.length;i++){var l=(vs[i].lang||'').replace('_','-').toLowerCase();if(l==='zh-tw'||l==='zh-hant-tw'){voice=vs[i];break;}}
     if(!voice)for(var j=0;j<vs.length;j++){if((vs[j].lang||'').toLowerCase().indexOf('zh')===0){voice=vs[j];break;}}}
   if('speechSynthesis' in window){pickVoice();speechSynthesis.onvoiceschanged=pickVoice;}
+  // mode 'symbol': ask the voice to read the Zhuyin symbol itself (its standard name); falls back to a same-sound character
+  // mode 'char': always use the same-sound character
+  var sayMode='symbol';
   function speak(ch){
+    var sm=$('sayMsg');if(sm)sm.textContent=ch+'　'+(PINYIN[ch]||'');
     if(!('speechSynthesis' in window)||!SAY[ch])return;
-    var sm=$('sayMsg');if(sm)sm.textContent=ch+'　'+(PINYIN[ch]||'');try{speechSynthesis.cancel();var u=new SpeechSynthesisUtterance(SAY[ch]);u.lang='zh-TW';u.rate=.8;u.pitch=1;if(voice)u.voice=voice;speechSynthesis.speak(u);}catch(e){}
-  }  function fillChart(id,str,c,k0){var el=$(id);str.split('').forEach(function(ch,i){var s=document.createElement('span');s.textContent=ch;s.style.setProperty('--c',c);s.style.setProperty('--k',k0+i);
+    try{
+      speechSynthesis.cancel();
+      var say=function(text,fb){var u=new SpeechSynthesisUtterance(text),t0=0;u.lang='zh-TW';u.rate=.75;u.pitch=1;if(voice)u.voice=voice;
+        u.onstart=function(){t0=performance.now();};
+        u.onend=function(){if(fb&&t0&&performance.now()-t0<200)say(SAY[ch],false);};
+        u.onerror=function(){if(fb)say(SAY[ch],false);};
+        speechSynthesis.speak(u);};
+      say(sayMode==='symbol'?ch:SAY[ch],sayMode==='symbol');
+    }catch(e){}
+  }  $('sayMode').onclick=function(){sayMode=sayMode==='symbol'?'char':'symbol';$('sayMode').firstChild.nodeValue=sayMode==='symbol'?'念法：標準注音':'念法：同音字';$('sayMode').lastChild.textContent=sayMode==='symbol'?'Reading: standard Zhuyin (tap to switch)':'Reading: same-sound character (tap to switch)';};
+  function fillChart(id,str,c,k0){var el=$(id);str.split('').forEach(function(ch,i){var s=document.createElement('span');s.textContent=ch;s.style.setProperty('--c',c);s.style.setProperty('--k',k0+i);
     s.addEventListener('click',function(){s.classList.remove('hit');void s.offsetWidth;s.classList.add('hit');var r=s.getBoundingClientRect();floatUp(ch,r.left+r.width/2,r.top,c);speak(ch);});
     el.appendChild(s);});}
   fillChart('chInit','ㄅㄆㄇㄈㄉㄊㄋㄌㄍㄎㄏㄐㄑㄒㄓㄔㄕㄖㄗㄘㄙ',COL.grey,0);
@@ -450,19 +477,20 @@ a.btn:hover{color:#fff}
   // photo
   function setPhoto(f,label,labelEn){
     if(!f)return;
-    var done=function(img){photo=img;photoMsg('目前使用：'+label+'。','Using: '+labelEn+'.');$('btnCam').classList.remove('pulse');setDone(1,true);render();flash();};
+    var done=function(img){photo=img;PZ.z=1;PZ.x=0;PZ.y=0;$('pzZoom').value=100;$('pzX').value=0;$('pzY').value=0;adjShow();photoMsg('目前使用：'+label+'。','Using: '+labelEn+'.');$('btnCam').classList.remove('pulse');setDone(1,true);render();flash();};
     if(window.createImageBitmap){createImageBitmap(f,{imageOrientation:'from-image'}).then(done).catch(function(){fallback(f,done);});}
     else fallback(f,done);
   }
   function fallback(f,done){var u=URL.createObjectURL(f),im=new Image();im.onload=function(){done(im);URL.revokeObjectURL(u);};im.src=u;}
   $('btnCam').onclick=function(){$('fileCam').click()};
   $('btnAlbum').onclick=function(){$('fileAlbum').click()};
-  $('btnPat').onclick=function(){photo=null;newPat();photoMsg('目前使用：隨機印花（再按一次換一組）。','Using: random pattern (press again for another).');setDone(1,true);render();flash();};
+  $('btnPat').onclick=function(){photo=null;adjShow();newPat();photoMsg('目前使用：隨機印花（再按一次換一組）。','Using: random pattern (press again for another).');setDone(1,true);render();flash();};
   $('fileCam').onchange=function(e){setPhoto(e.target.files[0],'剛拍的照片','the photo you just took');e.target.value='';};
   $('fileAlbum').onchange=function(e){setPhoto(e.target.files[0],'相簿照片','a photo from your album');e.target.value='';};
 
   // ---- compose: five styles ----
-  function coverRect(x,img,rx,ry,rw,rh){var s=Math.max(rw/img.width,rh/img.height),dw=img.width*s,dh=img.height*s;x.save();x.beginPath();x.rect(rx,ry,rw,rh);x.clip();x.drawImage(img,rx+(rw-dw)/2,ry+(rh-dh)/2,dw,dh);x.restore();}
+  var PZ={z:1,x:0,y:0};
+  function coverRect(x,img,rx,ry,rw,rh){var s=Math.max(rw/img.width,rh/img.height)*PZ.z,dw=img.width*s,dh=img.height*s,ex=Math.max(0,(dw-rw)/2),ey=Math.max(0,(dh-rh)/2);x.save();x.beginPath();x.rect(rx,ry,rw,rh);x.clip();x.drawImage(img,rx+(rw-dw)/2-PZ.x*ex,ry+(rh-dh)/2-PZ.y*ey,dw,dh);x.restore();}
   function bgFill(x,rx,ry,rw,rh){if(photo)coverRect(x,photo,rx,ry,rw,rh);else{x.save();x.beginPath();x.rect(rx,ry,rw,rh);x.clip();x.translate(rx,ry);drawPattern(x,rw,rh);x.restore();}}
   function toneBar(x,y,h){TONES.forEach(function(col,i){x.fillStyle=col;x.fillRect(i*W/4,y,W/4,h);});}
   function txt(x,s,font,color,px,py,align){x.font=font;x.fillStyle=color;x.textAlign=align||'left';x.textBaseline='top';x.fillText(s,px,py);x.textAlign='left';}
@@ -525,6 +553,12 @@ a.btn:hover{color:#fff}
   if(document.fonts&&document.fonts.load){Promise.all([document.fonts.load('900 54px "Noto Sans TC"'),document.fonts.load('700 100px Poppins'),document.fonts.load('500 38px "Noto Sans TC"')]).then(render,render);}
   render();
 
+  // ---- photo framing (zoom / move) ----
+  var adj=$('adj');
+  function pzSync(){PZ.z=+$('pzZoom').value/100;PZ.x=+$('pzX').value/100;PZ.y=+$('pzY').value/100;render();}
+  ['pzZoom','pzX','pzY'].forEach(function(id){$(id).addEventListener('input',pzSync);});
+  $('pzReset').onclick=function(){$('pzZoom').value=100;$('pzX').value=0;$('pzY').value=0;pzSync();};
+  function adjShow(){adj.hidden=!photo;}
   // ---- style switcher: swipe, buttons, dots, arrow keys ----
   var story=$('story'),stage=$('stage'),cvs=$('cvs'),sname=$('sname'),dots=$('dots5');
   STYLES.forEach(function(s,i){var b=document.createElement('button');b.type='button';b.setAttribute('aria-label','樣式 '+(i+1)+' '+s[0]);b.onclick=function(){setStyle(i,i>styleIdx?1:-1);};dots.appendChild(b);});
