@@ -1072,6 +1072,14 @@ main{overflow-x:clip}
 @keyframes inLift{to{transform:translateY(-100%);visibility:hidden}}
 html.intro-on{overflow:hidden}
 @media (prefers-reduced-motion:reduce){.intro{animation:inFade .4s ease .9s forwards}.in-sym{display:none}.in-mark{animation:none;opacity:1;transform:none}@keyframes inFade{to{opacity:0;visibility:hidden}}}
+
+/* reader view switch (phones only): single page or the two-page spread */
+.view-tog{display:none;justify-content:center;gap:.3rem;margin:0 auto .9rem}
+.view-tog button{border:0;border-radius:10px;background:var(--dot);padding:.35rem .9rem;font:inherit;font-weight:700;font-size:.82rem;line-height:1.25;cursor:pointer;display:flex;flex-direction:column;align-items:center}
+.view-tog .ti{font-weight:400;font-size:.66rem}
+.view-tog button[aria-pressed="true"]{background:var(--ink);color:#fff}
+.view-tog button[aria-pressed="true"] .ti{color:rgba(255,255,255,.7)}
+@media (max-width:760px){.view-tog{display:flex}.reader.spread .book-stage{display:flex}.reader.spread .single{display:none}}
 </style>
 
 <!-- ============ INTRO: a two-second opening — ㄅㄆㄇㄈ drop in, become the wordmark, the curtain lifts ============ -->
@@ -1327,6 +1335,7 @@ html.intro-on{overflow:hidden}
       <div class="chapters" id="chapters"></div>
     </div>
     <div class="reader">
+      <div class="view-tog" role="group" aria-label="檢視方式 View"><button type="button" data-v="single" aria-pressed="true">單頁<span class="ti">Single</span></button><button type="button" data-v="spread" aria-pressed="false">雙頁<span class="ti">Spread</span></button></div>
       <div class="book-stage" id="bookStage">
         <div class="book closed-front" id="bookEl"></div>
         <div class="book-shadow"></div>
@@ -1911,7 +1920,8 @@ function sizeBook() {
   const w = Math.min(innerWidth - 48, 1180), h = Math.min(innerHeight * .72, 640, w / 2 * 910 / 641);
   bookEl.style.setProperty('--bh', h + 'px');
 }
-const isSingle = () => innerWidth <= 760;
+let spreadMode = false; try { spreadMode = localStorage.getItem('bpmf-spread') === '1'; } catch (e) {}
+const isSingle = () => innerWidth <= 760 && !spreadMode;   // phones read one page at a time unless the reader picks the two-page spread
 function loadNear() {
   leaves.forEach((lf, i) => { if (Math.abs(i - flipped) <= 2) lf.querySelectorAll('img[data-src]').forEach(im => { im.src = im.dataset.src; im.removeAttribute('data-src'); }); });
   [sp - 1, sp + 1].forEach(p => { if (p >= 0 && p < N) { const im = new Image(); im.src = src(p); } });
@@ -2002,6 +2012,18 @@ let sx = null;
 single.addEventListener('pointerdown', e => sx = e.clientX);
 single.addEventListener('pointerup', e => { if (sx == null) return; const dx = e.clientX - sx; sx = null; if (Math.abs(dx) > 40) flip(dx < 0 ? 1 : -1); else flip(e.offsetX > single.clientWidth / 2 ? 1 : -1); });
 sizeBook(); renderBook();
+
+/* phone view switch: single page ⇄ two-page spread, keeping the place */
+(() => {
+  const tog = document.querySelector('.view-tog'); if (!tog) return;
+  const reader = tog.closest('.reader');
+  const paint = () => { reader.classList.toggle('spread', spreadMode); tog.querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', (b.dataset.v === 'spread') === spreadMode)); };
+  tog.addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; const want = b.dataset.v === 'spread'; if (want === spreadMode) return;
+    if (want) flipped = Math.ceil(sp / 2); else sp = flipped === 0 ? 0 : Math.min(N - 1, flipped * 2 - 1);
+    spreadMode = want; try { localStorage.setItem('bpmf-spread', want ? '1' : '0'); } catch (e) {}
+    paint(); sizeBook(); renderBook(); });
+  paint();
+})();
 
 /* zoom */
 const zoom = $('#zoom'), zoomPg = $('#zoomPg');
