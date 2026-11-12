@@ -1,4 +1,4 @@
-<!doctype html><html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta property="og:title" content="BOPOMOFO 臺灣注音印花設計"><meta property="og:description" content="Visual Translation of Taiwanese Zhuyin — 國立臺灣師範大學 圖文傳播學系 畢業製作"><meta property="og:image" content="assets/merch/book-cover.webp"><style>[hidden]{display:none!important}body{margin:0}</style></head><body>
+<!doctype html><html lang="zh-Hant"><head><!-- Google tag (gtag.js) --><script async src="https://www.googletagmanager.com/gtm.js?id=GTM-W2TKHMP7"></script><script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());</script><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta property="og:title" content="BOPOMOFO 臺灣注音印花設計"><meta property="og:description" content="Visual Translation of Taiwanese Zhuyin — 國立臺灣師範大學 圖文傳播學系 畢業製作"><meta property="og:image" content="assets/merch/book-cover.webp"><style>[hidden]{display:none!important}body{margin:0}</style></head><body>
 <title>BOPOMOFO</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <meta name="description" content="BOPOMOFO — Visual Translation of Taiwanese Zhuyin. Explore Taiwanese culture through Bopomofo.">
@@ -3061,6 +3061,46 @@ C.merch.forEach((p, i) => {
   el.addEventListener('animationend', e => { if (e.target === el) done(); });
   el.addEventListener('click', () => el.classList.add('skip'));
   setTimeout(() => el.isConnected && done(), 2600);   // safety net if animations don't run
+})();
+
+/* ---------- ANALYTICS: named events for the Google tag on the public site. A no-op here on claude.ai, where no tag loads.
+   Only counts and labels are sent — never what people type or draw. ---------- */
+(() => {
+  const send = (name, params) => { try { if (typeof window.gtag === 'function') window.gtag('event', name, params || {}); } catch (e) {} };
+  window.bpmfTrack = send;
+  const txt = el => (el && el.textContent || '').replace(/\s+/g, ' ').trim().slice(0, 60);
+  // hearts: one event per burst of tapping, carrying how many taps it was
+  let likeN = 0, likeT = 0;
+  const flushLikes = () => { if (likeN) send('heart_tap', {taps: likeN}); likeN = 0; };
+  addEventListener('pagehide', flushLikes);
+  document.addEventListener('click', e => {
+    const t = e.target.closest('a,button,.prod .card'); if (!t) return;
+    if (t.id === 'likeBtn') { likeN++; clearTimeout(likeT); likeT = setTimeout(flushLikes, 1500); return; }
+    if (t.matches('.lk-gift')) return send('heart_gift_open');
+    if (t.matches('.hdr a[href^="#"], .nav a[href^="#"]')) return send('nav_click', {section: t.getAttribute('href').slice(1)});
+    if (t.matches('.hero a[href^="#"], #home a[href^="#"]')) return send('hero_button', {target: t.getAttribute('href').slice(1)});
+    if (t.id === 'toTop') return send('back_to_top');
+    if (t.id === 'musicBtn') return send('music_toggle', {on: t.getAttribute('aria-pressed') !== 'true'});
+    if (['pSave', 'pShare', 'pPost'].includes(t.id)) return send('pattern_' + {pSave: 'save', pShare: 'share', pPost: 'post'}[t.id]);
+    if (t.closest('#symBtns')) return send('pattern_repeat', {style: txt(t)});
+    if (t.closest('#colorBtns')) return send('pattern_colour', {preset: t.getAttribute('aria-label') || ''});
+    if (t.id === 'wbDone') return setTimeout(() => send('workbook_hand_in', {grade: txt(document.getElementById('wbStamp')), symbol: txt(document.getElementById('wbSym'))}), 50);
+    if (t.id === 'wbSave') return send('workbook_save');
+    if (t.closest('#syTry')) return send('translator_example', {phrase: txt(t)});
+    if (t.id === 'sySay' || t.id === 'sySayEn') return send('translator_read_aloud', {lang: t.id === 'sySay' ? 'zh' : 'en'});
+    if (t.matches('.prod .card')) return send('product_view', {product: txt(t.closest('.prod').querySelector('h3'))});
+    if (t.matches('.mv-card')) return send('video_open', {card: t.getAttribute('aria-label') || ''});
+    if (t.id === 'vdShare') return send('video_share');
+    if (t.matches('.sp-b')) return send(t.dataset.k === 'support' ? 'support_click' : 'instagram_click');
+  }, true);
+  // a word card opening, from anywhere on the page
+  const dr = document.getElementById('drawer');
+  let drOpen = false;
+  if (dr) new MutationObserver(() => { const o = dr.classList.contains('open'), was = drOpen; drOpen = o; if (o && !was) { const h = document.getElementById('drTitle'); send('word_open', {word: (h && (h.getAttribute('aria-label') || h.textContent) || '').split('（')[0].trim()}); } })
+    .observe(dr, {attributes: true, attributeFilter: ['class']});
+  // translator: count uses (once a translation lands), not the text itself
+  const en = document.getElementById('syEn');
+  if (en) new MutationObserver(() => { if (en.textContent.trim() && !en.classList.contains('wait')) send('translator_use'); }).observe(en, {childList: true});
 })();
 </script>
 
