@@ -136,9 +136,9 @@ h1 small{display:block;font-family:var(--en);font-weight:400;font-size:.42em;col
 .dots5 button[aria-current="true"]{width:28px;background:var(--pink)}
 .adj{display:grid;gap:12px;padding:0;margin:0;width:100%}
 .adj .btn{width:100%}
-.adj label{display:grid;grid-template-columns:7.5em minmax(0,1fr);align-items:center;gap:10px;font-weight:700;font-size:.85rem;line-height:1.25}
+.adj label{display:grid;grid-template-columns:1fr;gap:4px;align-items:center;font-weight:700;font-size:.85rem;line-height:1.25}
 .adj label small{display:block;font-family:var(--en);font-weight:400;font-size:.68rem;color:var(--muted)}
-.adj input[type=range]{display:block;width:calc(100% + 10px);margin:0 -10px 0 0;padding:0;accent-color:var(--pink);min-width:0;box-sizing:border-box}
+.adj input[type=range]{display:block;width:100%;margin:0;padding:0;accent-color:var(--pink);min-width:0;box-sizing:border-box}
 .adj label{overflow:visible}
 .swipehint{text-align:center;margin:0;font-size:.8rem;color:var(--muted)}
 .swipehint b{display:inline-block;animation:nudge 1.6s ease-in-out infinite}
@@ -190,7 +190,16 @@ a.btn:hover{color:#fff}
 /* footer top edge: the same drifting wave as the BOPOMOFO site */
 .foot{margin-top:46px}
 .foot::before{content:"";position:absolute;left:0;right:0;top:-45px;height:46px;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='46' viewBox='0 0 240 46' preserveAspectRatio='none'%3E%3Cpath d='M0 46 L0 23 Q60 0 120 23 T240 23 L240 46 Z' fill='%23262324'/%3E%3C/svg%3E") 0 0/240px 46px repeat-x;pointer-events:none;animation:waveDriftL 26s linear infinite}
-@keyframes waveDriftL{to{background-position-x:-240px}}[hidden]{display:none!important}
+@keyframes waveDriftL{to{background-position-x:-240px}}.heroart{display:none}
+@media (min-width:760px){
+  .heroart{display:grid;grid-template-columns:repeat(3,64px);gap:8px;justify-self:end;align-self:center;grid-column:2;grid-row:1/5;padding-right:4px}
+  .heroart i{display:grid;place-items:center;width:64px;height:64px;background:var(--c);color:#fff;font-style:normal;font-weight:900;font-size:1.05rem;letter-spacing:.02em;line-height:1;animation:fadeIn 1.2s ease both,bobT 7s ease-in-out infinite;animation-delay:calc(var(--k)*90ms + .8s),calc(var(--k)*420ms)}
+  .heroart i:nth-child(even){transform:translateY(10px)}
+  .top{display:grid;grid-template-columns:minmax(0,1fr) auto;column-gap:32px;row-gap:14px;align-items:start}
+  .top>img,.top>h1,.top>.lead{grid-column:1}
+  .top>.tones{grid-column:1/-1}
+}
+@keyframes bobT{0%,100%{translate:0 0}50%{translate:0 -8px}}[hidden]{display:none!important}
 /* ---- responsive: small phones, large phones / tablets, desktop (preview sticks beside the steps) ---- */
 @media (max-width:380px){
   .row.eq{grid-template-columns:1fr}
@@ -230,6 +239,7 @@ a.btn:hover{color:#fff}
     <h1 id="ttl"><span id="ttlZh">注音打卡框</span><small id="ttlEn">Write your name in Zhuyin</small></h1>
     <p class="lead" id="lead">拍一張照，用手指寫下你的名字注音，做成一張限時動態，標註我們就完成打卡。</p>
     <p class="lead en2" id="leadEn">Take a photo, write your name in Zhuyin with your finger, turn it into an Instagram story and tag us to check in.</p>
+    <div class="heroart" aria-hidden="true"><i style="--c:var(--grey);--k:1">ㄊㄙ</i><i style="--c:var(--teal);--k:2">ㄞㄢ</i><i style="--c:var(--pink);--k:3">ㄤㄦ</i><i style="--c:var(--gold);--k:4">ㄎㄋ</i><i style="--c:var(--grey);--k:5">ㄕㄏ</i><i style="--c:var(--teal);--k:6">ㄛㄜ</i><i style="--c:var(--pink);--k:7">ㄅㄉ</i><i style="--c:var(--gold);--k:8">ㄍㄑ</i><i style="--c:var(--grey);--k:9">ㄆㄨ</i></div>
     <div class="tones" aria-hidden="true"><i style="background:var(--grey)"></i><i style="background:var(--teal)"></i><i style="background:var(--pink)"></i><i style="background:var(--gold)"></i></div>
   </header>
 
