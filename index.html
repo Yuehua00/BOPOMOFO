@@ -1294,7 +1294,6 @@ html.intro-on{overflow:hidden}
     <div class="ex-body">
       <div class="cat-intro" id="catIntro"></div>
       <div>
-        <div class="ex-bar"><p class="ex-hint">點一下圓圈，看注音與文化介紹<span class="ti">Tap a circle for its Zhuyin & story</span></p><div class="legend" id="exLegend"></div></div>
         <div class="field" id="field" role="list"></div>
       </div>
     </div>
@@ -1735,9 +1734,8 @@ function renderCat() {
   const c = C.categories[catIdx];
   [...tabs.children].forEach((b,i) => b.setAttribute('aria-selected', i === catIdx));
   const feat = c.items.filter(x => x.featured).length;
-  intro.style.setProperty('--c', COL[c.color]); $('#exLegend').style.setProperty('--c', COL[c.color]);
+  intro.style.setProperty('--c', COL[c.color]);
   intro.innerHTML = `<div class="badge"><img src="assets/badge/${c.key}.png" alt="${c.glyph}"></div><div><p class="line">${c.line}</p><p class="line-en">${c.lineEn}</p></div>`;
-  $('#exLegend').innerHTML = `<span><i></i>讀本收錄 In book ${feat}</span><span><i class="o"></i>待補 Coming ${c.items.length - feat}</span>`;
   renderField(true);
 }
 function renderField(enter) {
@@ -1746,11 +1744,11 @@ function renderField(enter) {
   field.innerHTML = '';
   field.style.setProperty('--c', COL[c.color]);
   c.items.forEach((it, i) => {
-    const b = el('button', 'chip' + (it.featured ? ' f' : '') + (enter && !RM ? ' enter' : '') + (highlight && highlight.has(it.z) ? ' hl' : ''));
+    const b = el('button', 'chip f' + (enter && !RM ? ' enter' : '') + (highlight && highlight.has(it.z) ? ' hl' : ''));
     const w = mobile ? 21 : 16;
     b.style.cssText = `left:${pos[i].x}%;top:${pos[i].y}%;--w:${w}cqw;--i:${i};--t:${3 + (i % 4) * .7}s;--dl:-${(i * .37) % 3}s;--m:${motifURL(motifForLetter[it.z] || 7)}`;
     b.setAttribute('role','listitem');
-    b.setAttribute('aria-label', `${it.z}，${it.word}${it.featured ? '' : '（內容待補）'}`);
+    b.setAttribute('aria-label', `${it.z}，${it.word}`);
     b.innerHTML = `<span class="in"><span class="z">${it.z}</span><span class="wd">${it.word}${it.en ? `<small>${it.en}</small>` : ''}</span></span>`;
     b.onclick = () => openDrawer(catIdx, i);
     field.appendChild(b);
