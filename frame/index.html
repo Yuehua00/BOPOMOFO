@@ -10,7 +10,7 @@
    symbols that pop when tapped, a five-style card you can swipe, and a tone-coloured confetti burst on finish. */
 :root{
   color-scheme:light;
-  --ink:#393536; --grey:#929399; --teal:#00A99F; --pink:#E40077; --gold:#B49154;
+  --ink:#393536; --grey:#929399; --teal:#00A99F; --pink:#DA1884; --gold:#B49154;
   --paper:#FBFBFB; --card:#FFFFFF; --line:#DCDBDC; --dot:#F4F4F4; --muted:#6E6B6D; --tray:#F3F2F2;
   --zh:"Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif;
   --en:"Poppins","Noto Sans TC",system-ui,sans-serif;
@@ -114,9 +114,10 @@ h1 small{display:block;font-family:var(--en);font-weight:400;font-size:.42em;col
 .pen::after{content:"";position:absolute;left:25%;right:25%;bottom:-7px;height:2px;border-radius:2px;background:var(--ink);transform:scaleX(0);transition:transform .25s var(--spring)}
 .pen[aria-pressed="true"]{transform:translateY(-3px)}
 .pen[aria-pressed="true"]::after{transform:scaleX(1)}
-.acts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;flex:1 1 100%;width:100%}
+.acts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));align-items:stretch;gap:8px;flex:1 1 100%;width:100%}
 .acts .btn{width:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;padding-inline:.5rem}
 .btn.sm{min-height:44px;padding:.45rem .9rem}
+@media (min-width:560px){.acts{grid-template-columns:repeat(4,minmax(0,1fr))}}
 .btn:disabled{opacity:.4;pointer-events:none}
 .ib{display:inline-flex;align-items:center;justify-content:center;border:0;background:#ECECEC;color:var(--ink);padding:.45rem .9rem;font-weight:700;min-height:44px;transition:background .15s,transform .25s var(--spring)}
 .ib:hover{background:#DEDEDF;transform:translateY(-2px)}
@@ -148,7 +149,9 @@ h1 small{display:block;font-family:var(--en);font-weight:400;font-size:.42em;col
 .adj input[type=range]{display:block;width:100%;margin:0;padding:0;accent-color:var(--pink);min-width:0;box-sizing:border-box}
 .adj label{overflow:visible}
 .swipehint{text-align:center;margin:0;font-size:.8rem;color:var(--muted)}
-.swipehint b{display:inline-block;animation:nudge 1.6s ease-in-out infinite}
+.swipehint b{display:inline-block;margin-inline:.7em;animation:nudge 1.6s ease-in-out infinite}
+.swipehint b:first-child{animation-name:nudgeL}
+@keyframes nudgeL{50%{transform:translateX(-6px)}}
 @keyframes nudge{50%{transform:translateX(6px)}}
 .result{display:grid;gap:10px;justify-items:center}
 .result img{width:min(100%,320px);height:auto;aspect-ratio:9/16;border:1px solid var(--line);border-radius:22px;animation:reveal .9s var(--spring) both}
@@ -168,7 +171,9 @@ a.btn:hover{color:#fff}
 @keyframes bnc{0%,100%{transform:translateY(0)}35%{transform:translateY(-10px)}60%{transform:translateY(0) scaleY(.8)}}
 .foot .cta{margin:0;text-align:center;color:#fff;font-size:1.15rem;font-weight:900;line-height:1.4}
 .foot .cta small{display:block;font-family:var(--en);font-weight:400;font-size:.72rem;color:#b9b5b7;margin-top:2px}
-.foot .links{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px}
+.foot .links{display:grid;grid-template-columns:minmax(0,1fr);gap:10px}
+.foot a.site .t{display:block;white-space:nowrap}.foot a.site small{white-space:nowrap}
+@media (min-width:600px){.foot .links{grid-template-columns:repeat(3,minmax(0,1fr))}.foot a.site{padding-inline:.9rem 2rem}.foot a.site .t{font-size:.92rem}}
 .foot a.site small{display:block;font-family:var(--en);font-weight:400;font-size:.68rem;opacity:.8;line-height:1.25}
 .foot a.site{flex-direction:column;display:flex;align-items:center;justify-content:center;text-align:center;min-height:48px;font-weight:700;color:#fff;padding:.55rem 1.1rem;background:rgba(255,255,255,.12);text-decoration:none;transition:background .15s,transform .25s var(--spring)}
 .foot a.site:hover{background:rgba(255,255,255,.22);transform:translateY(-2px);color:#fff}
@@ -213,15 +218,50 @@ a.btn:hover{color:#fff}
 .nm label small{display:block;font-family:var(--en);font-weight:400;font-size:.7rem;color:var(--muted)}
 .nm input{width:100%;min-height:54px;border:0;border-bottom:3px solid var(--ink);background:#fff;font:inherit;font-size:1.6rem;font-weight:700;padding:.3rem .6rem;color:var(--ink);letter-spacing:.2em;border-radius:0}
 .nm input:focus{outline:none;border-bottom-color:var(--pink)}
+.padcover{position:absolute;inset:0;z-index:3;display:grid;place-content:center;text-align:center;gap:2px;background:rgba(255,255,255,.7);color:var(--ink);font-weight:900;font-size:1.15rem;line-height:1.3;cursor:pointer;touch-action:pan-y}
+.padcover small{display:block;font-family:var(--en);font-weight:400;font-size:.72rem;color:var(--muted)}
+.padcover:hover{background:rgba(255,255,255,.55)}
+.consent{display:grid;grid-template-columns:auto 1fr;gap:10px;align-items:start;text-align:left;font-size:.88rem;line-height:1.5;padding:12px 14px;background:var(--tray);cursor:pointer}
+.consent input{width:20px;height:20px;margin:2px 0 0;accent-color:var(--pink)}
+.consent small{display:block;font-family:var(--en);font-size:.7rem;color:var(--muted);line-height:1.4}
+.fbstep{display:grid;gap:10px;padding:14px;background:var(--tray)}
+.fbstep h3,.fbq legend{margin:0;font-size:1rem;font-weight:900;line-height:1.4;padding:0}
+.fbstep h3 small,.fbq legend small{display:block;font-family:var(--en);font-weight:400;font-size:.74rem;color:var(--muted)}
+.fbform{display:grid;gap:18px}
+.fbq{border:0;margin:0;padding:0;display:grid;gap:10px;min-width:0}
+.chips{display:grid;grid-template-columns:minmax(0,1fr);gap:8px}
+.chips.c2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.chips.c6{grid-template-columns:repeat(6,minmax(0,1fr))}
+.chips.stars{grid-template-columns:repeat(5,minmax(0,1fr))}
+.chip>span{height:100%;box-sizing:border-box}
+.chip.big>span,.chips.stars .chip>span{min-width:0!important;padding-inline:0;align-items:center;text-align:center}
+.chip{position:relative}
+.chip input{position:absolute;opacity:0;inset:0;margin:0;cursor:pointer}
+.chip>span{display:flex;flex-direction:column;justify-content:center;min-height:44px;padding:.45rem .85rem;background:#fff;border:1px solid var(--line);font-weight:700;line-height:1.3;transition:background .15s,color .15s,transform .25s var(--spring)}
+.chip>span small{font-family:var(--en);font-weight:400;font-size:.68rem;opacity:.75}
+.chip.big>span{min-width:52px;align-items:center;font-size:1.35rem}
+.chip input:checked+span{background:var(--ink);color:#fff;transform:translateY(-2px)}
+.chip input:focus-visible+span{outline:2px solid var(--teal);outline-offset:2px}
+.chips.stars .chip>span{min-width:48px;align-items:center;font-size:1.2rem;color:var(--grey)}
+.chips.stars .chip.lit>span{color:var(--gold)}
+.chips.stars .chip input:checked+span{background:#fff;color:var(--gold)}
+.fbtext{width:100%;min-height:48px;padding:.6rem .8rem;border:1px solid var(--line);background:#fff;font:inherit;color:var(--ink)}
+.fbdone{display:grid;gap:8px;justify-items:center;text-align:center;padding:22px 16px;border:2px dashed var(--teal);background:#fff}
+.fbdone .ok{display:grid;place-items:center;width:3.2rem;height:3.2rem;border-radius:50%;background:var(--teal);color:#fff;font-size:1.6rem;animation:tick .6s var(--spring)}
+.fbdone .big{font-size:1.35rem;font-weight:900;margin:0}
+.fbdone .code{font-family:var(--en);font-weight:600;font-size:1.5rem;letter-spacing:.12em;color:var(--pink);margin:0}
+.fbdone p{margin:0}
 .nmmsg{margin:0;font-size:.8rem;color:var(--pink);min-height:1.2em}
 .zref{display:flex;flex-wrap:wrap;gap:14px 30px;align-items:flex-start;min-height:104px;padding:6px 0}
 .zph{color:var(--muted);font-size:.9rem;line-height:1.4;align-self:center}.zph small{display:block;font-family:var(--en);font-size:.7rem}
 .bz{display:flex;flex-direction:column;align-items:center;gap:6px}
 .bz-c{font-weight:900;font-size:2rem;line-height:1}
-.bz-y{display:flex;align-items:stretch;gap:3px;color:var(--pink)}
+.bz-y{display:flex;align-items:stretch;gap:3px;color:var(--pink);position:relative;padding-right:.95rem}
 .bz-s{display:block;font-weight:700;font-size:1.35rem;line-height:1.1;text-align:center}
-.bz-y .tn{align-self:flex-end;font-style:normal;font-weight:700;font-size:1.1rem;line-height:1}
-.bz-y .tn.top{align-self:flex-start}[hidden]{display:none!important}
+.bz-y .tn{position:absolute;right:0;transform:translateY(-50%);font-style:normal;font-weight:700;font-size:1.1rem;line-height:1}
+.bz-y .tn.top{right:auto;left:0;width:calc(100% - .95rem);text-align:center;transform:none;top:.1rem!important;line-height:1}
+#zref.haslt .bz-y{padding-top:1.35rem}
+#zref.haslt .bz-y .tn:not(.top){margin-top:1.35rem}[hidden]{display:none!important}
 /* ---- responsive: small phones, large phones / tablets, desktop (preview sticks beside the steps) ---- */
 @media (max-width:380px){
   .row.eq{grid-template-columns:1fr}
@@ -242,6 +282,7 @@ a.btn:hover{color:#fff}
   #c1{grid-column:1;grid-row:2}
   #c2{grid-column:1;grid-row:3}
   #c3{grid-column:2;grid-row:2/4;position:sticky;top:20px}
+  #c4{grid-column:1/-1;grid-row:4}
   .cvs{width:min(100%,360px)}
   .foot-in{max-width:1120px;grid-template-columns:1fr 1fr;column-gap:40px}
   .foot-in .dots4,.foot-in .cta,.foot-in .links,.foot-in hr{grid-column:1/-1}
@@ -250,6 +291,28 @@ a.btn:hover{color:#fff}
   .wrap{max-width:1240px;grid-template-columns:minmax(0,1fr) minmax(0,500px)}
   .foot-in{max-width:1240px}
 }@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}.float{display:none}}
+/* ---- language switch: Chinese-first (default) or English-first ---- */
+.langbtn{position:fixed;z-index:45;top:calc(10px + env(safe-area-inset-top,0px));right:max(12px,env(safe-area-inset-right,0px));font:600 .78rem/1 var(--en);letter-spacing:.04em;color:var(--ink);background:#fff;border:1.5px solid var(--ink);padding:.62rem .8rem;cursor:pointer;display:flex;gap:.5rem;align-items:center}
+.langbtn:hover{background:var(--ink);color:#fff}
+.langbtn b{font-weight:600;opacity:.4}.langbtn b.on{opacity:1}
+.zhw{display:inline}
+body.en .swp{display:block!important;font-family:var(--en)!important;font-size:1em!important;color:inherit!important;opacity:1!important;font-weight:inherit!important;line-height:1.35!important;margin:0 0 .15em!important;letter-spacing:0!important;min-height:0!important}
+body.en .zhw{font-family:var(--zh);font-size:.74em;font-weight:400;opacity:.7}
+body.en .btn .zhw,body.en .chip .zhw,body.en .consent .zhw{display:block;font-size:.68rem}
+body.en .hint .swp,body.en .cta .swp{font-size:.95em!important}
+body.en .hint .zhw{color:var(--muted);font-size:.8em}
+body.en .foot dt .swp,body.en .foot dd .swp{font-size:1em!important;color:inherit!important}
+body.en .foot a.site .t{font-size:.7rem;font-weight:400;opacity:.8;order:2}
+body.en .foot a.site .swp{font-size:.95rem!important;font-weight:600;white-space:normal}
+body.en h1{display:flex;flex-direction:column-reverse;font-size:clamp(1.6rem,7vw,2.2rem)}
+body.en h1 #ttlEn{font-family:var(--en);font-weight:600;font-size:1em;color:var(--ink);letter-spacing:-.01em;margin:0 0 .35rem;min-height:0;line-height:1.2}
+body.en h1 #ttlZh{display:block;font-size:.42em;font-weight:500;color:var(--muted);line-height:1.5}
+body.en .top{display:flex;flex-direction:column}
+body.en #leadEn{order:1;color:var(--ink);font-size:.95rem;max-width:30em;margin:0}
+body.en #lead{order:2;font-size:.8rem}
+body.en .heroart,body.en .tones{order:3}
+body.en .card h2 em{grid-row:1;font-family:var(--en);font-weight:600;font-size:1.15rem;color:var(--ink);line-height:1.2}
+body.en .card h2 .tt{grid-row:2;font-size:.78rem!important;font-weight:400!important;color:var(--muted);letter-spacing:0!important;transform:none!important}
 </style>
 
 <div class="float" id="float" aria-hidden="true"></div>
@@ -280,15 +343,16 @@ a.btn:hover{color:#fff}
   <section class="card rv" style="--i:2" aria-labelledby="s2" id="c2">
     <h2 id="s2" class="pre"><span class="no" id="n2">2</span><span class="tt">寫下你的名字</span> <em>Write your name</em></h2>
     <p class="hint">先輸入你的名字，下面會顯示每個字的注音；再對照淡淡的注音，在下方的格子裡由上往下，一格寫一個符號。<span class="en2">Type your name to see its Zhuyin, then trace each faint symbol in the boxes below, from top to bottom.</span></p>
-    <div class="nm"><label for="nameIn">輸入你的名字<small>Type your name (Chinese characters, up to 4)</small></label><input id="nameIn" type="text" maxlength="8" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="例：王小明" enterkeyhint="done"><p class="nmmsg" id="nmMsg" aria-live="polite"></p></div>
+    <div class="nm"><label for="nameIn">輸入你的名字（中文，最多 4 個字）<small>Type your name (Chinese characters, up to 4)</small></label><input id="nameIn" type="text" maxlength="8" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="例：王小明" enterkeyhint="done"><p class="nmmsg" id="nmMsg" aria-live="polite"></p></div>
     <div class="zref" id="zref" aria-live="polite"></div>
-    <div class="pad" id="pad"><canvas id="guides" width="930" height="758"></canvas><canvas id="ink" class="ink" width="930" height="758" aria-label="手寫區"></canvas></div>
+    <div class="pad" id="pad"><canvas id="guides" width="930" height="758"></canvas><canvas id="ink" class="ink" width="930" height="758" aria-label="手寫區"></canvas><div class="padcover" id="padCover" role="button" tabindex="0" aria-label="點一下開始書寫">點一下開始書寫<small>Tap to start writing</small></div></div>
     <div class="tools">
       <div class="grp"><span class="lbl">筆色 Pen colour</span><div class="pens" id="pens" role="group" aria-label="筆色"></div></div>
       <div class="acts">
         <button class="btn alt sm" id="btnUndo" type="button" disabled>返回上一筆<small>Undo last stroke</small></button>
         <button class="btn alt sm" id="btnRedo" type="button" disabled>重做<small>Redo</small></button>
         <button class="btn alt sm" id="btnClear" type="button">全部清除<small>Clear all</small></button>
+        <button class="btn alt sm" id="btnDone" type="button" disabled>完成書寫<small>Done writing</small></button>
       </div>
     </div>
     <p class="hint" style="margin-top:6px">注音符號表（點一下會念出發音）<span class="en2">Zhuyin chart (tap a symbol to hear it)</span></p>
@@ -324,10 +388,69 @@ a.btn:hover{color:#fff}
         <li>貼上下方的貼文文字，標註 <span id="handleTxt"></span>。<span class="en2">Paste the caption below and tag us.</span></li>
       </ol>
       <textarea id="cap" readonly aria-label="貼文文字"></textarea>
+      <label class="consent" id="consentBox"><input type="checkbox" id="upConsent"><span>我同意把這張成品圖上傳到展覽的圖片資料庫（可能包含我的照片與名字，主辦方會留存）<small>I agree to upload this image to the exhibition gallery (it may include my photo and name, and will be kept by the organisers).</small></span></label>
+      <p class="hint" id="upMsg" aria-live="polite"></p>
       <button class="btn alt" id="btnCopy" type="button">複製貼文文字<small>Copy caption</small></button>
       <a class="btn" id="btnIG" href="instagram://story-camera" style="background:var(--pink)">開啟我的 Instagram 限時動態<small>Open my Instagram Stories</small></a>
       <p class="hint">沒有跳轉到 Instagram？<a href="https://www.instagram.com/" target="_blank" rel="noopener">改開 Instagram 網頁</a><span class="en2">Nothing happened? Open Instagram on the web instead.</span></p>
       <p class="hint" id="copyMsg" aria-live="polite"></p>
+    </div>
+  </section>
+  <section class="card rv" style="--i:4" aria-labelledby="s4" id="c4">
+    <h2 id="s4" class="pre"><span class="no" id="n4">4</span><span class="tt">追蹤我們、填回饋，領好物</span> <em>Follow us, share feedback, get a gift</em></h2>
+    <p class="hint">完成下面兩步，回到展場出示完成畫面，就能領取限量好物（數量有限，送完為止）。<span class="en2">Finish the two steps below, then show the completion screen at our booth to collect a limited-edition gift (while supplies last).</span></p>
+    <div id="fbWrap" class="fbform">
+      <div class="fbstep">
+        <h3>① 追蹤 BOPOMOFO 的 Instagram<small>Step 1 · Follow us on Instagram</small></h3>
+        <a class="btn" id="fbFollow" href="https://www.instagram.com/bopomofo.ntnu/" target="_blank" rel="noopener" style="background:var(--pink)">追蹤 @bopomofo.ntnu<small>Follow @bopomofo.ntnu</small></a>
+        <label class="consent"><input type="checkbox" id="fbFollowed"><span>我已經追蹤了<small>I've followed you</small></span></label>
+      </div>
+      <form class="fbstep fbform" id="fbForm" novalidate>
+        <h3>② 回答五個小問題<small>Step 2 · Five quick questions</small></h3>
+        <fieldset class="fbq"><legend>1. 寫完自己的注音名字，你的感覺是？<small>How did writing your name in Zhuyin feel?</small></legend>
+          <div class="chips">
+            <label class="chip"><input type="radio" name="q1" value="回到國小一年級"><span>瞬間回到國小一年級<small>Back to first grade</small></span></label>
+            <label class="chip"><input type="radio" name="q1" value="手記得腦忘了"><span>手記得，腦忘了<small>My hand remembers, my brain doesn't</small></span></label>
+            <label class="chip"><input type="radio" name="q1" value="書法家附身"><span>書法家附身<small>Calligrapher mode</small></span></label>
+            <label class="chip"><input type="radio" name="q1" value="名字變可愛"><span>原來我的名字這麼可愛<small>My name looks cute in Zhuyin</small></span></label>
+          </div></fieldset>
+        <fieldset class="fbq"><legend>2. 如果注音符號是一個人，誰最有個性？<small>If a Zhuyin symbol were a person, who has the most personality?</small></legend>
+          <div class="chips c6">
+            <label class="chip big"><input type="radio" name="q2" value="ㄅ"><span>ㄅ</span></label>
+            <label class="chip big"><input type="radio" name="q2" value="ㄎ"><span>ㄎ</span></label>
+            <label class="chip big"><input type="radio" name="q2" value="ㄓ"><span>ㄓ</span></label>
+            <label class="chip big"><input type="radio" name="q2" value="ㄜ"><span>ㄜ</span></label>
+            <label class="chip big"><input type="radio" name="q2" value="ㄤ"><span>ㄤ</span></label>
+            <label class="chip big"><input type="radio" name="q2" value="ㄦ"><span>ㄦ</span></label>
+          </div></fieldset>
+        <fieldset class="fbq"><legend>3. 注音印花分成「食、景、物」，你最想帶哪一類回家？<small>Our patterns come in Food, Places and Objects. Which would you take home?</small></legend>
+          <div class="chips c2">
+            <label class="chip"><input type="radio" name="q3" value="食"><span>食<small>Food</small></span></label>
+            <label class="chip"><input type="radio" name="q3" value="景"><span>景<small>Places</small></span></label>
+            <label class="chip"><input type="radio" name="q3" value="物"><span>物<small>Objects</small></span></label>
+            <label class="chip"><input type="radio" name="q3" value="全部打包"><span>全部打包<small>All of them, please</small></span></label>
+          </div></fieldset>
+        <fieldset class="fbq"><legend>4. 幫這個注音打卡框打個分數？<small>How fun was the Zhuyin check-in frame?</small></legend>
+          <div class="chips stars" id="fbStars">
+            <label class="chip"><input type="radio" name="q4" value="1" aria-label="1 分"><span>★</span></label>
+            <label class="chip"><input type="radio" name="q4" value="2" aria-label="2 分"><span>★</span></label>
+            <label class="chip"><input type="radio" name="q4" value="3" aria-label="3 分"><span>★</span></label>
+            <label class="chip"><input type="radio" name="q4" value="4" aria-label="4 分"><span>★</span></label>
+            <label class="chip"><input type="radio" name="q4" value="5" aria-label="5 分"><span>★</span></label>
+          </div></fieldset>
+        <fieldset class="fbq"><legend>5. 用一句話（或一個注音）跟我們說說話（選填）<small>Leave us a line, or just one Zhuyin symbol (optional)</small></legend>
+          <input class="fbtext" type="text" name="q5" maxlength="60" placeholder="例：ㄏㄠˇ ㄎㄜˇ ㄞˋ！" autocomplete="off"></fieldset>
+        <button class="btn big" type="submit" id="fbSubmit" disabled>送出回饋，領取好物<small>Submit and claim your gift</small></button>
+        <p class="hint" id="fbMsg" aria-live="polite">完成第 ① 步並回答第 1～4 題後就能送出。<span class="en2">Finish step 1 and questions 1–4 to submit.</span></p>
+      </form>
+    </div>
+    <div class="fbdone" id="fbDone" hidden>
+      <span class="ok" aria-hidden="true">✓</span>
+      <p class="big">任務完成！<small class="en2">All done!</small></p>
+      <p>請到展場出示這個畫面，領取限量好物<span class="en2">Show this screen at our booth to collect your limited-edition gift.</span></p>
+      <p class="code" id="fbCode"></p>
+      <p class="hint" id="fbTime"></p>
+      <p class="hint">每人限領一次，數量有限，送完為止。<span class="en2">One per person, while supplies last.</span></p>
     </div>
   </section>
 </main>
@@ -337,9 +460,9 @@ a.btn:hover{color:#fff}
     <div class="dots4" aria-hidden="true"><i style="--c:var(--grey);--dl:0s"></i><i style="--c:var(--teal);--dl:.15s"></i><i style="--c:var(--pink);--dl:.3s"></i><i style="--c:var(--gold);--dl:.45s"></i></div>
     <p class="cta">喜歡這個計畫嗎？<small>Enjoy the project? Follow or support us.</small></p>
     <div class="links">
-      <a class="site ig" href="https://www.instagram.com/bopomofo.ntnu/" target="_blank" rel="noopener">追蹤 Instagram @bopomofo.ntnu<small>Follow us on Instagram</small></a>
-      <a class="site" href="https://yuehua00.github.io/BOPOMOFO/" target="_blank" rel="noopener">看完整 BOPOMOFO 網站<small>Visit the full BOPOMOFO site</small></a>
-      <a class="site" href="https://www.instagram.com/bopomofo.ntnu/" target="_blank" rel="noopener" style="background:var(--teal)">贊助支持<small>Support us</small></a>
+      <a class="site ig" href="https://www.instagram.com/bopomofo.ntnu/" target="_blank" rel="noopener"><span class="t">追蹤 Instagram</span><small>@bopomofo.ntnu</small></a>
+      <a class="site" href="https://yuehua00.github.io/BOPOMOFO/" target="_blank" rel="noopener"><span class="t">看完整 BOPOMOFO 網站</span><small>Visit the full site</small></a>
+      <a class="site" href="https://www.instagram.com/bopomofo.ntnu/" target="_blank" rel="noopener" style="background:var(--teal)"><span class="t">贊助支持</span><small>Support us</small></a>
     </div>
     <hr>
     <dl class="kv">
@@ -368,15 +491,18 @@ a.btn:hover{color:#fff}
 <script>
 (function(){
   // ---- editable settings ----
+  // Stats backend (Google Sheet). Leave TRACK_URL empty to turn tracking off. Setup guide: BOPOMOFO/後端統計/設定教學.txt
+  var TRACK_URL='';
+  var TRACK_TOKEN='CHANGE_ME';
   var HANDLE='@bopomofo.ntnu';
   var IG_URL='https://www.instagram.com/bopomofo.ntnu/';
   var TAGS='#BOPOMOFO #注音 #臺灣注音';
   var CAPTION='我的名字，用注音寫出來了！\nMy name, written in Zhuyin!\n'+TAGS+' '+HANDLE;
-  var COL={grey:'#929399',teal:'#00A99F',pink:'#E40077',gold:'#B49154',ink:'#393536'};
+  var COL={grey:'#929399',teal:'#00A99F',pink:'#DA1884',gold:'#B49154',ink:'#393536'};
   var TONES=[COL.grey,COL.teal,COL.pink,COL.gold];
   var W=1080,H=1920,PW=930,PH=758;
   var BOX=220,TONEW=60,TG=10,CG=30,VG=14,LABH=70,COLW=BOX+TG+TONEW,LW=PW,LH=PH;
-  var STYLES=[['簡約白','Minimal white'],['墨色','Ink'],['畫框','Gallery'],['單色','Mono'],['置中','Centred']];
+  var STYLES=[['簡約白','Minimal white'],['墨色','Ink'],['畫框','Gallery'],['紙卡','Paper card'],['置中','Centred'],['雙色','Duotone'],['拼貼','Collage']];
   var reduce=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   var GL='ㄅㄆㄇㄈㄉㄊㄋㄌㄍㄎㄏㄐㄑㄒㄓㄔㄕㄖㄗㄘㄙㄧㄨㄩㄚㄛㄜㄝㄞㄟㄠㄡㄢㄣㄤㄥㄦ';
 
@@ -463,25 +589,42 @@ a.btn:hover{color:#fff}
   });
 
   // boxes geometry shared by pad and story
-  function curCols(){return NAMECOLS.length?NAMECOLS:[{ch:'',syms:['','',''],tone:''},{ch:'',syms:['','',''],tone:''},{ch:'',syms:['','',''],tone:''}];}
+  // two stacked boxes per character: top = 聲母 on its own; bottom = the rest (介音+韻母), two symbols share that box, split top/bottom
+  function slot3(arr){var o=['',''];arr.forEach(function(ch){var u=ch.charCodeAt(0);if(u>=0x3105&&u<=0x3119&&!o[0]&&!o[1])o[0]=ch;else o[1]+=ch;});return o;}
+  function rlen(c){return Array.from(c.syms[1]||'').length;}
+  // tone sits on the right, between the last two symbols; a lone symbol gets it centred beside it; light tone at the top
+  function toneTop(c){if(c.tone==='˙')return LABH-DOTH+6;var n=rlen(c),cy;
+    if(n===2)cy=LABH+(BOX+VG)+BOX/2;else if(n===1&&c.syms[0])cy=LABH+BOX+VG/2;else if(n===1)cy=LABH+(BOX+VG)+BOX/2;else cy=LABH+BOX/2;
+    return cy-BOX*.25;}
+  // tone box rect relative to the column's left edge: light tone is a small box centred above the top box
+  var LAB0=70,DOTH=64;
+  function toneRect(c){if(c.tone==='˙')return {x:(BOX-TONEW)/2,y:toneTop(c),w:TONEW,h:DOTH-16};return {x:BOX+TG,y:toneTop(c),w:TONEW,h:BOX*.5};}
+  // same position for the text reference column (1 line = 1.485rem)
+  function toneRem(c){if(c.tone==='˙')return 0;var n=rlen(c);return (n===2?2:(n===1&&c.syms[0])?1:n===1?1.5:.5)*1.485;}
+  function curCols(){return NAMECOLS.length?NAMECOLS:[{ch:'',syms:['',''],tone:''},{ch:'',syms:['',''],tone:''},{ch:'',syms:['',''],tone:''}];}
   var NAMECOLS=[];
-  function calcLayout(){var cs=curCols(),ms=1;cs.forEach(function(c){ms=Math.max(ms,c.syms.length);});LW=cs.length*COLW+(cs.length-1)*CG;LH=LABH+ms*BOX+(ms-1)*VG;}
+  function calcLayout(){var cs=curCols(),ms=1;LABH=LAB0+(cs.some(function(c){return c.tone==='˙';})?DOTH:0);cs.forEach(function(c){ms=Math.max(ms,c.syms.length);});LW=cs.length*COLW+(cs.length-1)*CG;LH=LABH+ms*BOX+(ms-1)*VG;}
   function boxStroke(ctx,s,solid,dash){if(solid){ctx.strokeStyle='rgba(57,53,54,.3)';ctx.lineWidth=3*s;ctx.setLineDash([]);}else{ctx.strokeStyle='#9A9A9E';ctx.lineWidth=4*s;ctx.setLineDash([dash*s,(dash*.7)*s]);}}
   // vertical writing boxes: one column per character, one square per Zhuyin symbol, the tone mark in its own small box on the right
   function drawNameLayout(ctx,ox,oy,s,alpha,o){
     var cs=curCols();ctx.save();
     cs.forEach(function(c,i){
       var x0=ox+i*(COLW+CG)*s;
-      if(c.ch){ctx.font='900 '+Math.round(54*s)+'px "Noto Sans TC",sans-serif';ctx.fillStyle=o.dark?'#ffffff':COL.ink;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(c.ch,x0+BOX*s/2,oy+LABH*s*.45);}
+      if(c.ch){ctx.font='900 '+Math.round(54*s)+'px "Noto Sans TC",sans-serif';ctx.fillStyle=o.dark?'#ffffff':COL.ink;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(c.ch,x0+BOX*s/2,oy+LAB0*s*.45);}
       c.syms.forEach(function(sym,j){
         var bx=x0,by=oy+(LABH+j*(BOX+VG))*s,bw=BOX*s;
         ctx.globalAlpha=alpha;ctx.fillStyle='#ffffff';ctx.fillRect(bx,by,bw,bw);ctx.globalAlpha=1;
-        ctx.strokeStyle='#E3E3E5';ctx.lineWidth=3*s;ctx.setLineDash([]);ctx.beginPath();ctx.moveTo(bx+bw/2,by+12*s);ctx.lineTo(bx+bw/2,by+bw-12*s);ctx.moveTo(bx+12*s,by+bw/2);ctx.lineTo(bx+bw-12*s,by+bw/2);ctx.stroke();
-        if(o.trace&&sym){ctx.font='900 '+Math.round(BOX*.66*s)+'px "Noto Sans TC",sans-serif';ctx.fillStyle='rgba(146,147,153,.30)';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(sym,bx+bw/2,by+bw/2+6*s);}
+        var two=Array.from(sym).length===2;
+        ctx.strokeStyle='#E3E3E5';ctx.lineWidth=3*s;ctx.setLineDash([]);ctx.beginPath();ctx.moveTo(bx+bw/2,by+12*s);ctx.lineTo(bx+bw/2,by+bw-12*s);
+        if(!two){ctx.moveTo(bx+12*s,by+bw/2);ctx.lineTo(bx+bw-12*s,by+bw/2);}ctx.stroke();
+        if(two){ctx.strokeStyle='#A9A9AE';ctx.lineWidth=3*s;ctx.setLineDash([10*s,7*s]);ctx.beginPath();ctx.moveTo(bx,by+bw/2);ctx.lineTo(bx+bw,by+bw/2);ctx.stroke();ctx.setLineDash([]);}
+        if(o.trace&&sym){ctx.fillStyle='rgba(146,147,153,.30)';ctx.textAlign='center';ctx.textBaseline='middle';
+          if(two){var ab=Array.from(sym);ctx.font='900 '+Math.round(BOX*.38*s)+'px "Noto Sans TC",sans-serif';ctx.fillText(ab[0],bx+bw/2,by+bw*.25+4*s);ctx.fillText(ab[1],bx+bw/2,by+bw*.75+4*s);}
+          else{ctx.font='900 '+Math.round(BOX*.66*s)+'px "Noto Sans TC",sans-serif';ctx.fillText(sym,bx+bw/2,by+bw/2+6*s);}}
         boxStroke(ctx,s,o.solid,12);ctx.strokeRect(bx,by,bw,bw);
       });
       if(c.tone&&c.syms.length){
-        var tj=c.tone==='˙'?0:c.syms.length-1,tx=x0+(BOX+TG)*s,ty=oy+(LABH+tj*(BOX+VG))*s+(c.tone==='˙'?0:BOX*.08*s),tw=TONEW*s,th=BOX*.5*s;
+        var tr=toneRect(c),tx=x0+tr.x*s,ty=oy+tr.y*s,tw=tr.w*s,th=tr.h*s;
         ctx.globalAlpha=alpha;ctx.fillStyle='#ffffff';ctx.fillRect(tx,ty,tw,th);ctx.globalAlpha=1;
         boxStroke(ctx,s,o.solid,10);ctx.strokeRect(tx,ty,tw,th);
         if(o.trace){ctx.font='900 '+Math.round(54*s)+'px "Noto Sans TC",sans-serif';ctx.fillStyle='rgba(146,147,153,.40)';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(c.tone,tx+tw/2,ty+th/2);}
@@ -494,12 +637,13 @@ a.btn:hover{color:#fff}
   calcLayout();$('guides').width=LW;$('guides').height=LH;$('ink').width=LW;$('ink').height=LH;PW=LW;PH=LH;drawGuides();
   // handwriting
   var ink=$('ink'),ictx=ink.getContext('2d'),pad=$('pad');
-  function strokePath(s){ictx.strokeStyle=s.c;ictx.fillStyle=s.c;ictx.lineWidth=16;ictx.lineCap='round';ictx.lineJoin='round';
+  function strokePath(s){ictx.save();if(s.r){ictx.beginPath();ictx.rect(s.r.x,s.r.y,s.r.w,s.r.h);ictx.clip();}try{strokePath0(s);}finally{ictx.restore();}}
+  function strokePath0(s){ictx.strokeStyle=s.c;ictx.fillStyle=s.c;ictx.lineWidth=16;ictx.lineCap='round';ictx.lineJoin='round';
     if(s.p.length===1){ictx.beginPath();ictx.arc(s.p[0][0],s.p[0][1],8,0,7);ictx.fill();return;}
     ictx.beginPath();ictx.moveTo(s.p[0][0],s.p[0][1]);for(var i=1;i<s.p.length;i++)ictx.lineTo(s.p[i][0],s.p[i][1]);ictx.stroke();}
   function redrawInk(){ictx.clearRect(0,0,PW,PH);strokes.forEach(strokePath);}
   function pt(e){var r=ink.getBoundingClientRect();return [(e.clientX-r.left)*PW/r.width,(e.clientY-r.top)*PH/r.height];}
-  ink.addEventListener('pointerdown',function(e){e.preventDefault();ink.setPointerCapture(e.pointerId);drawing={c:pen,p:[pt(e)]};strokes.push(drawing);redoStack=[];pad.classList.add('started');setDone(2,true);syncUndo();redrawInk();});
+  ink.addEventListener('pointerdown',function(e){if(!writing)return;var p0=pt(e),rc=boxAt(p0[0],p0[1]);if(!rc)return;e.preventDefault();ink.setPointerCapture(e.pointerId);drawing={c:pen,p:[p0],r:rc};strokes.push(drawing);redoStack=[];pad.classList.add('started');setDone(2,true);syncUndo();redrawInk();});
   ink.addEventListener('pointermove',function(e){if(!drawing)return;drawing.p.push(pt(e));redrawInk();});
   function end(e){if(drawing){drawing=null;render();flash();if(!reduce&&e&&e.clientX!==undefined){sparkle(e.clientX,e.clientY);}}}
   ink.addEventListener('pointerup',end);ink.addEventListener('pointercancel',end);
@@ -516,13 +660,20 @@ a.btn:hover{color:#fff}
   }
 
   // ---- random pattern (印花) used when there is no photo ----
-  var WAYS=[{bg:'#FFFFFF',fg:[COL.pink,COL.teal]},{bg:'#FDF1F7',fg:[COL.pink]},{bg:'#E6F5F3',fg:[COL.teal]},{bg:'#F7EFE0',fg:[COL.gold]},{bg:COL.pink,fg:['#FFFFFF']},{bg:COL.teal,fg:['#FFFFFF']},{bg:COL.gold,fg:['#FFFFFF']},{bg:COL.ink,fg:['#FFFFFF',COL.gold]},{bg:'#F1F1F2',fg:[COL.grey,COL.ink]}];
+  var WAYS=[{fg:[COL.pink,COL.teal]},{fg:[COL.pink]},{fg:[COL.teal]},{fg:[COL.gold]},{fg:[COL.grey,COL.ink]},{fg:[COL.pink,COL.gold]},{fg:[COL.teal,COL.gold]},{fg:[COL.ink,COL.pink]}];
+  // key-visual paper: the same white paper texture as the page background, plus a soft dot grid
+  var PAPER=new Image();try{var pu=getComputedStyle(document.body,'::after').backgroundImage;var pm=pu&&pu.match(/url\(["']?(.*?)["']?\)/);if(pm)PAPER.src=pm[1];}catch(e){}
+  PAPER.onload=function(){try{render();}catch(e){}};
+  function paperBg(x,w,h,dots){x.save();x.fillStyle='#FFFFFF';x.fillRect(0,0,w,h);
+    if(PAPER.complete&&PAPER.naturalWidth){var r=Math.max(w/PAPER.naturalWidth,h/PAPER.naturalHeight),pw=PAPER.naturalWidth*r,ph=PAPER.naturalHeight*r;x.drawImage(PAPER,(w-pw)/2,(h-ph)/2,pw,ph);}
+    if(dots){var g=46;x.fillStyle='rgba(146,147,153,.22)';for(var yy=g/2;yy<h;yy+=g)for(var xx=g/2;xx<w;xx+=g){x.beginPath();x.arc(xx,yy,4,0,7);x.fill();}}
+    x.restore();}
   var LAY=['grid','drop','rot','mirror'];
   function newPat(){var gs=[],n=2+Math.floor(Math.random()*2);while(gs.length<n){var g=GL.charAt(Math.floor(Math.random()*GL.length));if(gs.indexOf(g)<0)gs.push(g);}
     pat={gs:gs,way:WAYS[Math.floor(Math.random()*WAYS.length)],lay:LAY[Math.floor(Math.random()*LAY.length)]};}
   function drawPattern(x,w,h){
     var cs=230,P=pat,rows=Math.ceil(h/cs)+2,cols=Math.ceil(w/cs)+1;
-    x.save();x.fillStyle=P.way.bg;x.fillRect(0,0,w,h);x.textAlign='center';x.textBaseline='middle';
+    paperBg(x,w,h,true);x.save();x.textAlign='center';x.textBaseline='middle';
     for(var r=-1;r<rows;r++)for(var c=0;c<cols;c++){
       var cx=c*cs+cs/2,cy=r*cs+cs/2+(P.lay==='drop'&&c%2?cs/2:0),g=P.gs[(r+c+8)%P.gs.length],col=P.way.fg[(r+c+8)%P.way.fg.length];
       x.save();x.translate(cx,cy);if(P.lay==='rot')x.rotate(((r+c+8)%4)*Math.PI/2);if(P.lay==='mirror')x.scale(c%2?-1:1,1);
@@ -540,9 +691,9 @@ a.btn:hover{color:#fff}
     else fallback(f,done);
   }
   function fallback(f,done){var u=URL.createObjectURL(f),im=new Image();im.onload=function(){done(im);URL.revokeObjectURL(u);};im.src=u;}
-  $('btnCam').onclick=function(){$('fileCam').click()};
-  $('btnAlbum').onclick=function(){$('fileAlbum').click()};
-  $('btnPat').onclick=function(){photo=null;adjShow();newPat();photoMsg('目前使用：隨機印花（再按一次換一組）。','Using: random pattern (press again for another).');setDone(1,true);render();flash();};
+  $('btnCam').onclick=function(){track('photo_camera');$('fileCam').click()};
+  $('btnAlbum').onclick=function(){track('photo_album');$('fileAlbum').click()};
+  $('btnPat').onclick=function(){track('pattern_random');photo=null;adjShow();newPat();photoMsg('目前使用：隨機印花（再按一次換一組）。','Using: random pattern (press again for another).');setDone(1,true);render();flash();};
   $('fileCam').onchange=function(e){setPhoto(e.target.files[0],'剛拍的照片','the photo you just took');e.target.value='';};
   $('fileAlbum').onchange=function(e){setPhoto(e.target.files[0],'相簿照片','a photo from your album');e.target.value='';};
 
@@ -557,14 +708,14 @@ a.btn:hover{color:#fff}
   function scrim(x,y0,y1,c0,c1){var g=x.createLinearGradient(0,y0,0,y1);g.addColorStop(0,c0);g.addColorStop(1,c1);x.fillStyle=g;x.fillRect(0,Math.min(y0,y1),W,Math.abs(y1-y0));}
   function ls(x,v){if('letterSpacing' in x)x.letterSpacing=v;}
   function wlogo(x,px,py,w){if(logoW.complete&&logoW.naturalWidth)x.drawImage(logoW,px,py,w,w*190/848);}
-  function nameAt(x,rx,ry,rw,rh,alpha,dark){var s=Math.min(rw/LW,rh/LH),w=LW*s,h=LH*s,ox=rx+(rw-w)/2,oy=ry+(rh-h)/2;drawNameLayout(x,ox,oy,s,alpha,{solid:true,trace:false,dark:dark});x.drawImage(ink,ox,oy,w,h);}
+  function nameAt(x,rx,ry,rw,rh,alpha,dark,left){var s=Math.min(rw/LW,rh/LH),w=LW*s,h=LH*s,ox=left?rx:rx+(rw-w)/2,oy=ry+(rh-h)/2;drawNameLayout(x,ox,oy,s,alpha,{solid:true,trace:false,dark:dark});x.drawImage(ink,ox,oy,w,h);}
   var TAG_EN="Take Taiwan's Zhuyin home";
   function sty0(x){ // minimal white: a quiet white card
-    bgFill(x,0,0,W,H);scrim(x,0,320,'rgba(20,18,19,.35)','rgba(20,18,19,0)');wlogo(x,M,92,300);
+    bgFill(x,0,0,W,H);if(photo){scrim(x,0,320,'rgba(20,18,19,.35)','rgba(20,18,19,0)');wlogo(x,M,92,300);}else if(logoD.complete&&logoD.naturalWidth)x.drawImage(logoD,M,92,300,300*190/848);
     x.save();x.shadowColor='rgba(20,18,19,.2)';x.shadowBlur=60;x.shadowOffsetY=16;x.fillStyle='rgba(255,255,255,.95)';x.fillRect(M,880,W-2*M,960);x.restore();
     var ix=M+44,iw=W-2*M-88;
     txt(x,'我的名字，用注音寫','500 30px '+ZH,COL.ink,ix,924);ls(x,'2px');txt(x,'MY NAME IN ZHUYIN','400 20px '+EN,COL.grey,ix+iw,930,'right');ls(x,'0px');
-    nameAt(x,ix,990,iw,640,1,false);
+    nameAt(x,ix,990,iw,640,1,false,true);
     x.fillStyle='rgba(57,53,54,.14)';x.fillRect(ix,1676,iw,2);
     txt(x,'#BOPOMOFO','600 34px '+EN,COL.ink,ix,1700);txt(x,HANDLE,'400 24px '+EN,COL.grey,ix+iw,1707,'right');
     txt(x,TAG_EN+'　把臺灣的注音，帶走','400 22px '+EN,COL.grey,ix,1748);
@@ -572,13 +723,13 @@ a.btn:hover{color:#fff}
   function sty1(x){ // ink: a dim photo, text straight on it
     bgFill(x,0,0,W,H);x.fillStyle='rgba(20,18,19,.3)';x.fillRect(0,0,W,H);scrim(x,900,H,'rgba(20,18,19,0)','rgba(20,18,19,.6)');wlogo(x,M,92,300);
     txt(x,'我的名字，用注音寫','500 36px '+ZH,'#fff',M,960);ls(x,'2px');txt(x,'MY NAME IN ZHUYIN','400 20px '+EN,'rgba(255,255,255,.7)',M,1016);ls(x,'0px');
-    nameAt(x,M,1070,W-2*M,590,.95,true);
+    nameAt(x,M,1070,W-2*M,590,.95,true,true);
     txt(x,'#BOPOMOFO','600 34px '+EN,'#fff',M,1722);txt(x,HANDLE,'400 24px '+EN,'rgba(255,255,255,.8)',W-M,1729,'right');
     txt(x,TAG_EN+'　把臺灣的注音，帶走','400 22px '+EN,'rgba(255,255,255,.7)',M,1776);
     TONES.forEach(function(col,i){x.fillStyle=col;x.fillRect(M+i*(W-2*M)/4,1846,(W-2*M)/4,4);});
   }
   function sty2(x){ // gallery: print-like frame on warm paper
-    x.fillStyle='#F3F1EE';x.fillRect(0,0,W,H);x.drawImage(logoD,M,84,240,240*190/848);
+    paperBg(x,W,H,true);x.drawImage(logoD,M,84,240,240*190/848);
     var fw=W-2*M,fh=680,fy=190;
     x.save();x.shadowColor='rgba(57,53,54,.18)';x.shadowBlur=40;x.shadowOffsetY=14;x.fillStyle='#fff';x.fillRect(M,fy,fw,fh);x.restore();
     x.save();x.beginPath();x.rect(M+16,fy+16,fw-32,fh-32);x.clip();x.translate(M+16,fy+16);bgFill(x,0,0,fw-32,fh-32);x.restore();
@@ -586,14 +737,19 @@ a.btn:hover{color:#fff}
     txt(x,'#BOPOMOFO','600 38px '+EN,COL.ink,W/2,1636,'center');txt(x,HANDLE,'400 24px '+EN,COL.grey,W/2,1690,'center');
     txt(x,TAG_EN+'　把臺灣的注音，帶走','400 22px '+EN,COL.grey,W/2,1736,'center');
   }
-  function sty3(x){ // mono: black-and-white photo, one pink accent
-    bgFill(x,0,0,W,H);x.globalCompositeOperation='saturation';x.fillStyle='#000';x.fillRect(0,0,W,H);x.globalCompositeOperation='source-over';
-    x.fillStyle='rgba(20,18,19,.28)';x.fillRect(0,0,W,H);scrim(x,900,H,'rgba(20,18,19,0)','rgba(20,18,19,.55)');wlogo(x,M,92,300);
-    txt(x,'我的名字','500 56px '+ZH,'#fff',M,880);txt(x,'用注音寫','500 56px '+ZH,'#fff',M,946);
-    x.fillStyle=COL.pink;x.fillRect(M,1030,64,4);ls(x,'2px');txt(x,'MY NAME IN ZHUYIN','400 20px '+EN,'rgba(255,255,255,.75)',M+84,1022);ls(x,'0px');
-    nameAt(x,M,1070,W-2*M,590,.95,true);
-    txt(x,'#BOPOMOFO','600 34px '+EN,'#fff',M,1690);txt(x,HANDLE,'400 24px '+EN,'rgba(255,255,255,.8)',W-M,1697,'right');
-    txt(x,TAG_EN+'　把臺灣的注音，帶走','400 22px '+EN,'rgba(255,255,255,.7)',M,1744);
+  function sty3(x){ // paper card: the key visual's white paper and dots, photo in a rounded window, tone-colour bar
+    paperBg(x,W,H,true);
+    if(logoD.complete&&logoD.naturalWidth)x.drawImage(logoD,M,72,240,240*190/848);
+    var px=M,py=160,pw=W-2*M,ph=860,r=36;
+    x.save();x.shadowColor='rgba(57,53,54,.18)';x.shadowBlur=36;x.shadowOffsetY=12;
+    x.beginPath();x.moveTo(px+r,py);x.arcTo(px+pw,py,px+pw,py+ph,r);x.arcTo(px+pw,py+ph,px,py+ph,r);x.arcTo(px,py+ph,px,py,r);x.arcTo(px,py,px+pw,py,r);x.closePath();
+    x.fillStyle='#fff';x.fill();x.restore();
+    x.save();x.beginPath();x.moveTo(px+r,py);x.arcTo(px+pw,py,px+pw,py+ph,r);x.arcTo(px+pw,py+ph,px,py+ph,r);x.arcTo(px,py+ph,px,py,r);x.arcTo(px,py,px+pw,py,r);x.closePath();x.clip();bgFill(x,px,py,pw,ph);x.restore();
+    TONES.forEach(function(col,k){x.fillStyle=col;x.fillRect(M+k*pw/4,py+ph+20,pw/4,6);});
+    txt(x,'我的名字，用注音寫','700 40px '+ZH,COL.ink,M,py+ph+94);ls(x,'2px');txt(x,'MY NAME IN ZHUYIN','400 20px '+EN,COL.grey,M,py+ph+148);ls(x,'0px');
+    nameAt(x,M,py+ph+186,W-2*M,1690-(py+ph+186),1,false,true);
+    txt(x,'#BOPOMOFO','600 34px '+EN,COL.ink,M,1724);txt(x,HANDLE,'400 24px '+EN,COL.grey,W-M,1731,'right');
+    txt(x,TAG_EN+'　把臺灣的注音，帶走','400 22px '+EN,COL.grey,M,1772);
   }
   function sty4(x){ // centred, bright
     bgFill(x,0,0,W,H);x.fillStyle='rgba(255,255,255,.14)';x.fillRect(0,0,W,H);
@@ -604,7 +760,44 @@ a.btn:hover{color:#fff}
     x.fillStyle=COL.pink;x.fillRect(W/2-32,1706,64,3);
     txt(x,'#BOPOMOFO','600 40px '+EN,COL.ink,W/2,1738,'center');txt(x,HANDLE,'400 24px '+EN,COL.grey,W/2,1794,'center');
   }
-  var DRAW=[sty0,sty1,sty2,sty3,sty4];
+  function rrect(x,px,py,pw,ph,r){x.beginPath();x.moveTo(px+r,py);x.arcTo(px+pw,py,px+pw,py+ph,r);x.arcTo(px+pw,py+ph,px,py+ph,r);x.arcTo(px,py+ph,px,py,r);x.arcTo(px,py,px+pw,py,r);x.closePath();}
+  function foot(x,dark,center){var c1=dark?'#fff':COL.ink,c2=dark?'rgba(255,255,255,.8)':COL.grey;
+    if(center){txt(x,'#BOPOMOFO','600 36px '+EN,c1,W/2,1720,'center');txt(x,HANDLE,'400 24px '+EN,c2,W/2,1774,'center');return;}
+    txt(x,'#BOPOMOFO','600 34px '+EN,c1,M,1724);txt(x,HANDLE,'400 24px '+EN,c2,W-M,1731,'right');txt(x,TAG_EN+'　把臺灣的注音，帶走','400 22px '+EN,c2,M,1772);}
+  function sty5(x){ // duotone: photo/pattern tinted in brand pink, name on a white ticket
+    bgFill(x,0,0,W,H);x.globalCompositeOperation='saturation';x.fillStyle='#000';x.fillRect(0,0,W,H);
+    x.globalCompositeOperation='color';x.fillStyle=COL.pink;x.fillRect(0,0,W,H);x.globalCompositeOperation='source-over';
+    if(photo){scrim(x,0,320,'rgba(20,18,19,.3)','rgba(20,18,19,0)');wlogo(x,M,92,280);}else x.drawImage(logoD,M,92,280,280*190/848);
+    var ty=900,th=880;x.save();x.shadowColor='rgba(20,18,19,.3)';x.shadowBlur=50;x.shadowOffsetY=16;rrect(x,M-24,ty,W-2*M+48,th,30);x.fillStyle='#fff';x.fill();x.restore();
+    x.save();rrect(x,M-24,ty,W-2*M+48,th,30);x.clip();x.fillStyle=COL.pink;x.fillRect(M-24,ty,W-2*M+48,10);x.restore();
+    x.setLineDash([12,10]);x.strokeStyle='#D9D7D8';x.lineWidth=3;x.beginPath();x.moveTo(M,ty+th-150);x.lineTo(W-M,ty+th-150);x.stroke();x.setLineDash([]);
+    txt(x,'我的名字，用注音寫','700 40px '+ZH,COL.ink,M,ty+44);ls(x,'2px');txt(x,'MY NAME IN ZHUYIN','400 20px '+EN,COL.grey,W-M,ty+56,'right');ls(x,'0px');
+    nameAt(x,M,ty+120,W-2*M,th-300,1,false,true);
+    txt(x,'#BOPOMOFO','600 34px '+EN,COL.pink,M,ty+th-118);txt(x,HANDLE,'400 24px '+EN,COL.grey,W-M,ty+th-111,'right');
+    txt(x,TAG_EN+'　把臺灣的注音，帶走','400 22px '+EN,COL.grey,M,ty+th-70);
+  }
+  function sty6(x){ // collage: a tilted instant photo taped onto the paper
+    paperBg(x,W,H,true);x.drawImage(logoD,M,72,240,240*190/848);
+    var pw=760,ph=820,cx=W/2+10,cy=650;
+    x.save();x.translate(cx,cy);x.rotate(-3.5*Math.PI/180);
+    x.save();x.shadowColor='rgba(57,53,54,.25)';x.shadowBlur=40;x.shadowOffsetY=16;x.fillStyle='#fff';x.fillRect(-pw/2,-ph/2,pw,ph);x.restore();
+    bgFill(x,-pw/2+28,-ph/2+28,pw-56,ph-150);
+    txt(x,'把臺灣的注音，帶走','500 30px '+ZH,COL.ink,0,ph/2-92,'center');
+    x.restore();
+    function tape(tx,ty,rot,col){x.save();x.translate(tx,ty);x.rotate(rot*Math.PI/180);x.globalAlpha=.72;x.fillStyle=col;x.fillRect(-90,-24,180,48);x.restore();}
+    tape(cx-pw/2+40,cy-ph/2+10,-38,COL.gold);tape(cx+pw/2-30,cy-ph/2+30,34,COL.teal);
+    txt(x,'我的名字，用注音寫','700 40px '+ZH,COL.ink,M,1128);x.fillStyle=COL.pink;x.fillRect(M,1186,64,5);
+    nameAt(x,M,1220,W-2*M,1676-1220,1,false,true);foot(x,false,false);
+  }
+  function sty7(x){ // circle: photo in a round window ringed by the four tone colours
+    paperBg(x,W,H,true);x.drawImage(logoD,(W-260)/2,72,260,260*190/848);
+    var cx=W/2,cy=640,R=400;
+    TONES.forEach(function(col,k){x.beginPath();x.strokeStyle=col;x.lineWidth=14;x.arc(cx,cy,R+22,-Math.PI/2+k*Math.PI/2+.06,-Math.PI/2+(k+1)*Math.PI/2-.06);x.stroke();});
+    x.save();x.beginPath();x.arc(cx,cy,R,0,Math.PI*2);x.clip();bgFill(x,cx-R,cy-R,2*R,2*R);x.restore();
+    txt(x,'我的名字，用注音寫','700 40px '+ZH,COL.ink,W/2,1112,'center');ls(x,'3px');txt(x,'MY NAME IN ZHUYIN','400 20px '+EN,COL.grey,W/2,1166,'center');ls(x,'0px');
+    nameAt(x,M,1210,W-2*M,1690-1210,1,false);foot(x,false,true);
+  }
+  var DRAW=[sty0,sty1,sty2,sty3,sty4,sty5,sty6];
   function render(){var c=$('story'),x=c.getContext('2d');x.save();x.clearRect(0,0,W,H);DRAW[styleIdx](x);x.restore();}
   if(document.fonts&&document.fonts.load){Promise.all([document.fonts.load('900 54px "Noto Sans TC"'),document.fonts.load('700 100px Poppins'),document.fonts.load('500 38px "Noto Sans TC"')]).then(render,render);}
   render();
@@ -634,13 +827,13 @@ a.btn:hover{color:#fff}
     chars.forEach(function(c,i){var n=num[i];if(n===undefined)return;
       if(/0$/.test(n)&&!NEUTRAL[c]){var d=P.pinyin(P.toSimp(c),{toneType:'num'});if(/[1-4]$/.test(d))n=d;}
       var zy=py2zy(n);if(!zy)return;var mm=zy.match(/^(˙?)([^ˊˇˋ˙]*)([ˊˇˋ]?)$/);
-      out.push({ch:c,syms:Array.from(mm[2]),tone:mm[1]?'˙':(mm[3]||'')});});
+      out.push({ch:c,syms:slot3(Array.from(mm[2])),tone:mm[1]?'˙':(mm[3]||'')});});
     return out;
   }
   function renderZref(){
-    var el=$('zref');
+    var el=$('zref');el.classList.toggle('haslt',NAMECOLS.some(function(c){return c.tone==='˙';}));
     if(!NAMECOLS.length){el.innerHTML='<span class="zph">在上面輸入名字，這裡會顯示每個字的注音<small>Type your name above to see its Zhuyin here</small></span>';return;}
-    el.innerHTML=NAMECOLS.map(function(c){return '<span class="bz"><span class="bz-c">'+c.ch+'</span><span class="bz-y"><span class="bz-s">'+c.syms.join('<br>')+'</span>'+(c.tone?'<i class="tn'+(c.tone==='˙'?' top':'')+'">'+c.tone+'</i>':'')+'</span></span>';}).join('');
+    el.innerHTML=NAMECOLS.map(function(c){return '<span class="bz"><span class="bz-c">'+c.ch+'</span><span class="bz-y"><span class="bz-s">'+[c.syms[0]||'\u3000'].concat(rlen(c)?Array.from(c.syms[1]):['\u3000']).join('<br>')+'</span>'+(c.tone?'<i class="tn'+(c.tone==='˙'?' top':'')+'" style="top:'+toneRem(c)+'rem">'+c.tone+'</i>':'')+'</span></span>';}).join('');
   }
   var lastSig='';
   function setCols(cols){
@@ -648,17 +841,87 @@ a.btn:hover{color:#fff}
     NAMECOLS=cols;calcLayout();
     $('guides').width=LW;$('guides').height=LH;$('ink').width=LW;$('ink').height=LH;PW=LW;PH=LH;
     pad.style.aspectRatio=LW+' / '+LH;pad.style.width=Math.max(42,Math.min(100,LW/930*100))+'%';
-    drawGuides();strokes=[];redoStack=[];redrawInk();pad.classList.remove('started');setDone(2,false);syncUndo();renderZref();render();
+    drawGuides();strokes=[];redoStack=[];redrawInk();pad.classList.remove('started');setDone(2,false);syncUndo();renderZref();render();if(typeof setWriting==='function')setWriting(false);
   }
+  function capName(inp){
+    var arr=Array.from(inp.value),n=0,cut=-1;
+    for(var i=0;i<arr.length;i++){if(/\p{Script=Han}/u.test(arr[i])){n++;if(n===4){cut=i+1;break;}}}
+    if(cut>-1&&cut<arr.length){inp.value=arr.slice(0,cut).join('');return true;}
+    return false;
+  }
+  $('nameIn').addEventListener('compositionend',function(e){e.target.dispatchEvent(new Event('input'));});
   $('nameIn').addEventListener('input',function(e){
+    if(e.isComposing)return;
+    var trimmed=capName(e.target);
     var v=e.target.value,msg=$('nmMsg');
     if(!v.trim()){msg.textContent='';setCols([]);return;}
     var han=Array.from(v).filter(function(c){return /\p{Script=Han}/u.test(c);});
     var cols=parseName(v);
-    msg.textContent=han.length===0?'目前只支援中文名字 Chinese names only for now':(han.length>4?'最多 4 個字，只取前 4 個 Up to 4 characters':'');
-    setCols(cols);
+    msg.textContent=han.length===0?'目前只支援中文名字 Chinese names only for now':(trimmed?'最多 4 個字，多的已自動刪除 Up to 4 characters':'');
+    setCols(cols);if(cols.length)track('name_entered','chars='+cols.length);
   });
   setCols([]);
+  // ---- writing only inside the boxes, and only after "start writing" is tapped ----
+  function writeRects(){
+    var out=[];
+    curCols().forEach(function(c,i){var x0=i*(COLW+CG);
+      c.syms.forEach(function(sym,j){out.push({x:x0,y:LABH+j*(BOX+VG),w:BOX,h:BOX});});
+      if(c.tone&&c.syms.length){var tr=toneRect(c);out.push({x:x0+tr.x,y:tr.y,w:tr.w,h:tr.h});}
+    });
+    return out;
+  }
+  function boxAt(x,y){var rs=writeRects();for(var i=0;i<rs.length;i++){var r=rs[i];if(x>=r.x&&x<=r.x+r.w&&y>=r.y&&y<=r.y+r.h)return r;}return null;}
+  var writing=false;
+  function setWriting(on){writing=on;$('padCover').hidden=on;ink.style.touchAction=on?'none':'pan-y';$('btnDone').disabled=!on;pad.classList.toggle('writing',on);}
+  $('padCover').addEventListener('click',function(){setWriting(true);track('start_writing');});
+  $('padCover').addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();setWriting(true);track('start_writing');}});
+  $('btnDone').onclick=function(){setWriting(false);};
+  setWriting(false);
+  // ---- stats: anonymous events + opt-in image upload to a Google Sheet backend (off while TRACK_URL is empty) ----
+  var VID=(function(){try{var k='bpmf_vid',v=localStorage.getItem(k);if(!v){v='v'+Math.random().toString(36).slice(2,10)+Date.now().toString(36);localStorage.setItem(k,v);}return v;}catch(e){return 'v'+Math.random().toString(36).slice(2,10);}})();
+  function track(ev,meta){
+    if(!TRACK_URL)return;
+    try{fetch(TRACK_URL,{method:'POST',mode:'no-cors',keepalive:true,headers:{'Content-Type':'text/plain'},body:JSON.stringify({token:TRACK_TOKEN,type:'event',id:VID,event:ev,meta:meta||'',ua:/Mobi|Android|iPhone|iPad/i.test(navigator.userAgent)?'mobile':'desktop'})});}catch(e){}
+  }
+  var pendingData=null,uploaded=false;
+  function onImageMade(){
+    uploaded=false;pendingData=null;$('upConsent').checked=false;$('upMsg').textContent='';
+    track('image_created','style='+STYLES[styleIdx][0]);
+    if(!TRACK_URL)return;
+    var c=document.createElement('canvas');c.width=720;c.height=1280;c.getContext('2d').drawImage($('story'),0,0,720,1280);
+    try{pendingData={data:c.toDataURL('image/jpeg',.82),style:STYLES[styleIdx][0]};}catch(e){}
+  }
+  function uploadImage(){
+    if(!TRACK_URL||uploaded||!pendingData)return;uploaded=true;
+    fetch(TRACK_URL,{method:'POST',mode:'no-cors',headers:{'Content-Type':'text/plain'},body:JSON.stringify({token:TRACK_TOKEN,type:'image',id:VID,style:pendingData.style,image:pendingData.data})})
+      .then(function(){$('upMsg').textContent='已上傳，謝謝！ Uploaded, thank you!';track('image_uploaded',pendingData.style);})
+      .catch(function(){uploaded=false;$('upMsg').textContent='上傳失敗，請稍後再試 Upload failed, please try again.';});
+  }
+  $('upConsent').addEventListener('change',function(e){if(e.target.checked)uploadImage();});
+  document.addEventListener('click',function(e){var a=e.target.closest&&e.target.closest('a');if(!a)return;if(a.id==='btnIG')track('ig_open');else if(a.closest&&a.closest('.foot'))track('link',a.hostname||'');});
+  if(!TRACK_URL){var cb=$('consentBox');if(cb)cb.hidden=true;$('upMsg').hidden=true;}
+  track('view');
+  // ---- step 4: follow + five-question feedback, then a completion screen to show at the booth ----
+  (function(){
+    var form=$('fbForm');if(!form)return;var KEY='bpmf_fb_done';
+    function answered(n){return !!form.querySelector('input[name="'+n+'"]:checked');}
+    function ready(){return $('fbFollowed').checked&&answered('q1')&&answered('q2')&&answered('q3')&&answered('q4');}
+    function sync(){$('fbSubmit').disabled=!ready();
+      var v=+((form.querySelector('input[name="q4"]:checked')||{}).value||0);
+      [].forEach.call($('fbStars').querySelectorAll('.chip'),function(c,i){c.classList.toggle('lit',i<v);});}
+    function showDone(d){$('fbWrap').hidden=true;$('fbDone').hidden=false;$('fbCode').textContent=d.code;$('fbTime').textContent='完成時間 Completed '+d.time;setDone(4,true);}
+    form.addEventListener('change',sync);$('fbFollowed').addEventListener('change',sync);
+    $('fbFollow').addEventListener('click',function(){track('fb_follow_click');});
+    form.addEventListener('submit',function(e){e.preventDefault();if(!ready())return;
+      var fd={};['q1','q2','q3','q4'].forEach(function(n){fd[n]=form.querySelector('input[name="'+n+'"]:checked').value;});fd.q5=(form.q5.value||'').trim();
+      var t=new Date(),pad=function(n){return (n<10?'0':'')+n;};
+      var d={code:'BPMF-'+VID.replace(/[^a-z0-9]/gi,'').slice(-4).toUpperCase(),time:t.getFullYear()+'/'+pad(t.getMonth()+1)+'/'+pad(t.getDate())+' '+pad(t.getHours())+':'+pad(t.getMinutes())};
+      if(TRACK_URL){try{fetch(TRACK_URL,{method:'POST',mode:'no-cors',keepalive:true,headers:{'Content-Type':'text/plain'},body:JSON.stringify({token:TRACK_TOKEN,type:'feedback',id:VID,code:d.code,answers:fd})});}catch(err){}}
+      track('feedback_done');try{localStorage.setItem(KEY,JSON.stringify(d));}catch(err){}
+      showDone(d);try{confetti();}catch(err){}$('fbDone').scrollIntoView({behavior:reduce?'auto':'smooth',block:'center'});});
+    try{var saved=JSON.parse(localStorage.getItem(KEY)||'null');if(saved&&saved.code)showDone(saved);}catch(err){}
+    sync();
+  })();
   // ---- photo framing (zoom / move) ----
   var adj=$('adj');
   function pzSync(){PZ.z=+$('pzZoom').value/100;PZ.x=+$('pzX').value/100;PZ.y=+$('pzY').value/100;render();}
@@ -672,7 +935,7 @@ a.btn:hover{color:#fff}
     [].forEach.call(dots.children,function(b,i){b.setAttribute('aria-current',i===styleIdx?'true':'false');});
     if(anim&&!reduce){sname.classList.remove('swap');void sname.offsetWidth;sname.classList.add('swap');}}
   function setStyle(i,dir){
-    i=(i+STYLES.length)%STYLES.length;if(i===styleIdx&&!dir)return;styleIdx=i;render();label(true);
+    i=(i+STYLES.length)%STYLES.length;if(i===styleIdx&&!dir)return;styleIdx=i;render();label(true);track('style',STYLES[i][0]);
     if(!reduce&&dir){cvs.classList.remove('in-l','in-r');void cvs.offsetWidth;cvs.classList.add(dir>0?'in-l':'in-r');}
   }
   label(false);
@@ -711,7 +974,7 @@ a.btn:hover{color:#fff}
     $('story').toBlob(function(b){
       if(!b)return;if(lastUrl)URL.revokeObjectURL(lastUrl);lastUrl=URL.createObjectURL(b);
       var ri=$('resImg');ri.style.animation='none';void ri.offsetWidth;ri.style.animation='';
-      ri.src=lastUrl;$('result').hidden=false;setDone(3,true);confetti();
+      ri.src=lastUrl;$('result').hidden=false;setDone(3,true);confetti();onImageMade();
       setTimeout(function(){$('result').scrollIntoView({behavior:reduce?'auto':'smooth',block:'start'});},reduce?0:350);
     },'image/png');
   };
@@ -765,7 +1028,7 @@ a.btn:hover{color:#fff}
     offB.onclick=stop;
     document.addEventListener('visibilitychange',function(){if(!AC||!master)return;if(document.hidden){master.gain.setTargetAtTime(0,AC.currentTime,.2);}else{AC.resume();master.gain.setTargetAtTime(1,AC.currentTime,.4);}});
   })();
-  $('btnCopy').onclick=function(){
+  $('btnCopy').onclick=function(){track('copy_caption');
     var m=$('copyMsg'),t=$('cap');
     function fb(){t.focus();t.select();m.textContent='已選取文字，請手動複製。 Text selected, please copy it manually.';}
     try{navigator.clipboard.writeText(CAPTION).then(function(){m.textContent='已複製。 Copied.';},fb);}catch(e){fb();}
@@ -773,4 +1036,60 @@ a.btn:hover{color:#fff}
 })();
 </script>
 
+<button class="langbtn" id="langBtn" type="button" aria-label="Switch language 切換語言"><b id="lgZh" class="on">中</b><b id="lgEn">EN</b></button>
+<script>
+(function(){
+  var EN_SEL='small,span.en2',body=document.body,mode='zh',busy=false;
+  function isEn(n){return n.nodeType===1&&n.matches&&n.matches(EN_SEL);}
+  function prep(E){
+    if(!E||E.nodeType!==1||E.closest('h1,h2,header.top,script,style,textarea,canvas,button.langbtn'))return;
+    var kids=Array.prototype.slice.call(E.childNodes),hasEn=kids.some(isEn);
+    if(!hasEn)return;
+    kids.forEach(function(n){if(n.nodeType===3&&n.textContent.trim()){var w=document.createElement('span');w.className='zhw';w.textContent=n.textContent;E.replaceChild(w,n);}});
+    kids=Array.prototype.slice.call(E.childNodes);
+    var ens=kids.filter(isEn);
+    ens.forEach(function(n){n.classList.add('swp');});
+    if(!E._ord)E._ord=kids;
+    arrange(E,kids,ens);
+  }
+  function arrange(E,kids,ens){
+    if(mode==='en'){
+      var rest=kids.filter(function(n){return ens.indexOf(n)<0;});
+      var lead=[];while(rest.length&&rest[0].nodeType===1&&rest[0].classList.contains('no'))lead.push(rest.shift());
+      lead.concat(ens,rest).forEach(function(n){E.appendChild(n);});
+    }else{(E._ord||kids).forEach(function(n){E.appendChild(n);});}
+  }
+  function all(root){
+    var list=(root||document).querySelectorAll('*');
+    Array.prototype.forEach.call(list,function(E){
+      if(E.childNodes.length&&Array.prototype.some.call(E.childNodes,isEn)){
+        var fresh=!E._ord||!Array.prototype.every.call(E._ord,function(n){return n.parentNode===E;})||Array.prototype.some.call(E.childNodes,function(n){return n.nodeType===3&&n.textContent.trim();})||Array.prototype.some.call(E.childNodes,function(n){return isEn(n)&&!n.classList.contains('swp');});
+        if(fresh)E._ord=null;
+        prep(E);
+      }
+    });
+  }
+  var mo=new MutationObserver(function(){if(busy)return;busy=true;mo.disconnect();try{all(document.querySelector('main')||document.body);}catch(e){}connect();busy=false;});
+  function connect(){mo.observe(body,{childList:true,subtree:true});}
+  function setMode(m){
+    mode=m;busy=true;mo.disconnect();
+    body.classList.toggle('en',m==='en');
+    document.documentElement.lang=m==='en'?'en':'zh-Hant';
+    document.title=m==='en'?'Zhuyin Check-in Frame':'注音打卡框';
+    var ni=document.getElementById('nameIn');if(ni)ni.placeholder=m==='en'?'e.g. 王小明 (Chinese characters)':'例：王小明';
+    Array.prototype.forEach.call(document.querySelectorAll('*'),function(E){if(E._ord){var kids=Array.prototype.slice.call(E.childNodes),ens=kids.filter(isEn);arrange(E,kids,ens);}});
+    all(document.body);
+    document.getElementById('lgZh').classList.toggle('on',m!=='en');
+    document.getElementById('lgEn').classList.toggle('on',m==='en');
+    try{localStorage.setItem('bpmf_lang',m);}catch(e){}
+    try{history.replaceState(null,'',m==='en'?'#en':location.pathname+location.search);}catch(e){}
+    connect();busy=false;
+  }
+  document.getElementById('langBtn').addEventListener('click',function(){setMode(mode==='en'?'zh':'en');});
+  var start='zh';
+  try{if(/#en\b/.test(location.hash))start='en';else if(localStorage.getItem('bpmf_lang')==='en')start='en';}catch(e){}
+  busy=true;all(document.body);busy=false;connect();
+  if(start==='en')setMode('en');
+})();
+</script>
 </body></html>
