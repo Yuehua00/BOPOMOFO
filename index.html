@@ -1457,7 +1457,6 @@ html.intro-on{overflow:hidden}
         <h2 class="sec rv">印花動起來<small>Animated BOPOMOFO patterns</small></h2>
         <p class="lead rv" style="margin-top:.75rem">六款注音印花的動態版本，滑過就會自己播放。點一下可以放大觀看。<span class="te">Six Zhuyin patterns in motion. They play as you scroll; tap one to watch it larger.</span></p>
       </div>
-      <button class="btn" id="mvOpen" type="button"><span>▶ 觀看動畫<span class="te">Watch</span></span></button>
     </div>
     <div class="mv-strip" id="mvStrip" role="list" aria-label="印花動畫，左右滑動挑一張"></div>
     <div class="fan-ctl"><button class="mt-btn2" id="fanPrev" aria-label="上一張">←</button><span id="fanN">01 / 06</span><button class="mt-btn2" id="fanNext" aria-label="下一張">→</button></div>
@@ -2493,7 +2492,7 @@ C.merch.forEach((p, i) => {
   function show(k) { cur = (k + N) % N; video.src = vids[cur].mp4; video.poster = vids[cur].jpg; video.play().catch(() => {}); $('#vdN').textContent = `${cur + 1} / ${N}`; }
   function open(k) { last = document.activeElement; dlg.hidden = false; requestAnimationFrame(() => dlg.classList.add('open')); show(k); $('#vdClose').focus(); document.body.style.overflow = 'hidden'; }
   function close() { dlg.classList.remove('open'); video.pause(); setTimeout(() => { dlg.hidden = true; video.removeAttribute('src'); video.load(); }, 250); document.body.style.overflow = ''; last && last.focus && last.focus({preventScroll: true}); }
-  $('#mvOpen').onclick = () => open(0);
+
   // share the clip that's playing: native share sheet with the video file on phones, otherwise save it
   $('#vdShare').onclick = async () => {
     const v = vids[cur], name = `bopomofo-pattern-${cur + 1}.mp4`, btn = $('#vdShare'); btn.disabled = true;
