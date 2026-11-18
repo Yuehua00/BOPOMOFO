@@ -850,7 +850,7 @@ main>section.pre-rule::before{--rule:0}
 
 /* ---------- 37-symbol chart ---------- */
 #chart{padding-block:5rem 4rem}
-.zc-filter{display:flex;flex-wrap:wrap;gap:.4rem;margin-top:1.75rem}
+.zc-filter{display:grid;grid-template-columns:repeat(4,1fr);gap:.4rem;margin-top:1.75rem}   /* four equal buttons spanning the same width as the cards below */
 .zc-filter button{border:0;border-radius:0;background:var(--dot);padding:.45rem .9rem;font-weight:700;font-size:.85rem;line-height:1.25;cursor:pointer;transition:background .25s,color .25s}
 .zc-filter button[aria-pressed="true"]{background:var(--c,var(--ink));color:#fff}
 .zc{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:8px;margin-top:1.5rem}
@@ -1037,12 +1037,15 @@ main{overflow-x:clip}
 
 /* ---------- pattern lab, guided: five numbered steps; the bar on top ticks off what you've done and points at what's next ---------- */
 .lab-steps{list-style:none;margin:2rem 0 0;padding:0;display:grid;grid-template-columns:repeat(5,1fr);gap:.4rem;counter-reset:none}
-.lab-steps a{display:flex;align-items:center;gap:.5rem;padding:.55rem .6rem;border-radius:12px;color:var(--muted);text-decoration:none;font-size:.82rem;font-weight:700;line-height:1.2;background:rgba(255,255,255,.55);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);box-shadow:inset 0 0 0 1px rgba(57,53,54,.08);transition:background .25s,color .25s}
+.lab-steps a{display:flex;align-items:center;gap:.5rem;padding:.55rem .6rem;border-radius:12px;color:var(--muted);text-decoration:none;font-size:.82rem;font-weight:700;line-height:1.2;background:rgba(255,255,255,.55);-webkit-backdrop-filter:blur(8px);position:relative;-webkit-tap-highlight-color:transparent;outline:none;transition:background .25s,color .25s}
+.lab-steps a::after{content:"";position:absolute;left:.6rem;right:.6rem;bottom:.15rem;height:2px;border-radius:1px;background:var(--pink);transform:scaleX(0);transition:transform .35s var(--ease)}
+.lab-steps a:focus-visible{box-shadow:0 0 0 2px var(--ink)}
 .lab-steps .ti{font-weight:400;font-size:.66rem}
 .lab-steps i{flex:none;width:1.6rem;height:1.6rem;border-radius:50%;display:grid;place-items:center;font-style:normal;font-family:var(--en);font-size:.78rem;background:var(--dot);color:var(--ink);transition:background .25s,color .25s}
 .lab-steps li.done i{background:var(--teal);color:#fff;font-size:0}
 .lab-steps li.done i::before{content:"✓";font-size:.8rem}
-.lab-steps li.now a{background:#fff;color:var(--ink);box-shadow:inset 0 0 0 1.5px var(--pink)}
+.lab-steps li.now a{color:var(--ink)}
+.lab-steps li.now a::after{transform:none}   /* current step: a pink underline, no frame */
 .lab-steps li.now i{background:var(--pink);color:#fff}
 .lab .st-h{display:flex;align-items:center;gap:.65rem;margin:1.6rem 0 .7rem;scroll-margin-top:110px}
 .lab .panel>.st-h:first-child{margin-top:0}
