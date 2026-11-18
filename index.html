@@ -1080,6 +1080,67 @@ html.intro-on{overflow:hidden}
 .view-tog button[aria-pressed="true"]{background:var(--ink);color:#fff}
 .view-tog button[aria-pressed="true"] .ti{color:rgba(255,255,255,.7)}
 @media (max-width:760px){.view-tog{display:flex}.reader.spread .book-stage{display:flex}.reader.spread .single{display:none}}
+
+/* ---------- PAGED MODE: one section at a time, stacked like layers; the next page slides up over the last ---------- */
+html.paged main>section{display:none;min-height:100vh;min-height:100dvh;background-color:var(--paper)}
+html.paged main>section.pg-on{display:block}
+html.paged #wall.pg-with{display:block}
+html.paged footer{display:none}
+html.paged.pg-last footer{display:block}
+html.paged main>section.pg-in{position:relative;z-index:6;box-shadow:0 -24px 50px -30px rgba(57,53,54,.45);animation:pgUp .6s cubic-bezier(.2,.8,.2,1)}
+html.paged main>section.pg-in.back{z-index:4;box-shadow:none;animation:pgRise .6s cubic-bezier(.2,.8,.2,1)}
+.pg-ghost{position:fixed;left:0;right:0;z-index:5;pointer-events:none;overflow:hidden;background:var(--paper);transform-origin:50% 0;animation:pgSink .6s cubic-bezier(.4,0,.2,1) forwards}
+.pg-ghost.back{z-index:7;box-shadow:0 -24px 50px -30px rgba(57,53,54,.45);animation:pgDown .6s cubic-bezier(.6,0,.4,1) forwards}
+@keyframes pgUp{from{transform:translateY(100vh)}}
+@keyframes pgRise{from{transform:scale(.94);opacity:.5}}
+@keyframes pgSink{to{transform:scale(.94);opacity:.35}}
+@keyframes pgDown{to{transform:translateY(100vh)}}
+@media (prefers-reduced-motion:reduce){html.paged main>section.pg-in,.pg-ghost{animation-duration:.01s}}
+/* bottom bar */
+.pager{display:none}
+html.paged .pager{display:flex;position:fixed;left:50%;bottom:max(16px,env(safe-area-inset-bottom));transform:translateX(-50%);z-index:58;align-items:center;gap:2px;padding:4px;border-radius:999px;background:rgba(255,255,255,.62);-webkit-backdrop-filter:blur(14px) saturate(1.3);backdrop-filter:blur(14px) saturate(1.3);box-shadow:inset 0 0 0 1px rgba(255,255,255,.85),0 10px 26px -12px rgba(57,53,54,.5)}
+.pg-b{width:38px;height:38px;border:0;border-radius:50%;background:none;display:grid;place-items:center;cursor:pointer;color:var(--ink);transition:background .2s}
+.pg-b:hover{background:rgba(57,53,54,.07)}
+.pg-b:disabled{opacity:.25;cursor:default;background:none}
+.pg-b svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.pg-mid{border:0;background:none;height:38px;padding:0 .8rem;border-radius:19px;display:flex;align-items:center;gap:.5rem;cursor:pointer;font:inherit;color:var(--ink);white-space:nowrap;transition:background .2s}
+.pg-mid:hover{background:rgba(57,53,54,.07)}
+.pg-mid b{font-family:var(--en);font-size:.8rem;letter-spacing:.06em}
+.pg-mid b::after{content:" / " attr(data-n);font-weight:400;color:var(--muted)}
+.pg-mid span{font-size:.82rem;font-weight:700}
+@media (max-width:600px){.pg-mid span{display:none}.pg-mid{padding:0 .6rem}}
+/* contents panel */
+.pg-index{position:fixed;inset:0;z-index:70;display:grid;place-items:end center;padding:16px;background:rgba(57,53,54,.28);-webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px)}
+.pg-index[hidden]{display:none}
+.pg-box{width:min(100%,420px);max-height:calc(100dvh - 32px);overflow:auto;background:rgba(255,255,255,.92);-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);border-radius:20px;padding:1rem 1rem 1.1rem;box-shadow:0 24px 60px -24px rgba(57,53,54,.6);animation:pgPop .35s cubic-bezier(.2,.9,.3,1.2)}
+@keyframes pgPop{from{transform:translateY(20px);opacity:0}}
+.pg-hd{display:flex;align-items:center;justify-content:space-between;padding:.2rem .4rem .6rem}
+.pg-hd b{font-size:1.05rem;line-height:1.25}
+.pg-hd .ti{font-weight:400;font-size:.72rem;color:var(--muted)}
+.pg-x{border:0;background:none;font-size:1.6rem;line-height:1;cursor:pointer;color:var(--muted);width:36px;height:36px;border-radius:50%}
+.pg-x:hover{background:rgba(57,53,54,.07)}
+#pgList{list-style:none;margin:0;padding:0;display:grid;gap:2px}
+#pgList a{display:flex;align-items:center;gap:.75rem;padding:.55rem .6rem;border-radius:12px;text-decoration:none;color:var(--ink);line-height:1.25;transition:background .2s}
+#pgList a:hover{background:rgba(57,53,54,.06)}
+#pgList i{flex:none;width:1.9rem;height:1.9rem;border-radius:50%;display:grid;place-items:center;font-style:normal;font-weight:900;background:var(--dot)}
+#pgList em{font-style:normal;font-family:var(--en);font-size:.72rem;color:var(--muted);width:1.4rem}
+#pgList b{font-size:.92rem}
+#pgList small{display:block;font-family:var(--en);font-size:.7rem;color:var(--muted);font-weight:400}
+#pgList a[aria-current="page"]{background:var(--ink);color:#fff}
+#pgList a[aria-current="page"] i{background:var(--pink);color:#fff}
+#pgList a[aria-current="page"] em,#pgList a[aria-current="page"] small{color:rgba(255,255,255,.7)}
+.pg-mode{margin-top:.8rem;width:100%;border:0;border-radius:12px;background:var(--dot);padding:.55rem;font:inherit;font-size:.82rem;font-weight:700;line-height:1.3;cursor:pointer}
+.pg-mode-ft{width:auto;display:inline-flex;flex-direction:column;align-items:center;margin:1.2rem 0 0;padding:.5rem 1rem}
+.pg-mode .ti{font-weight:400;font-size:.68rem;color:var(--muted)}
+/* end-of-page hand-off to the next layer */
+.pg-next{display:none}
+html.paged .pg-next{display:flex;align-items:center;justify-content:space-between;gap:1rem;width:min(calc(100% - var(--gut-l) - var(--gut-r)),1180px);margin:3.5rem auto 6.5rem;padding:1.3rem 1.4rem;border-radius:18px;text-decoration:none;color:var(--ink);background:rgba(255,255,255,.6);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);box-shadow:inset 0 0 0 1px rgba(57,53,54,.08),0 14px 30px -22px rgba(57,53,54,.5);transition:transform .3s var(--spring),box-shadow .3s}
+html.paged .pg-next:hover{transform:translateY(-3px)}
+.pg-next small{display:block;font-family:var(--en);font-size:.7rem;letter-spacing:.18em;text-transform:uppercase;color:var(--muted)}
+.pg-next b{display:block;font-size:1.25rem;line-height:1.3;margin-top:.15rem}
+.pg-next b span{display:block;font-family:var(--en);font-weight:400;font-size:.8rem;color:var(--muted)}
+.pg-next .ar{flex:none;width:46px;height:46px;border-radius:50%;display:grid;place-items:center;background:var(--ink);color:#fff;font-size:1.2rem}
+html.paged .totop{bottom:calc(max(16px,env(safe-area-inset-bottom)) + 56px)}
 </style>
 
 <!-- ============ INTRO: a two-second opening — ㄅㄆㄇㄈ drop in, become the wordmark, the curtain lifts ============ -->
@@ -1521,6 +1582,20 @@ html.intro-on{overflow:hidden}
 </footer>
 
 <!-- drawer -->
+
+<!-- ============ PAGER: page-by-page reading (bottom bar + contents panel) ============ -->
+<nav class="pager" id="pager" aria-label="頁面 Pages">
+  <button type="button" class="pg-b" id="pgPrev" aria-label="上一頁 Previous page"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button>
+  <button type="button" class="pg-mid" id="pgMid" aria-haspopup="dialog" aria-controls="pgIndex"><b id="pgNum">01</b><span id="pgName">首頁</span></button>
+  <button type="button" class="pg-b" id="pgNext" aria-label="下一頁 Next page"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg></button>
+</nav>
+<div class="pg-index" id="pgIndex" role="dialog" aria-modal="true" aria-label="目錄 Contents" hidden>
+  <div class="pg-box">
+    <div class="pg-hd"><b>目錄<span class="ti">Contents</span></b><button type="button" class="pg-x" id="pgClose" aria-label="關閉 Close">×</button></div>
+    <ol id="pgList"></ol>
+    <button type="button" class="pg-mode" id="pgMode">改回一路往下滑<span class="ti">Switch to continuous scroll</span></button>
+  </div>
+</div>
 <div class="veil" id="veil" aria-hidden="true"><div><b id="veilZ">ㄆ</b><small id="veilT"></small></div></div>
 <canvas class="bubbles" id="bubbles" aria-hidden="true"></canvas>
 <div class="scrim" id="scrim"></div>
@@ -2618,6 +2693,7 @@ C.merch.forEach((p, i) => {
   const RMq = matchMedia('(prefers-reduced-motion: reduce)').matches;
   const MARK = {home: ['ㄅ', 'Top'], about: ['ㄅ', 'About'], explore: ['ㄆ', 'Explore'], write: ['ㄒ', 'Practice'], say: ['ㄓ', 'Translator'], chart: ['ㄓ', 'Zhuyin chart'], book: ['ㄇ', 'Reader'], lab: ['ㄈ', 'Pattern Lab'], merch: ['ㄉ', 'Shop'], pile: ['ㄊ', 'Pick one'], wall: ['ㄋ', 'Pattern wall'], motion: ['ㄌ', 'In motion']};
   document.addEventListener('click', e => {
+    if (document.documentElement.classList.contains('paged')) return;   // the page flipper handles links then
     const a = e.target.closest('a[href^="#"]'); if (!a || RMq) return;
     const id = a.getAttribute('href').slice(1), target = id && document.getElementById(id); if (!target) return;
     e.preventDefault();
@@ -3121,6 +3197,114 @@ C.merch.forEach((p, i) => {
   // translator: count uses (once a translation lands), not the text itself
   const en = document.getElementById('syEn');
   if (en) new MutationObserver(() => { if (en.textContent.trim() && !en.classList.contains('wait')) send('translator_use'); }).observe(en, {childList: true});
+})();
+
+/* ---------- PAGED MODE: the site reads as a stack of pages instead of one long scroll.
+   Each section is a page; the window still scrolls inside a page, so everything that listens to scrolling keeps working. ---------- */
+(() => {
+  const root = document.documentElement;
+  const PAGES = [
+    ['home', 'ㄅ', '首頁', 'Home'], ['about', 'ㄆ', '關於 BOPOMOFO', 'About'], ['chart', 'ㄇ', '注音總表', 'Zhuyin chart'],
+    ['write', 'ㄈ', '注音練習簿', 'Practice'], ['say', 'ㄉ', '注音翻譯機', 'Translator'], ['explore', 'ㄊ', '食・景・物', 'Explore'],
+    ['pile', 'ㄋ', '插畫牆', 'Illustrations'], ['book', 'ㄌ', '特色讀本', 'Reader'], ['lab', 'ㄍ', '注音印花實驗室', 'Pattern Lab'],
+    ['motion', 'ㄎ', '印花動起來', 'In motion'], ['merch', 'ㄏ', '周邊商品', 'Shop']
+  ].filter(p => document.getElementById(p[0]));
+  const WITH = {lab: ['wall']};   // sections that ride along on another page
+  const idx = id => PAGES.findIndex(p => p[0] === id);
+  const pageOf = el => { const s = el && el.closest && el.closest('main>section'); if (!s) return null; for (const k in WITH) if (WITH[k].includes(s.id)) return k; return s.id; };
+  let on = true; try { on = localStorage.getItem('bpmf-paged') !== '0'; } catch (e) {}
+  let cur = -1, busy = false;
+  // "next page" cards at the foot of every page
+  PAGES.forEach((p, i) => {
+    const host = document.getElementById((WITH[p[0]] || []).slice(-1)[0] || p[0]); const nx = PAGES[i + 1] || PAGES[0];
+    const a = document.createElement('a'); a.className = 'pg-next'; a.href = '#' + nx[0];
+    a.innerHTML = `<span><small>${PAGES[i + 1] ? 'Next · 下一頁' : 'Back to start · 回到開頭'}</small><b>${nx[2]}<span>${nx[3]}</span></b></span><span class="ar" aria-hidden="true">${PAGES[i + 1] ? '→' : '↺'}</span>`;
+    host.appendChild(a);
+  });
+  // contents list
+  const list = document.getElementById('pgList'), panel = document.getElementById('pgIndex');
+  list.innerHTML = PAGES.map((p, i) => `<li><a href="#${p[0]}"><em>${String(i + 1).padStart(2, '0')}</em><i>${p[1]}</i><span><b>${p[2]}</b><small>${p[3]}</small></span></a></li>`).join('');
+  document.getElementById('pgNum').dataset.n = String(PAGES.length).padStart(2, '0');
+  const openIdx = () => { panel.hidden = false; const a = list.querySelector('[aria-current]'); a && a.focus({preventScroll: true}); };
+  const closeIdx = () => { panel.hidden = true; };
+  document.getElementById('pgMid').onclick = openIdx;
+  document.getElementById('pgClose').onclick = closeIdx;
+  panel.addEventListener('click', e => { if (e.target === panel) closeIdx(); });
+  addEventListener('keydown', e => { if (e.key === 'Escape' && !panel.hidden) closeIdx(); });
+  const RMq = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const nudge = () => { dispatchEvent(new Event('resize')); requestAnimationFrame(() => dispatchEvent(new Event('resize'))); };   // pages hidden at load measure themselves now
+  function paint() {
+    const p = PAGES[cur];
+    PAGES.forEach((q, i) => { const show = i === cur; document.getElementById(q[0]).classList.toggle('pg-on', show); (WITH[q[0]] || []).forEach(w => document.getElementById(w).classList.toggle('pg-with', show)); });
+    root.classList.toggle('pg-last', cur === PAGES.length - 1);
+    document.getElementById('pgNum').textContent = String(cur + 1).padStart(2, '0');
+    document.getElementById('pgName').textContent = p[2];
+    document.getElementById('pgPrev').disabled = cur === 0;
+    document.getElementById('pgNext').disabled = cur === PAGES.length - 1;
+    list.querySelectorAll('a').forEach((a, i) => i === cur ? a.setAttribute('aria-current', 'page') : a.removeAttribute('aria-current'));
+    document.querySelectorAll('#nav a[href^="#"]').forEach(a => a.classList.toggle('on', a.getAttribute('href') === '#' + p[0]));
+  }
+  function go(i, opt = {}) {
+    i = Math.max(0, Math.min(PAGES.length - 1, i));
+    if (i === cur || busy) { if (opt.then) opt.then(); return; }
+    const from = cur, back = i < from, old = from >= 0 && document.getElementById(PAGES[from][0]);
+    // freeze the page we're leaving as a ghost layer, exactly where it sits on screen
+    let ghost = null;
+    if (old && !opt.instant && !RMq) {
+      const r = old.getBoundingClientRect();
+      ghost = old.cloneNode(true); ghost.removeAttribute('id'); ghost.querySelectorAll('[id]').forEach(n => n.removeAttribute('id'));
+      ghost.querySelectorAll('video').forEach(v => v.removeAttribute('autoplay'));
+      ghost.className = 'pg-ghost' + (back ? ' back' : ''); ghost.style.top = r.top + 'px'; ghost.style.height = Math.min(r.height, innerHeight - r.top) + 'px';
+      ghost.setAttribute('aria-hidden', 'true'); document.body.appendChild(ghost);
+    }
+    cur = i; closeIdx();
+    const nav = document.getElementById('nav'); nav && nav.classList.remove('open'); document.body.classList.remove('nav-open');
+    paint();
+    const h = root.style.scrollBehavior; root.style.scrollBehavior = 'auto'; scrollTo(0, 0); root.style.scrollBehavior = h;
+    const sec = document.getElementById(PAGES[i][0]);
+    if (ghost) { busy = true; sec.classList.add('pg-in'); sec.classList.toggle('back', back);
+      setTimeout(() => { ghost.remove(); sec.classList.remove('pg-in', 'back'); busy = false; }, 620); }
+    history.replaceState(null, '', '#' + PAGES[i][0]);
+    nudge();
+    window.bpmfTrack && window.bpmfTrack('page_view_section', {section: PAGES[i][0]});
+    if (opt.then) requestAnimationFrame(() => requestAnimationFrame(opt.then));
+  }
+  // anything that scrolls an element into view in another page flips there first
+  const origSIV = Element.prototype.scrollIntoView;
+  Element.prototype.scrollIntoView = function (o) {
+    if (on) { const pg = pageOf(this); if (pg && idx(pg) !== cur && idx(pg) >= 0) { const el = this; go(idx(pg), {instant: true, then: () => origSIV.call(el, o)}); return; } }
+    return origSIV.call(this, o);
+  };
+  // links: page ids flip pages; links to things inside another page flip, then scroll to them
+  document.addEventListener('click', e => {
+    if (!on) return;
+    const a = e.target.closest('a[href^="#"]'); if (!a) return;
+    const id = a.getAttribute('href').slice(1);
+    if (a.id === 'toTop') { e.preventDefault(); e.stopImmediatePropagation(); scrollTo({top: 0, behavior: RMq ? 'auto' : 'smooth'}); return; }
+    if (idx(id) >= 0) { e.preventDefault(); e.stopImmediatePropagation(); if (idx(id) === cur) scrollTo({top: 0, behavior: RMq ? 'auto' : 'smooth'}); else go(idx(id)); return; }
+    const t = id && document.getElementById(id), pg = pageOf(t);
+    if (t && pg && idx(pg) !== cur) { e.preventDefault(); e.stopImmediatePropagation(); go(idx(pg), {then: () => origSIV.call(t, {block: 'start'})}); }
+  }, true);
+  document.getElementById('pgPrev').onclick = () => go(cur - 1);
+  document.getElementById('pgNext').onclick = () => go(cur + 1);
+  // try-out switch back to the long page
+  const modeBtn = document.getElementById('pgMode');
+  function setMode(v) {
+    on = v; try { localStorage.setItem('bpmf-paged', v ? '1' : '0'); } catch (e) {}
+    root.classList.toggle('paged', v);
+    modeBtn.innerHTML = v ? '改回一路往下滑<span class="ti">Switch to continuous scroll</span>' : '改成分頁瀏覽<span class="ti">Switch to page-by-page</span>';
+    if (v) { const start = idx(location.hash.slice(1)); cur = -1; go(start >= 0 ? start : 0, {instant: true}); } else { closeIdx(); root.classList.remove('pg-last'); nudge(); }
+  }
+  modeBtn.onclick = () => setMode(!on);
+  // a small switch in the footer too, so the long page can come back to paging
+  const ft = document.querySelector('footer .wrap') || document.querySelector('footer');
+  if (ft) { const sw = document.createElement('button'); sw.type = 'button'; sw.className = 'pg-mode pg-mode-ft'; sw.onclick = () => setMode(!on);
+    const lab = () => sw.innerHTML = on ? '改回一路往下滑<span class="ti">Continuous scroll</span>' : '改成分頁瀏覽<span class="ti">Page-by-page</span>';
+    lab(); modeBtn.addEventListener('click', lab); sw.addEventListener('click', lab); ft.appendChild(sw); }
+  // start where the address says (a section, or something inside one)
+  const h0 = location.hash.slice(1), t0 = h0 && document.getElementById(h0), p0 = idx(h0) >= 0 ? h0 : pageOf(t0);
+  if (on) { root.classList.add('paged'); cur = -1; go(p0 ? idx(p0) : 0, {instant: true, then: () => { if (t0 && idx(h0) < 0) origSIV.call(t0, {block: 'start'}); }}); }
+  else modeBtn.innerHTML = '改成分頁瀏覽<span class="ti">Switch to page-by-page</span>';
 })();
 </script>
 
