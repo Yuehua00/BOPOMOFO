@@ -531,6 +531,7 @@ body.grid-on .grid-bg{opacity:1}
 .pv{position:relative}
 .pv canvas{width:100%;display:block;aspect-ratio:4/3;background:var(--ground)}
 .pv-tabs{display:flex;flex-wrap:wrap;gap:.4rem;margin-top:.9rem}
+@media (max-width:820px){#symBtns{display:grid;grid-template-columns:repeat(4,1fr)}#symBtns .sym-g{grid-column:1/-1}#symBtns .sbtn{width:100%;padding-left:.2rem;padding-right:.2rem;text-align:center;align-items:center;justify-content:center}#symBtns .sbtn[data-k=oct],#symBtns .sbtn[data-k=octdrop]{grid-column:span 2}#symBtns [hidden]{display:none}}   /* phones: repeat styles on the same four-column grid; the two eight-way ones split the row */
 @media (max-width:820px){.pv-tabs{display:grid;grid-template-columns:repeat(4,1fr)}.pv-tabs .sbtn{width:100%;padding-left:.2rem;padding-right:.2rem;text-align:center;align-items:center;justify-content:center}}   /* phones: four equal tabs, as wide as the preview */
 .pv-note{font-size:.78rem;color:var(--muted);margin-top:.6rem}
 .range{display:flex;align-items:center;gap:.75rem}
