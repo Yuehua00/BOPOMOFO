@@ -13,9 +13,9 @@
   color-scheme: light;
   --ink:#393536;      /* CIS dark */
   --grey:#929399;     /* 平 — BO */
-  --teal:#239088;     /* PANTONE 3295 C · 上 — PO  / 景 */
-  --pink:#DA1884;     /* PANTONE 219 C · 去 — MO  / 食 */
-  --gold:#B8882F;     /* PANTONE 873 C · 入 — FO  / 物 */
+  --teal:#009E96;     /* PANTONE 3295 C · CMYK C100 Y50 · 上 — PO  / 景 */
+  --pink:#E40077;     /* PANTONE 219 C · CMYK M100 Y10 · 去 — MO  / 食 */
+  --gold:#BF9D5B;     /* PANTONE 873 C · CMYK C30 M40 Y70 · 入 — FO  / 物 */
   --paper:#FFFFFF;
   --ground:#F8F8F8;
   --dot:#ECECEC;
@@ -486,7 +486,7 @@ body.grid-on .grid-bg{opacity:1}
 .ed .quad span{display:none!important;position:absolute;right:6px;bottom:4px;font-size:.7rem;color:var(--pink);font-weight:700;background:rgba(255,255,255,.85);padding:0 .3rem}
 .tok{position:absolute;translate:-50% -50%;border:0;background:transparent;color:transparent;font-weight:900;font-size:calc(var(--s)*18cqw);line-height:1;padding:.08em .12em;cursor:grab;touch-action:none;border-radius:6px;transform:rotate(var(--r))}
 .tok:hover{outline:1.5px dashed var(--grey)}
-.tok.sel{outline:2px solid var(--teal);background:rgba(35,144,136,.06)}
+.tok.sel{outline:2px solid var(--teal);background:rgba(0,158,150,.06)}
 .tok:active{cursor:grabbing}
 .ed-ctl{display:grid;grid-template-columns:repeat(6,1fr);gap:.4rem;margin-top:.75rem}
 .ed-ctl .sbtn{width:100%;justify-content:center;text-align:center;padding-inline:.4rem;white-space:nowrap}
@@ -1406,7 +1406,7 @@ html.intro-on{overflow:hidden}
         <div class="st-h" id="step3"><i>3</i><span><b>幫它配色</b><span class="ti">Pick the colours</span></span></div>
         <p class="st-tip">點色塊可任選顏色，或直接用下面的快速配色<span class="ti">Tap a swatch for any colour, or use a preset below</span></p>
         <div class="pickers">
-          <label class="pk"><input type="color" id="pkInk" value="#da1884" aria-label="圖案色"><span class="pk-sw" id="pkInkSw"></span><span class="pk-t"><b>圖案色<span class="ti">Pattern</span></b><em id="pkInkV">#DA1884</em></span></label>
+          <label class="pk"><input type="color" id="pkInk" value="#E40077" aria-label="圖案色"><span class="pk-sw" id="pkInkSw"></span><span class="pk-t"><b>圖案色<span class="ti">Pattern</span></b><em id="pkInkV">#E40077</em></span></label>
           <button class="pk-swap" id="pkSwap" type="button" aria-label="圖案色與底色對調" title="對調">⇄</button>
           <label class="pk"><input type="color" id="pkBg" value="#ffffff" aria-label="底色"><span class="pk-sw" id="pkBgSw"></span><span class="pk-t"><b>底色<span class="ti">Ground</span></b><em id="pkBgV">#FFFFFF</em></span></label>
         </div>
@@ -1574,7 +1574,7 @@ html.intro-on{overflow:hidden}
 const C = window.BPMF_CONTENT;
 const RM = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const FINE = matchMedia('(hover:hover) and (pointer:fine)').matches;
-const COL = {grey:'#929399', teal:'#239088', pink:'#DA1884', gold:'#B8882F', ink:'#393536'};
+const COL = {grey:'#929399', teal:'#009E96', pink:'#E40077', gold:'#BF9D5B', ink:'#393536'};
 const motifURL = id => `url("assets/motifs/m${id}.png")`;
 const motifForLetter = {};
 C.motifs.forEach(m => m.letters.forEach(l => motifForLetter[l] = m.id));
@@ -2704,7 +2704,7 @@ C.merch.forEach((p, i) => {
 /* ---------- BUBBLES: a handful of small soft circles drifting upward ---------- */
 (() => {
   const cv = document.getElementById('bubbles'); if (!cv || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-  const x = cv.getContext('2d'), COLS = ['160,180,200', '35,144,136', '218,24,132', '146,147,153', '184,136,47'];
+  const x = cv.getContext('2d'), COLS = ['160,180,200', '0,158,150', '228,0,119', '146,147,153', '191,157,91'];
   let W, H, dpr, bs = [], running = true, last = 0;
   const rnd = (a, b) => a + Math.random() * (b - a);
   const make = (y) => ({x: rnd(0, W), y: y ?? rnd(0, H), r: rnd(4, 15), vy: rnd(5, 13), sw: rnd(10, 26), ph: rnd(0, 6.28), sp: rnd(.25, .55), c: COLS[Math.floor(Math.random() * COLS.length)], a: rnd(.14, .24)});
@@ -2813,7 +2813,7 @@ C.merch.forEach((p, i) => {
   const SY = 'ㄅㄆㄇㄈㄉㄊㄋㄌㄍㄎㄏㄐㄑㄒㄓㄔㄕㄖㄗㄘㄙㄧㄨㄩㄚㄛㄜㄝㄞㄟㄠㄡㄢㄣㄤㄥㄦ'.split('');
   const PY = {ㄅ:'b',ㄆ:'p',ㄇ:'m',ㄈ:'f',ㄉ:'d',ㄊ:'t',ㄋ:'n',ㄌ:'l',ㄍ:'g',ㄎ:'k',ㄏ:'h',ㄐ:'j',ㄑ:'q',ㄒ:'x',ㄓ:'zh',ㄔ:'ch',ㄕ:'sh',ㄖ:'r',ㄗ:'z',ㄘ:'c',ㄙ:'s',ㄧ:'i',ㄨ:'u',ㄩ:'ü',ㄚ:'a',ㄛ:'o',ㄜ:'e',ㄝ:'ê',ㄞ:'ai',ㄟ:'ei',ㄠ:'ao',ㄡ:'ou',ㄢ:'an',ㄣ:'en',ㄤ:'ang',ㄥ:'eng',ㄦ:'er'};
   const grp = i => i < 21 ? ['聲母', 'Initial'] : i < 24 ? ['介音', 'Medial'] : ['韻母', 'Final'];
-  const INK = {pencil: 'rgba(64,60,61,.92)', red: '#DA1884'}, LINE = '#7fc3b9', LINE2 = '#c4e3de', FONT = '"Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif';
+  const INK = {pencil: 'rgba(64,60,61,.92)', red: '#E40077'}, LINE = '#7fc3b9', LINE2 = '#c4e3de', FONT = '"Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif';
   const bx = bg.getContext('2d'), ix = ink.getContext('2d');
   let si = 0, tool = 'pencil', strokes = [], cur = null, W = 0, H = 0, dpr = 1, G = null;
   // geometry: columns of [big square | narrow zhuyin strip], read right-to-left like a real exercise book
@@ -2933,7 +2933,7 @@ C.merch.forEach((p, i) => {
     x.fillStyle = '#5aa79c'; x.font = `400 11px ${FONT}`; x.textAlign = 'center'; x.fillText('訂', pad + W - 14, pad + hh / 2 - 9); x.fillText('正', pad + W - 14, pad + hh / 2 + 9);
     x.drawImage(bg, pad, pad + hh, W, H); x.drawImage(ink, pad, pad + hh, W, H);
     if (stamp.classList.contains('on')) { const r = stamp.getBoundingClientRect(), hr = head.getBoundingClientRect(), cx = pad + r.left - hr.left + r.width / 2, cy = pad + r.top - hr.top + r.height / 2;
-      x.save(); x.translate(cx, cy); x.rotate(-12 * Math.PI / 180); x.globalAlpha = .88; x.strokeStyle = x.fillStyle = '#DA1884'; x.lineWidth = 3;
+      x.save(); x.translate(cx, cy); x.rotate(-12 * Math.PI / 180); x.globalAlpha = .88; x.strokeStyle = x.fillStyle = '#E40077'; x.lineWidth = 3;
       x.beginPath(); x.arc(0, 0, r.width / 2 - 2, 0, 7); x.stroke(); x.lineWidth = 1.5; x.beginPath(); x.arc(0, 0, r.width / 2 - 7, 0, 7); x.stroke();
       x.font = `900 ${parseFloat(getComputedStyle(stamp).fontSize)}px ${FONT}`; x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillText(stamp.textContent, 0, 2); x.restore(); }
     x.fillStyle = '#929399'; x.font = `600 12px Poppins, ${FONT}`; x.textAlign = 'right'; x.textBaseline = 'alphabetic'; x.fillText('BOPOMOFO · 注音練習簿', W + pad, H + hh + pad + 20);
