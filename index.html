@@ -752,7 +752,8 @@ main>section.pre-rule::before{--rule:0}
 .support{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:1rem 2rem;margin-top:2.5rem;padding:1.25rem 0;border-top:1px solid rgba(255,255,255,.1)}
 .sp-t{margin:0;font-weight:700;font-size:.95rem;color:#fff}
 .sp-t span{display:block;font-family:var(--en);font-weight:400;font-size:.75rem;color:rgba(255,255,255,.55);margin-top:.15rem}
-.sp-btns{display:flex;gap:.6rem;flex-wrap:wrap}
+.sp-btns{display:grid;grid-template-columns:1fr 1fr;gap:.6rem;flex:1 1 100%;width:100%}   /* two equal buttons, edge to edge with the footer */
+.sp-btns .sp-b{justify-content:center}
 .sp-b{display:inline-flex;align-items:center;gap:.6rem;padding:.6rem 1rem;border-radius:10px;color:#fff;text-decoration:none;font-size:.85rem;font-weight:700;background:rgba(255,255,255,.08);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);box-shadow:inset 0 0 0 1px rgba(255,255,255,.16);transition:background .3s,color .3s}
 .sp-b svg{width:20px;height:20px;flex:none}
 .sp-b i{display:block;font-style:normal;font-family:var(--en);font-weight:400;font-size:.7rem;opacity:.6}
