@@ -1044,6 +1044,7 @@ main{overflow-x:clip}
 .nm-in{display:flex;gap:.5rem}
 .nm-in input{flex:1;min-width:0;font:inherit;font-size:1.1rem;font-weight:700;padding:.7rem .9rem;border:0;border-radius:12px;background:var(--dot);color:var(--ink);outline:none;transition:box-shadow .2s,background .2s}
 .nm-in input:focus{background:#fff;box-shadow:inset 0 0 0 2px var(--pink)}
+.nm-in button:disabled{opacity:.35;cursor:default}
 .nm-in button{flex:none;border:0;border-radius:12px;background:var(--ink);color:#fff;font:inherit;font-weight:700;font-size:.9rem;line-height:1.25;padding:.45rem 1.1rem;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center}
 .nm-in button .ti{color:rgba(255,255,255,.7);font-weight:400}
 .nm-zy{display:flex;flex-wrap:wrap;align-items:center;gap:.4rem;margin-top:.6rem}
@@ -1054,6 +1055,7 @@ main{overflow-x:clip}
 .nm-zy button em{font-style:normal;font-weight:700;font-size:.78rem;line-height:1;color:var(--pink);writing-mode:vertical-rl;text-orientation:upright}
 .nm-zy button.alt{box-shadow:inset 0 0 0 1.5px var(--line)}
 .nm-zy button.alt:hover{box-shadow:inset 0 0 0 1.5px var(--pink)}
+.nm-zy .nm-msg{color:var(--pink)}
 .nm-zy small{flex-basis:100%;font-size:.72rem;color:var(--muted);line-height:1.35}
 .pv-print{width:100%;justify-content:center;text-align:center;margin-top:.4rem}
 .pv-print .te{color:rgba(255,255,255,.75)}
@@ -1414,10 +1416,10 @@ html.intro-on{overflow:hidden}
 
         <div id="customUI">
           <div class="nm" id="nmBox">
-            <label class="nm-l" for="nmIn">用你的名字排<span class="ti">Make it from your name</span></label>
+            <label class="nm-l" for="nmIn">用你的名字排（中文，最多 4 個字）<span class="ti">Make it from your name (Chinese characters, up to 4)</span></label>
             <div class="nm-in">
-              <input id="nmIn" type="text" maxlength="8" placeholder="輸入中文名字 Your Chinese name" autocomplete="off" enterkeyhint="go" aria-label="輸入中文名字 Type your Chinese name">
-              <button type="button" id="nmGo">排出來<span class="ti">Make it</span></button>
+              <input id="nmIn" type="text" maxlength="8" placeholder="例：王小明" autocomplete="off" enterkeyhint="go" aria-label="輸入中文名字 Type your Chinese name">
+              <button type="button" id="nmGo">換個排法<span class="ti">Shuffle</span></button>
             </div>
             <div class="nm-zy" id="nmZy" aria-live="polite"></div>
           </div>
@@ -2212,24 +2214,32 @@ function nameChips() {
   });
   if (L.name.some(e => e.alts.length > 1)) box.appendChild(el('small', '', '讀音不對嗎？點有框的字換一個讀音。<span class="ti">Wrong reading? Tap a framed character to switch it.</span>'));
 }
-async function makeFromName() {
-  const v = $('#nmIn').value.trim(), go = $('#nmGo');
-  if (!v) { $('#nmIn').focus(); return; }
-  let mixed = true;
-  if (v !== nmText || !L.name) {
-    mixed = false; go.disabled = true;
-    const list = window.bpmfNameZhuyin ? await window.bpmfNameZhuyin(v).catch(() => null) : null;
-    go.disabled = false;
-    if (!list || !list.length) { L.name = null; nmText = ''; $('#nmZy').innerHTML = list ? '<small>請用中文字輸入名字，例如「王小明」。<span class="ti">Please type the name in Chinese characters, e.g. 王小明.</span></small>' : '<small>注音資料載入失敗，請檢查網路後再試一次。<span class="ti">Couldn’t load the Zhuyin data. Check the connection and try again.</span></small>'; return; }
-    L.name = list; nmText = v; nameChips();
-  }
-  if (L.mode !== 'custom') setMode('custom');
-  L.tokens = nameTokens(L.name, mixed); L.sel = -1; renderTokens(); drawAll();
-  go.innerHTML = '換個排法<span class="ti">Shuffle</span>';
+const nmHint = (zh, en) => { const box = $('#nmZy'); box.querySelector('.nm-msg')?.remove(); if (zh) box.prepend(el('small', 'nm-msg', `${zh}<span class="ti">${en}</span>`)); };
+function capName(inp) {   // keep at most 4 Chinese characters, as on the frame page
+  const arr = [...inp.value]; let n = 0;
+  for (let i = 0; i < arr.length; i++) if (/\p{Script=Han}/u.test(arr[i]) && ++n === 4) { if (i + 1 < arr.length) { inp.value = arr.slice(0, i + 1).join(''); return true; } break; }
+  return false;
 }
-$('#nmGo').onclick = makeFromName;
-$('#nmIn').addEventListener('keydown', e => { if (e.key === 'Enter' && !e.isComposing) { e.preventDefault(); makeFromName(); } });
-$('#nmIn').addEventListener('input', () => { if ($('#nmIn').value.trim() !== nmText) $('#nmGo').innerHTML = '排出來<span class="ti">Make it</span>'; if (!$('#nmIn').value.trim()) { L.name = null; nmText = ''; nameChips(); } });
+let nmSeq = 0;
+async function nameInput(e) {
+  if (e && e.isComposing) return;
+  const inp = $('#nmIn'), trimmed = capName(inp), v = inp.value.trim(), my = ++nmSeq;
+  if (v === nmText && L.name) return;
+  if (!v) { L.name = null; nmText = ''; nameChips(); $('#nmGo').disabled = true; return; }
+  const list = window.bpmfNameZhuyin ? await window.bpmfNameZhuyin(v).catch(() => null) : null;
+  if (my !== nmSeq) return;
+  if (!list) { L.name = null; nameChips(); nmHint('注音資料載入失敗，請檢查網路後再試一次。', 'Couldn’t load the Zhuyin data. Check the connection and try again.'); return; }
+  if (!list.length) { L.name = null; nmText = ''; nameChips(); $('#nmGo').disabled = true; nmHint('目前只支援中文名字', 'Chinese names only for now'); return; }
+  L.name = list; nmText = v; nameChips(); $('#nmGo').disabled = false;
+  if (trimmed) nmHint('最多 4 個字，多的已自動刪除', 'Up to 4 characters');
+  if (L.mode !== 'custom') setMode('custom');
+  L.tokens = nameTokens(L.name, false); L.sel = -1; renderTokens(); drawAll();
+}
+$('#nmIn').addEventListener('input', nameInput);
+$('#nmIn').addEventListener('compositionend', () => nameInput());
+$('#nmIn').addEventListener('keydown', e => { if (e.key === 'Enter' && !e.isComposing) { e.preventDefault(); e.target.blur(); } });
+$('#nmGo').disabled = true;
+$('#nmGo').onclick = () => { if (!L.name) return; if (L.mode !== 'custom') setMode('custom'); L.tokens = nameTokens(L.name, true); L.sel = -1; renderTokens(); drawAll(); };
 window.__bpmfName = () => L.name;
 
 // drawing
@@ -2488,7 +2498,7 @@ C.merch.forEach((p, i) => {
   $('#pSave').onclick = async () => save(await patternBlob());
   $('#pShare').onclick = async () => {
     const blob = await patternBlob(), file = new File([blob], fname(), {type: 'image/png'});
-    try { if (navigator.canShare && navigator.canShare({files: [file]})) { await navigator.share({files: [file], title: 'BOPOMOFO 注音印花', text: '我用注音排了一款臺灣印花！'}); return; } } catch (e) { if (e && e.name === 'AbortError') return; }
+    try { if (navigator.canShare && navigator.canShare({files: [file]})) { await navigator.share({files: [file], title: 'BOPOMOFO 注音印花', text: '我用名字的注音排了一款臺灣印花！\nMy name, as a Zhuyin pattern!\n#BOPOMOFO #注音 #臺灣注音 @bopomofo.ntnu'}); return; } } catch (e) { if (e && e.name === 'AbortError') return; }
     msg('這個環境不支援直接分享，先幫你存成圖片 · Sharing isn’t supported here, so the image was saved instead'); save(blob);
   };
 
@@ -2518,8 +2528,12 @@ C.merch.forEach((p, i) => {
       let cx = W / 2 - (step * name.length - cs * .22) / 2; const cy = y + cs / 2;
       name.forEach(e => {
         x.fillStyle = ink; x.textAlign = 'center'; x.font = `900 ${cs}px ${zh}`; x.fillText(e.c, cx + cs / 2, cy);
-        const s = [...e.zy]; x.fillStyle = pink; x.font = `700 ${zs}px ${zh}`;
-        s.forEach((z, k) => x.fillText(z, cx + cs + gap + zs / 2, cy + (k - (s.length - 1) / 2) * zs * 1.02));
+        // symbols stacked; the tone to their right, between the last two (beside a lone one); the light tone ˙ on top
+        const m = e.zy.match(/^(˙?)([^ˊˇˋ˙]*)([ˊˇˋ]?)$/) || ['', '', e.zy, ''], sy = [...m[2]], lh = zs * 1.05, top = cy - (sy.length - 1) / 2 * lh, zx = cx + cs + gap + zs / 2;
+        x.fillStyle = pink; x.font = `700 ${zs}px ${zh}`;
+        sy.forEach((z, k) => x.fillText(z, zx, top + k * lh));
+        if (m[1]) x.fillText('˙', zx, top - lh * .8);
+        if (m[3]) x.fillText(m[3], zx + zs * .62, top + (sy.length > 1 ? sy.length - 1.5 : 0) * lh);
         cx += step;
       });
       y += cs + capH * .1;
@@ -2530,7 +2544,7 @@ C.merch.forEach((p, i) => {
     y += wmH + capH * .09;
     const d = new Date();
     x.fillStyle = '#929399'; x.textAlign = 'center'; x.font = `500 ${capH * .055}px Poppins, ${zh}`;
-    x.fillText(`臺灣注音印花 · Visual Translation of Taiwanese Zhuyin · ${d.getFullYear()}.${String(d.getMonth() + 1).padStart(2, '0')}.${String(d.getDate()).padStart(2, '0')}`, W / 2, y);
+    x.fillText(`臺灣注音印花 · @bopomofo.ntnu · ${d.getFullYear()}.${String(d.getMonth() + 1).padStart(2, '0')}.${String(d.getDate()).padStart(2, '0')}`, W / 2, y);
     return new Promise(r => c.toBlob(r, 'image/png'));
   }
   let printing = false;
@@ -3130,19 +3144,20 @@ C.merch.forEach((p, i) => {
   function load() { if (lib) return Promise.resolve(lib); if (loading) return loading;
     loading = new Promise((res, rej) => { const sc = document.createElement('script'); sc.src = 'assets/vendor/zhuyin.js'; sc.onload = () => { lib = window.BPMF_PINYIN; res(lib); }; sc.onerror = rej; document.head.appendChild(sc); });
     return loading; }
-  // a name → one entry per Han character: its Zhuyin plus every other reading it can have (for 多音字).
-  // The first character is read as a surname (曾 ㄗㄥ, 單 ㄕㄢˋ, 區 ㄡ); the rest use the everyday reading.
+  // a name → one entry per Han character. Same rules as the 注音打卡框 page (frame/), so a name gets the same Zhuyin
+  // on the IG frame and on the printed photo: everyday reading, no tone sandhi, Taiwan's neutral-tone fix, at most 4 characters.
+  // alts = the character's other readings, so a visitor can fix a 多音字 by tapping it.
   window.bpmfNameZhuyin = async name => {
     const P = await load(), chars = [...name].filter(c => /\p{Script=Han}/u.test(c)).slice(0, 4);
     if (!chars.length) return [];
-    const simp = P.toSimp(chars.join(''));
-    const plain = P.pinyin(simp, {toneType: 'num', type: 'array'}), sur = P.pinyin(simp, {toneType: 'num', type: 'array', mode: 'surname'});
+    const num = P.pinyin(P.toSimp(chars.join('')), {toneType: 'num', type: 'array', toneSandhi: false, nonZh: 'consecutive'});
     return chars.map((c, i) => {
-      let n = i === 0 ? sur[0] : plain[i];
-      if (/0$/.test(n)) { const d = P.pinyin(P.toSimp(c), {toneType: 'num'}); if (/[1-4]$/.test(d)) n = d; }
-      const all = [n, ...P.pinyin(P.toSimp(c), {toneType: 'num', type: 'array', multiple: true})].map(py2zy).filter(Boolean);
-      return {c, zy: all[0] || '', alts: [...new Set(all)]};
-    }).filter(e => e.zy);
+      let n = num[i]; if (n === undefined) return null;
+      if (/0$/.test(n) && !NEUTRAL.has(c)) { const d = P.pinyin(P.toSimp(c), {toneType: 'num'}); if (/[1-4]$/.test(d)) n = d; }
+      const zy = py2zy(n); if (!zy) return null;
+      const alts = [zy, ...P.pinyin(P.toSimp(c), {toneType: 'num', type: 'array', multiple: true}).map(py2zy)].filter(Boolean);
+      return {c, zy, alts: [...new Set(alts)]};
+    }).filter(Boolean);
   };
   inp.addEventListener('focus', load, {once: true});
   new IntersectionObserver((es, o) => { if (es.some(e => e.isIntersecting)) { load(); o.disconnect(); } }, {rootMargin: '400px'}).observe(inp);
