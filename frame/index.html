@@ -397,8 +397,8 @@ body.en .card h2 .tt{grid-row:2;font-size:.78rem!important;font-weight:400!impor
     </div>
   </section>
   <section class="card rv" style="--i:4" aria-labelledby="s4" id="c4">
-    <h2 id="s4" class="pre"><span class="no" id="n4">4</span><span class="tt">追蹤我們、填回饋，領好物</span> <em>Follow us, share feedback, get a gift</em></h2>
-    <p class="hint">完成下面兩步，回到展場出示完成畫面，就能領取限量好物（數量有限，送完為止）。<span class="en2">Finish the two steps below, then show the completion screen at our booth to collect a limited-edition gift (while supplies last).</span></p>
+    <h2 id="s4" class="pre"><span class="no" id="n4">4</span><span class="tt">追蹤我們、填回饋，領好物並抽獎</span> <em>Follow us, share feedback, get a gift and enter the draw</em></h2>
+    <p class="hint">完成下面兩步，回到展場出示完成畫面，就能領取限量好物，並參加抽獎（好物數量有限，送完為止）。<span class="en2">Finish the two steps below, then show the completion screen at our booth to collect a limited-edition gift and enter the prize draw (gifts while supplies last).</span></p>
     <div id="fbWrap" class="fbform">
       <div class="fbstep">
         <h3>① 追蹤 BOPOMOFO 的 Instagram<small>Step 1 · Follow us on Instagram</small></h3>
@@ -407,47 +407,44 @@ body.en .card h2 .tt{grid-row:2;font-size:.78rem!important;font-weight:400!impor
       </div>
       <form class="fbstep fbform" id="fbForm" novalidate>
         <h3>② 回答五個小問題<small>Step 2 · Five quick questions</small></h3>
-        <fieldset class="fbq"><legend>1. 寫完自己的注音名字，你的感覺是？<small>How did writing your name in Zhuyin feel?</small></legend>
+        <p class="hint" style="margin:0">透過五個小問題，和我們一起探索注音與臺灣文化的魅力！<span class="en2">Five quick questions to explore the charm of Zhuyin and Taiwanese culture with us.</span></p>
+        <fieldset class="fbq"><legend>1. 想到臺灣，你腦海中第一個浮現的是什麼？<small>What is the first thing that comes to mind when you think of Taiwan?</small></legend>
+          <p class="hint" style="margin:0">可以是美食、風景、生活物件，或任何讓你聯想到臺灣的事物！<span class="en2">It can be food, scenery, everyday objects, or anything that reminds you of Taiwan!</span></p>
+          <input class="fbtext" type="text" name="q1" maxlength="80" placeholder="例：珍珠奶茶 / e.g. bubble tea" autocomplete="off"></fieldset>
+        <fieldset class="fbq"><legend>2. 體驗 BoPoMoFo 後，你對注音的印象有改變嗎？<small>Has BoPoMoFo changed the way you see Zhuyin?</small></legend>
           <div class="chips">
-            <label class="chip"><input type="radio" name="q1" value="回到國小一年級"><span>瞬間回到國小一年級<small>Back to first grade</small></span></label>
-            <label class="chip"><input type="radio" name="q1" value="手記得腦忘了"><span>手記得，腦忘了<small>My hand remembers, my brain doesn't</small></span></label>
-            <label class="chip"><input type="radio" name="q1" value="書法家附身"><span>書法家附身<small>Calligrapher mode</small></span></label>
-            <label class="chip"><input type="radio" name="q1" value="名字變可愛"><span>原來我的名字這麼可愛<small>My name looks cute in Zhuyin</small></span></label>
+            <label class="chip"><input type="radio" name="q2" value="大大改觀"><span>大大改觀！原來注音這麼有趣<small>Totally! Zhuyin is so much fun</small></span></label>
+            <label class="chip"><input type="radio" name="q2" value="有一點"><span>有一點，發現注音的新可能<small>A little, I found new possibilities in Zhuyin</small></span></label>
+            <label class="chip"><input type="radio" name="q2" value="沒什麼改變"><span>沒什麼改變，但體驗很有趣<small>Not much change, but it was fun</small></span></label>
+            <label class="chip"><input type="radio" name="q2" value="原本就喜歡"><span>原本就很喜歡注音！<small>I already loved Zhuyin!</small></span></label>
           </div></fieldset>
-        <fieldset class="fbq"><legend>2. 如果注音符號是一個人，誰最有個性？<small>If a Zhuyin symbol were a person, who has the most personality?</small></legend>
-          <div class="chips c6">
-            <label class="chip big"><input type="radio" name="q2" value="ㄅ"><span>ㄅ</span></label>
-            <label class="chip big"><input type="radio" name="q2" value="ㄎ"><span>ㄎ</span></label>
-            <label class="chip big"><input type="radio" name="q2" value="ㄓ"><span>ㄓ</span></label>
-            <label class="chip big"><input type="radio" name="q2" value="ㄜ"><span>ㄜ</span></label>
-            <label class="chip big"><input type="radio" name="q2" value="ㄤ"><span>ㄤ</span></label>
-            <label class="chip big"><input type="radio" name="q2" value="ㄦ"><span>ㄦ</span></label>
+        <fieldset class="fbq"><legend>3. 哪一種方式最能讓你認識臺灣文化？<small>How do you prefer to explore Taiwanese culture?</small></legend>
+          <div class="chips">
+            <label class="chip"><input type="radio" name="q3" value="食"><span>食｜透過美食認識臺灣<small>Food · discover Taiwan through its flavours</small></span></label>
+            <label class="chip"><input type="radio" name="q3" value="景"><span>景｜探索臺灣各地風景<small>Places · explore scenery across Taiwan</small></span></label>
+            <label class="chip"><input type="radio" name="q3" value="物"><span>物｜發現生活物件背後的故事<small>Objects · find the stories behind everyday things</small></span></label>
+            <label class="chip"><input type="radio" name="q3" value="玩"><span>玩｜透過互動遊戲認識文化<small>Play · learn culture through interactive games</small></span></label>
           </div></fieldset>
-        <fieldset class="fbq"><legend>3. 注音印花分成「食、景、物」，你最想帶哪一類回家？<small>Our patterns come in Food, Places and Objects. Which would you take home?</small></legend>
-          <div class="chips c2">
-            <label class="chip"><input type="radio" name="q3" value="食"><span>食<small>Food</small></span></label>
-            <label class="chip"><input type="radio" name="q3" value="景"><span>景<small>Places</small></span></label>
-            <label class="chip"><input type="radio" name="q3" value="物"><span>物<small>Objects</small></span></label>
-            <label class="chip"><input type="radio" name="q3" value="全部打包"><span>全部打包<small>All of them, please</small></span></label>
+        <fieldset class="fbq"><legend>4. 如果能帶走一款 BoPoMoFo 周邊，你最想要？<small>Which BoPoMoFo merchandise would you love to take home?</small></legend>
+          <div class="chips">
+            <label class="chip"><input type="radio" name="q4" value="注音印花貼紙"><span>注音印花貼紙<small>Zhuyin pattern stickers</small></span></label>
+            <label class="chip"><input type="radio" name="q4" value="文化明信片"><span>臺灣文化特色明信片<small>Taiwan culture postcards</small></span></label>
+            <label class="chip"><input type="radio" name="q4" value="壓克力吊飾"><span>注音造型壓克力吊飾<small>Zhuyin acrylic charms</small></span></label>
+            <label class="chip"><input type="radio" name="q4" value="DIY手鍊"><span>DIY 注音字組手鍊<small>DIY Zhuyin letter bracelet</small></span></label>
           </div></fieldset>
-        <fieldset class="fbq"><legend>4. 幫這個注音打卡框打個分數？<small>How fun was the Zhuyin check-in frame?</small></legend>
-          <div class="chips stars" id="fbStars">
-            <label class="chip"><input type="radio" name="q4" value="1" aria-label="1 分"><span>★</span></label>
-            <label class="chip"><input type="radio" name="q4" value="2" aria-label="2 分"><span>★</span></label>
-            <label class="chip"><input type="radio" name="q4" value="3" aria-label="3 分"><span>★</span></label>
-            <label class="chip"><input type="radio" name="q4" value="4" aria-label="4 分"><span>★</span></label>
-            <label class="chip"><input type="radio" name="q4" value="5" aria-label="5 分"><span>★</span></label>
-          </div></fieldset>
-        <fieldset class="fbq"><legend>5. 用一句話（或一個注音）跟我們說說話（選填）<small>Leave us a line, or just one Zhuyin symbol (optional)</small></legend>
-          <input class="fbtext" type="text" name="q5" maxlength="60" placeholder="例：ㄏㄠˇ ㄎㄜˇ ㄞˋ！" autocomplete="off"></fieldset>
-        <button class="btn big" type="submit" id="fbSubmit" disabled>送出回饋，領取好物<small>Submit and claim your gift</small></button>
+        <fieldset class="fbq"><legend>5. 留一句話給 BoPoMoFo 吧！（選填）<small>Leave a message for BoPoMoFo! (optional)</small></legend>
+          <p class="hint" style="margin:0">可以是喜歡的設計、體驗心得、改善建議，或任何想對我們說的話！<span class="en2">It can be a design you like, how it felt, ideas to improve, or anything you want to tell us!</span></p>
+          <input class="fbtext" type="text" name="q5" maxlength="120" placeholder="想對我們說的話 / Your message" autocomplete="off"></fieldset>
+        <button class="btn big" type="submit" id="fbSubmit" disabled>送出回饋，領好物並參加抽獎<small>Submit, claim your gift and enter the draw</small></button>
         <p class="hint" id="fbMsg" aria-live="polite">完成第 ① 步並回答第 1～4 題後就能送出。<span class="en2">Finish step 1 and questions 1–4 to submit.</span></p>
       </form>
     </div>
     <div class="fbdone" id="fbDone" hidden>
       <span class="ok" aria-hidden="true">✓</span>
-      <p class="big">任務完成！<small class="en2">All done!</small></p>
-      <p>請到展場出示這個畫面，領取限量好物<span class="en2">Show this screen at our booth to collect your limited-edition gift.</span></p>
+      <p class="big">ㄅㄆㄇㄈ，謝謝你的分享！<small class="en2">Thank you for sharing your thoughts!</small></p>
+      <p>你的每一份回饋，都是讓注音文化持續發聲的小小力量。<span class="en2">Every piece of feedback is a small force that keeps Zhuyin culture speaking.</span></p>
+      <p>歡迎將你的專屬注音打卡照分享到 Instagram，標記我們，一起讓更多人看見注音的魅力！<span class="en2">Share your Zhuyin check-in photo on Instagram and tag us, so more people can see the charm of Zhuyin!</span></p>
+      <p>請到展場出示這個畫面，領取限量好物，並完成抽獎登記<span class="en2">Show this screen at our booth to collect your limited-edition gift and register for the prize draw.</span></p>
       <p class="code" id="fbCode"></p>
       <p class="hint" id="fbTime"></p>
       <p class="hint">每人限領一次，數量有限，送完為止。<span class="en2">One per person, while supplies last.</span></p>
@@ -905,21 +902,19 @@ body.en .card h2 .tt{grid-row:2;font-size:.78rem!important;font-weight:400!impor
   (function(){
     var form=$('fbForm');if(!form)return;var KEY='bpmf_fb_done';
     function answered(n){return !!form.querySelector('input[name="'+n+'"]:checked');}
-    function ready(){return $('fbFollowed').checked&&answered('q1')&&answered('q2')&&answered('q3')&&answered('q4');}
-    function sync(){$('fbSubmit').disabled=!ready();
-      var v=+((form.querySelector('input[name="q4"]:checked')||{}).value||0);
-      [].forEach.call($('fbStars').querySelectorAll('.chip'),function(c,i){c.classList.toggle('lit',i<v);});}
+    function ready(){return $('fbFollowed').checked&&((form.q1.value||'').trim().length>0)&&answered('q2')&&answered('q3')&&answered('q4');}
+    function sync(){$('fbSubmit').disabled=!ready();}
     function showDone(d){$('fbWrap').hidden=true;$('fbDone').hidden=false;$('fbCode').textContent=d.code;$('fbTime').textContent='完成時間 Completed '+d.time;setDone(4,true);}
-    form.addEventListener('change',sync);$('fbFollowed').addEventListener('change',sync);
+    form.addEventListener('change',sync);form.addEventListener('input',sync);$('fbFollowed').addEventListener('change',sync);
     $('fbFollow').addEventListener('click',function(){track('fb_follow_click');});
     form.addEventListener('submit',function(e){e.preventDefault();if(!ready())return;
-      var fd={};['q1','q2','q3','q4'].forEach(function(n){fd[n]=form.querySelector('input[name="'+n+'"]:checked').value;});fd.q5=(form.q5.value||'').trim();
+      var fd={};fd.q1=(form.q1.value||'').trim();['q2','q3','q4'].forEach(function(n){fd[n]=form.querySelector('input[name="'+n+'"]:checked').value;});fd.q5=(form.q5.value||'').trim();
       var t=new Date(),pad=function(n){return (n<10?'0':'')+n;};
-      var d={code:'BPMF-'+VID.replace(/[^a-z0-9]/gi,'').slice(-4).toUpperCase(),time:t.getFullYear()+'/'+pad(t.getMonth()+1)+'/'+pad(t.getDate())+' '+pad(t.getHours())+':'+pad(t.getMinutes())};
+      var d={code:'BPMF-'+VID.replace(/[^a-z0-9]/gi,'').slice(-6).toUpperCase(),time:t.getFullYear()+'/'+pad(t.getMonth()+1)+'/'+pad(t.getDate())+' '+pad(t.getHours())+':'+pad(t.getMinutes())};
       if(TRACK_URL){try{fetch(TRACK_URL,{method:'POST',mode:'no-cors',keepalive:true,headers:{'Content-Type':'text/plain'},body:JSON.stringify({token:TRACK_TOKEN,type:'feedback',id:VID,code:d.code,answers:fd})});}catch(err){}}
-      track('feedback_done');try{localStorage.setItem(KEY,JSON.stringify(d));}catch(err){}
+      track('feedback_done');
       showDone(d);try{confetti();}catch(err){}$('fbDone').scrollIntoView({behavior:reduce?'auto':'smooth',block:'center'});});
-    try{var saved=JSON.parse(localStorage.getItem(KEY)||'null');if(saved&&saved.code)showDone(saved);}catch(err){}
+    try{localStorage.removeItem(KEY);}catch(err){}
     sync();
   })();
   // ---- photo framing (zoom / move) ----
