@@ -1036,6 +1036,34 @@ main{overflow-x:clip}
 .sy-say:disabled{opacity:.4;cursor:default}
 .sy-say.on{background:var(--ink);color:#fff}
 .sy-say.on .ti{color:rgba(255,255,255,.7)}
+
+/* ---------- LAB: your name → its Zhuyin → a tile; print the finished pattern as a photo ---------- */
+.nm{margin:0 0 1.1rem;padding:.9rem 1rem 1rem;border-radius:14px;background:rgba(255,255,255,.7);box-shadow:inset 0 0 0 1px rgba(57,53,54,.08)}
+.nm-l{display:block;font-weight:700;font-size:.95rem;line-height:1.25;margin-bottom:.55rem}
+.nm-l .ti{font-weight:400;font-size:.7rem;color:var(--muted)}
+.nm-in{display:flex;gap:.5rem}
+.nm-in input{flex:1;min-width:0;font:inherit;font-size:1.1rem;font-weight:700;padding:.7rem .9rem;border:0;border-radius:12px;background:var(--dot);color:var(--ink);outline:none;transition:box-shadow .2s,background .2s}
+.nm-in input:focus{background:#fff;box-shadow:inset 0 0 0 2px var(--pink)}
+.nm-in button{flex:none;border:0;border-radius:12px;background:var(--ink);color:#fff;font:inherit;font-weight:700;font-size:.9rem;line-height:1.25;padding:.45rem 1.1rem;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.nm-in button .ti{color:rgba(255,255,255,.7);font-weight:400}
+.nm-zy{display:flex;flex-wrap:wrap;align-items:center;gap:.4rem;margin-top:.6rem}
+.nm-zy:empty{display:none}
+.nm-zy button{border:0;border-radius:10px;background:var(--dot);padding:.3rem .55rem;display:flex;align-items:center;gap:.25rem;cursor:pointer;font:inherit;color:var(--ink)}
+.nm-zy button:disabled{cursor:default}
+.nm-zy button b{font-size:1.35rem;font-weight:900;line-height:1}
+.nm-zy button em{font-style:normal;font-weight:700;font-size:.78rem;line-height:1;color:var(--pink);writing-mode:vertical-rl;text-orientation:upright}
+.nm-zy button.alt{box-shadow:inset 0 0 0 1.5px var(--line)}
+.nm-zy button.alt:hover{box-shadow:inset 0 0 0 1.5px var(--pink)}
+.nm-zy small{flex-basis:100%;font-size:.72rem;color:var(--muted);line-height:1.35}
+.pv-print{width:100%;justify-content:center;text-align:center;margin-top:.4rem}
+.pv-print .te{color:rgba(255,255,255,.75)}
+#printSheet{display:none}
+@media print{
+  html,body{background:#fff!important;margin:0!important;padding:0!important}
+  body>*:not(#printSheet){display:none!important}
+  #printSheet{display:block!important}
+  #printSheet img{display:block;width:100vw;height:100vh;object-fit:contain}
+}
 .sy-say.on svg{fill:#fff;stroke:#fff}
 
 /* ---------- pattern lab, guided: five numbered steps; the bar on top ticks off what you've done and points at what's next ---------- */
@@ -1385,6 +1413,14 @@ html.intro-on{overflow:hidden}
         </div>
 
         <div id="customUI">
+          <div class="nm" id="nmBox">
+            <label class="nm-l" for="nmIn">用你的名字排<span class="ti">Make it from your name</span></label>
+            <div class="nm-in">
+              <input id="nmIn" type="text" maxlength="8" placeholder="輸入中文名字 Your Chinese name" autocomplete="off" enterkeyhint="go" aria-label="輸入中文名字 Type your Chinese name">
+              <button type="button" id="nmGo">排出來<span class="ti">Make it</span></button>
+            </div>
+            <div class="nm-zy" id="nmZy" aria-live="polite"></div>
+          </div>
           <div class="ed-wrap"><p class="ed-cap" id="edCap">在左上虛線格裡排列，其他格會自動對稱<span class="te">Arrange inside the dashed top-left cell; the rest mirrors automatically</span></p>
             <div class="ed" id="ed"><canvas id="edCanvas"></canvas><div class="quad" id="quad"><span>在這一格排列<span class="te">Arrange in this cell</span></span></div></div>
           </div>
@@ -1432,6 +1468,7 @@ html.intro-on{overflow:hidden}
           <button class="sbtn" id="pShare" type="button">分享<span class="te">Share</span></button>
           <button class="btn" id="pPost" type="button"><span>發布到作品牆 →<span class="te">Post to the wall</span></span></button>
         </div>
+        <button class="btn pv-print" id="pPrint" type="button"><span>列印成相片 →<span class="te">Print it as a photo</span></span></button>
         <p class="pv-msg" id="pMsg" aria-live="polite"></p>
         <p class="pv-note">商品為模擬示意，實際印刷效果以成品為準。<span class="te">Mock-ups for illustration; actual prints may vary.</span></p>
       </div>
@@ -2151,6 +2188,50 @@ $('#tShuffle').onclick = () => {
   L.sel = -1; renderTokens(); drawAll();
 };
 
+// your name → its Zhuyin → a tile. First tap lays the symbols out upright in reading order;
+// tapping again with the same name shuffles them (turned, nudged, resized). Tap a framed character to switch a 多音字's reading.
+L.name = null;
+let nmText = '';
+function nameTokens(list, mixed) {
+  const syms = []; list.forEach(e => [...e.zy].forEach(z => syms.push({c: z, tone: /[ˊˇˋ˙]/.test(z)})));
+  const n = syms.length, lo = .05, hi = quadMode() ? .47 : .93;
+  const cols = Math.ceil(Math.sqrt(n)), rows = Math.ceil(n / cols), cw = (hi - lo) / cols, ch = (hi - lo) / rows, cell = Math.min(cw, ch);
+  const base = Math.min(1.5, cell * .95 / .18), jit = () => mixed ? (Math.random() - .5) * cell * .3 : 0;
+  const order = syms.map((_, i) => i); if (mixed) for (let i = n - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [order[i], order[j]] = [order[j], order[i]]; }
+  return order.map((k, p) => { const s = syms[k];
+    return {c: s.c, x: lo + (p % cols + .5) * cw + jit(), y: lo + (Math.floor(p / cols) + .5) * ch + jit(),
+      r: mixed ? [0, 90, 180, 270][Math.floor(Math.random() * 4)] : 0, s: +(base * (s.tone ? .8 : 1) * (mixed ? .85 + Math.random() * .3 : 1)).toFixed(2)}; });
+}
+function nameChips() {
+  const box = $('#nmZy'); box.innerHTML = ''; if (!L.name) return;
+  L.name.forEach(e => {
+    const b = el('button', e.alts.length > 1 ? 'alt' : '', `<b>${e.c}</b><em>${e.zy}</em>`); b.type = 'button';
+    if (e.alts.length > 1) { b.setAttribute('aria-label', `${e.c} 讀作 ${e.zy}，點一下換讀音`); b.onclick = () => { e.zy = e.alts[(e.alts.indexOf(e.zy) + 1) % e.alts.length]; L.tokens = nameTokens(L.name, false); L.sel = -1; nameChips(); renderTokens(); drawAll(); }; }
+    else { b.disabled = true; b.setAttribute('aria-label', `${e.c} 讀作 ${e.zy}`); }
+    box.appendChild(b);
+  });
+  if (L.name.some(e => e.alts.length > 1)) box.appendChild(el('small', '', '讀音不對嗎？點有框的字換一個讀音。<span class="ti">Wrong reading? Tap a framed character to switch it.</span>'));
+}
+async function makeFromName() {
+  const v = $('#nmIn').value.trim(), go = $('#nmGo');
+  if (!v) { $('#nmIn').focus(); return; }
+  let mixed = true;
+  if (v !== nmText || !L.name) {
+    mixed = false; go.disabled = true;
+    const list = window.bpmfNameZhuyin ? await window.bpmfNameZhuyin(v).catch(() => null) : null;
+    go.disabled = false;
+    if (!list || !list.length) { L.name = null; nmText = ''; $('#nmZy').innerHTML = list ? '<small>請用中文字輸入名字，例如「王小明」。<span class="ti">Please type the name in Chinese characters, e.g. 王小明.</span></small>' : '<small>注音資料載入失敗，請檢查網路後再試一次。<span class="ti">Couldn’t load the Zhuyin data. Check the connection and try again.</span></small>'; return; }
+    L.name = list; nmText = v; nameChips();
+  }
+  if (L.mode !== 'custom') setMode('custom');
+  L.tokens = nameTokens(L.name, mixed); L.sel = -1; renderTokens(); drawAll();
+  go.innerHTML = '換個排法<span class="ti">Shuffle</span>';
+}
+$('#nmGo').onclick = makeFromName;
+$('#nmIn').addEventListener('keydown', e => { if (e.key === 'Enter' && !e.isComposing) { e.preventDefault(); makeFromName(); } });
+$('#nmIn').addEventListener('input', () => { if ($('#nmIn').value.trim() !== nmText) $('#nmGo').innerHTML = '排出來<span class="ti">Make it</span>'; if (!$('#nmIn').value.trim()) { L.name = null; nmText = ''; nameChips(); } });
+window.__bpmfName = () => L.name;
+
 // drawing
 const tinted = {};
 function tintMotif(id, color) {
@@ -2182,7 +2263,7 @@ function drawTile(T, clear) {
   }
   return c;
 }
-window.__bpmfPattern = (c, sc) => makePattern(c, sc); window.__bpmfScale = () => L.scale;
+window.__bpmfPattern = (c, sc) => makePattern(c, sc); window.__bpmfScale = () => L.scale; window.__bpmfPvW = () => pv.getBoundingClientRect().width || 400;
 function makePattern(ctx, scaleCss) {
   const dpr = Math.min(devicePixelRatio || 1, 2), T = Math.round(scaleCss * dpr);
   let tile = drawTile(T);
@@ -2409,6 +2490,67 @@ C.merch.forEach((p, i) => {
     const blob = await patternBlob(), file = new File([blob], fname(), {type: 'image/png'});
     try { if (navigator.canShare && navigator.canShare({files: [file]})) { await navigator.share({files: [file], title: 'BOPOMOFO 注音印花', text: '我用注音排了一款臺灣印花！'}); return; } } catch (e) { if (e && e.name === 'AbortError') return; }
     msg('這個環境不支援直接分享，先幫你存成圖片 · Sharing isn’t supported here, so the image was saved instead'); save(blob);
+  };
+
+  // ---- print: the pattern on a photo card (300 dpi), name + Zhuyin underneath ----
+  // Paper defaults to 4×6 in (10×15 cm) photo paper; add ?paper=a6 / 5x7 / 3x5 / a4 to the address to change it.
+  // At the venue, open the site in Chrome started with --kiosk-printing so this prints straight away, no dialog.
+  const PAPERS = {'4x6': [101.6, 152.4, '4in 6in'], '5x7': [127, 177.8, '5in 7in'], '3x5': [89, 127, '89mm 127mm'], a6: [105, 148, 'A6'], a4: [210, 297, 'A4']};
+  const PAPER = PAPERS[(new URLSearchParams(location.search).get('paper') || '').toLowerCase()] || PAPERS['4x6'];
+  const loadImg = src => new Promise(r => { const im = new Image(); im.onload = () => r(im); im.onerror = () => r(null); im.src = src; });
+  async function sheetBlob() {
+    const px = mm => Math.round(mm / 25.4 * 300), W = px(PAPER[0]), H = px(PAPER[1]);
+    const M = px(6), capH = Math.round(W * .36), pw = W - 2 * M, ph = H - M - capH;   // 6 mm white edge: this printer can't print borderless
+    const name = window.__bpmfName && window.__bpmfName();
+    const ink = '#393536', pink = '#E40077', zh = '"Noto Sans TC", sans-serif';
+    if (document.fonts) await document.fonts.load(`900 40px ${zh}`, (name || []).map(e => e.c + e.zy).join('') + '臺灣注音印花').catch(() => {});
+    const c = document.createElement('canvas'); c.width = W; c.height = H; const x = c.getContext('2d');
+    x.fillStyle = '#fff'; x.fillRect(0, 0, W, H);
+    const dpr = Math.min(devicePixelRatio || 1, 2);
+    x.save(); x.translate(M, M); x.beginPath(); x.rect(0, 0, pw, ph); x.clip();
+    x.fillStyle = window.__bpmfPattern(x, window.__bpmfScale() * (pw / window.__bpmfPvW()) / dpr); x.fillRect(0, 0, pw, ph);
+    x.restore();
+    // caption: the name, each character with its Zhuyin standing beside it as in a textbook; then the wordmark
+    let y = M + ph + capH * .1;
+    x.textBaseline = 'middle';
+    if (name && name.length) {
+      const cs = Math.min(capH * .36, pw / (name.length * 1.55)), zs = cs * .27, gap = cs * .08, step = cs + gap + zs + cs * .22;
+      let cx = W / 2 - (step * name.length - cs * .22) / 2; const cy = y + cs / 2;
+      name.forEach(e => {
+        x.fillStyle = ink; x.textAlign = 'center'; x.font = `900 ${cs}px ${zh}`; x.fillText(e.c, cx + cs / 2, cy);
+        const s = [...e.zy]; x.fillStyle = pink; x.font = `700 ${zs}px ${zh}`;
+        s.forEach((z, k) => x.fillText(z, cx + cs + gap + zs / 2, cy + (k - (s.length - 1) / 2) * zs * 1.02));
+        cx += step;
+      });
+      y += cs + capH * .1;
+    } else y += capH * .12;
+    const wm = await loadImg('assets/brand/wordmark-color.png');
+    const wmH = name && name.length ? capH * .1 : capH * .16;
+    if (wm) { const wmW = wmH * wm.naturalWidth / wm.naturalHeight; x.drawImage(wm, (W - wmW) / 2, y, wmW, wmH); }
+    y += wmH + capH * .09;
+    const d = new Date();
+    x.fillStyle = '#929399'; x.textAlign = 'center'; x.font = `500 ${capH * .055}px Poppins, ${zh}`;
+    x.fillText(`臺灣注音印花 · Visual Translation of Taiwanese Zhuyin · ${d.getFullYear()}.${String(d.getMonth() + 1).padStart(2, '0')}.${String(d.getDate()).padStart(2, '0')}`, W / 2, y);
+    return new Promise(r => c.toBlob(r, 'image/png'));
+  }
+  let printing = false;
+  $('#pPrint').onclick = async () => {
+    if (printing) return; printing = true; msg('準備列印… · Preparing the print…');
+    try {
+      const url = URL.createObjectURL(await sheetBlob());
+      let sheet = document.getElementById('printSheet');
+      if (!sheet) { sheet = document.createElement('div'); sheet.id = 'printSheet'; sheet.setAttribute('aria-hidden', 'true'); document.body.appendChild(sheet); }
+      let page = document.getElementById('printPage');
+      if (!page) { page = document.createElement('style'); page.id = 'printPage'; document.head.appendChild(page); }
+      page.textContent = `@page{size:${PAPER[2]};margin:0}`;
+      const im = new Image(); await new Promise((res, rej) => { im.onload = res; im.onerror = rej; im.src = url; });
+      sheet.replaceChildren(im);
+      const done = () => { removeEventListener('afterprint', done); setTimeout(() => { sheet.replaceChildren(); URL.revokeObjectURL(url); }, 500); };
+      addEventListener('afterprint', done);
+      window.print();
+      msg('已送出列印，請到印表機領取 · Sent to the printer — collect your photo there', 'ok'); window.stampIt && stampIt();
+    } catch (e) { msg('列印失敗，請再試一次 · Couldn’t print, please try again', 'err'); }
+    printing = false;
   };
 
   // ---- wall ----
@@ -2988,6 +3130,20 @@ C.merch.forEach((p, i) => {
   function load() { if (lib) return Promise.resolve(lib); if (loading) return loading;
     loading = new Promise((res, rej) => { const sc = document.createElement('script'); sc.src = 'assets/vendor/zhuyin.js'; sc.onload = () => { lib = window.BPMF_PINYIN; res(lib); }; sc.onerror = rej; document.head.appendChild(sc); });
     return loading; }
+  // a name → one entry per Han character: its Zhuyin plus every other reading it can have (for 多音字).
+  // The first character is read as a surname (曾 ㄗㄥ, 單 ㄕㄢˋ, 區 ㄡ); the rest use the everyday reading.
+  window.bpmfNameZhuyin = async name => {
+    const P = await load(), chars = [...name].filter(c => /\p{Script=Han}/u.test(c)).slice(0, 4);
+    if (!chars.length) return [];
+    const simp = P.toSimp(chars.join(''));
+    const plain = P.pinyin(simp, {toneType: 'num', type: 'array'}), sur = P.pinyin(simp, {toneType: 'num', type: 'array', mode: 'surname'});
+    return chars.map((c, i) => {
+      let n = i === 0 ? sur[0] : plain[i];
+      if (/0$/.test(n)) { const d = P.pinyin(P.toSimp(c), {toneType: 'num'}); if (/[1-4]$/.test(d)) n = d; }
+      const all = [n, ...P.pinyin(P.toSimp(c), {toneType: 'num', type: 'array', multiple: true})].map(py2zy).filter(Boolean);
+      return {c, zy: all[0] || '', alts: [...new Set(all)]};
+    }).filter(e => e.zy);
+  };
   inp.addEventListener('focus', load, {once: true});
   new IntersectionObserver((es, o) => { if (es.some(e => e.isIntersecting)) { load(); o.disconnect(); } }, {rootMargin: '400px'}).observe(inp);
   const esc = c => c.replace(/[&<>"]/g, ch => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;'}[ch]));
@@ -3072,11 +3228,11 @@ C.merch.forEach((p, i) => {
       [li, h].forEach(e => { if (!e) return; e.classList.toggle('done', done.has(k)); e.classList.toggle('now', k === now); }); } };
   const mark = k => () => { if (!done.has(k)) { done.add(k); paint(); } };
   const on = (sel, ev, k) => document.querySelectorAll(sel).forEach(e => e.addEventListener(ev, mark(k), {passive: true}));
-  on('#palette', 'click', 1); on('#ed', 'pointerdown', 1); on('#motifPick', 'click', 1); on('#tShuffle', 'click', 1);
+  on('#palette', 'click', 1); on('#ed', 'pointerdown', 1); on('#motifPick', 'click', 1); on('#tShuffle', 'click', 1); on('#nmGo', 'click', 1);
   on('#symBtns', 'click', 2);
   on('#pkInk', 'input', 3); on('#pkBg', 'input', 3); on('#pkSwap', 'click', 3); on('#colorBtns', 'click', 3);
   on('#scale', 'input', 4); on('#gap', 'input', 4);
-  on('#pSave', 'click', 5); on('#pShare', 'click', 5); on('#pPost', 'click', 5);
+  on('#pSave', 'click', 5); on('#pShare', 'click', 5); on('#pPost', 'click', 5); on('#pPrint', 'click', 5);
   // the step bar scrolls to a step without the page-wide paper transition
   bar.querySelectorAll('a').forEach(a => a.addEventListener('click', e => { e.preventDefault(); e.stopImmediatePropagation(); document.querySelector(a.getAttribute('href')).scrollIntoView({behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start'}); }, true));
   paint();
@@ -3111,6 +3267,8 @@ C.merch.forEach((p, i) => {
     if (t.id === 'toTop') return send('back_to_top');
     if (t.id === 'musicBtn') return send('music_toggle', {on: t.getAttribute('aria-pressed') !== 'true'});
     if (['pSave', 'pShare', 'pPost'].includes(t.id)) return send('pattern_' + {pSave: 'save', pShare: 'share', pPost: 'post'}[t.id]);
+    if (t.id === 'pPrint') return send('pattern_print');
+    if (t.id === 'nmGo') return send('pattern_from_name');
     if (t.closest('#symBtns')) return send('pattern_repeat', {style: txt(t)});
     if (t.closest('#colorBtns')) return send('pattern_colour', {preset: t.getAttribute('aria-label') || ''});
     if (t.id === 'wbDone') return setTimeout(() => send('workbook_hand_in', {grade: txt(document.getElementById('wbStamp')), symbol: txt(document.getElementById('wbSym'))}), 50);
