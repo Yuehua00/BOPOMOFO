@@ -1,0 +1,1705 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>設計風格時間軸</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=Noto+Serif+TC:wght@900&family=Special+Elite&family=Abril+Fatface&family=Jost:wght@500;700&family=Bangers&family=Unbounded:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+/* 版面概念：白底、無襯線字；上方是醒目的年代尺，下方左右滑動的章節，色彩只留給各風格的重點色與右側圖形 */
+:root{
+  --bg-page:#ffffff;
+  --ink:#151515;
+  --dim:#6b6b6b;
+  --line:#e6e6e6;
+  --soft-bg:#f6f6f6;
+  --font-body:"Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif;
+  --font-latin:"Jost","Noto Sans TC",system-ui,sans-serif;
+  color-scheme:light;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{background:var(--bg-page);color:var(--ink);font-family:var(--font-body);overflow:hidden;-webkit-font-smoothing:antialiased}
+.app{height:100%;display:grid;grid-template-rows:auto 1fr auto}
+
+/* ---------- 年代尺 ---------- */
+.top{background:#fff;color:var(--ink);padding:12px 28px 10px;border-bottom:4px solid var(--now,#151515);display:grid;grid-template-columns:auto 1fr;gap:28px;align-items:end;transition:border-color .4s}
+.brand{display:flex;flex-direction:column;gap:2px;min-width:10.5em;padding-bottom:8px}
+.brand b{font-weight:700;font-size:.85rem;color:var(--dim);letter-spacing:.06em}
+.brand .big{font-family:var(--font-latin);font-weight:700;font-size:clamp(1.6rem,1.4vw + 1.2vh,2.4rem);line-height:1.05;font-variant-numeric:tabular-nums}
+.brand #bigName{font-weight:900;font-size:1rem;display:flex;align-items:center;gap:8px}
+.brand #bigName::before{content:"";width:12px;height:12px;border-radius:2px;background:var(--now,#151515);transition:background .4s}
+.ruler{position:relative;height:170px}
+.lanes{position:absolute;left:0;right:0;top:40px;height:160px;--lane:40px}
+.war{position:absolute;top:-4px;bottom:-24px;background:repeating-linear-gradient(135deg,rgba(0,0,0,.06) 0 4px,transparent 4px 8px)}
+.war em{position:absolute;top:-22px;bottom:auto;left:50%;transform:translateX(-50%);font-style:normal;font-size:.75rem;font-weight:700;color:var(--dim);white-space:nowrap}
+.bar{position:absolute;height:27px;border-radius:5px;border:0;cursor:pointer;padding:0 0 0 8px;transition:transform .3s,box-shadow .3s;font:900 1rem/27px var(--font-body);color:#111;text-align:left;white-space:nowrap;overflow:visible;box-shadow:inset 0 0 0 1px rgba(0,0,0,.15);letter-spacing:.02em}
+.bar span{pointer-events:none;position:relative;z-index:1}
+.bar.op span{background:#fff;padding:0 6px;border-radius:3px;margin-left:-4px}
+.bar:hover{transform:translateY(-2px)}
+.bar.dim{box-shadow:inset 0 0 0 100px rgba(255,255,255,.5),inset 0 0 0 1px rgba(0,0,0,.15);color:#333}
+.bar.on{box-shadow:0 0 0 3px #151515,0 6px 14px rgba(0,0,0,.18);transform:translateY(-1px) scale(1.03);z-index:2}
+.bar:focus-visible{outline:3px solid #151515;outline-offset:2px}
+.axis{position:absolute;left:0;right:0;bottom:0;height:22px;border-top:2px solid #151515}
+.tick{position:absolute;top:0;width:1px;height:6px;background:#9a9a9a}
+.tick.major{width:2px;height:10px;background:#151515}
+.tick b{position:absolute;top:8px;left:50%;transform:translateX(-50%);font:700 .85rem var(--font-latin);color:#151515;font-variant-numeric:tabular-nums}
+.needle{position:absolute;top:0;bottom:0;width:3px;margin-left:-1px;background:#151515;transition:left .6s cubic-bezier(.6,.05,.2,1),opacity .3s;pointer-events:none;z-index:3}
+.needle::after{content:"";position:absolute;bottom:-7px;left:50%;width:14px;height:14px;margin-left:-7px;border-radius:50%;background:var(--now,#151515);box-shadow:0 0 0 3px #fff,0 0 0 5px #151515}
+.needle i{position:absolute;top:0;font-style:normal;font-size:.88rem;font-weight:700;background:#151515;color:#fff;padding:2px 10px;border-radius:4px;white-space:nowrap;transform:translateX(-50%)}
+.needle.hide{opacity:0}
+
+/* ---------- 章節軌道 ---------- */
+.track{display:flex;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;scrollbar-width:none;overscroll-behavior-x:contain;background:#fff}
+.track::-webkit-scrollbar{display:none}
+.panel{flex:0 0 100%;height:100%;scroll-snap-align:start;scroll-snap-stop:always;position:relative;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);align-items:start;overflow-y:auto;overflow-x:hidden;overscroll-behavior-y:contain;background:#fff;color:var(--ink)}
+.info{padding:clamp(32px,6vh,64px) clamp(28px,5vw,80px) clamp(56px,10vh,96px);display:flex;flex-direction:column;gap:clamp(18px,3vh,30px);min-height:var(--ph,100%)}
+.meta{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;font-size:clamp(.8rem,.5vw + .5vh,.98rem);color:var(--dim);font-weight:500}
+.meta .num{font-family:var(--font-latin);font-weight:700;font-variant-numeric:tabular-nums;background:#151515;color:#fff;padding:2px 9px;border-radius:4px}
+.meta .seg{color:var(--ink);font-weight:700;border-left:4px solid var(--accent);padding-left:8px}
+h2{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 16px;text-wrap:balance}
+h2 .zh{font-weight:900;font-size:clamp(2.1rem,2.5vw + 2.1vh,4.2rem);line-height:1.08;letter-spacing:.01em}
+h2 .en{font-family:var(--font-latin);font-weight:500;font-size:clamp(1.05rem,1vw + .9vh,1.8rem);color:var(--dim);line-height:1.1}
+.motto{align-self:flex-start;font-weight:900;font-size:clamp(1.1rem,1vw + 1vh,1.8rem);background:var(--accent);color:var(--on-accent,#fff);padding:4px 16px 6px;border-radius:4px;letter-spacing:.1em}
+.cols{display:flex;flex-direction:column;gap:clamp(24px,4vh,40px);margin-top:clamp(4px,1vh,12px)}
+.cols section{border-top:1px solid var(--line);padding-top:clamp(14px,2.2vh,20px)}
+
+h3{font-size:clamp(.78rem,.42vw + .5vh,.92rem);letter-spacing:.12em;color:var(--dim);margin-bottom:6px;font-weight:700}
+.info p,.info li{font-size:clamp(1.02rem,.55vw + .8vh,1.3rem);line-height:1.85;max-width:34em}
+h3{margin-bottom:10px!important}
+.info ul{gap:10px!important}
+.works li{display:flex;justify-content:space-between;gap:16px;max-width:34em}
+.works li small{display:inline!important;white-space:nowrap;padding-top:.15em}
+.info ul{list-style:none;display:flex;flex-direction:column;gap:5px}
+.info ul li{padding-left:1.05em;position:relative}
+.info ul li::before{content:"";position:absolute;left:0;top:.66em;width:.42em;height:.42em;border-radius:50%;background:var(--accent)}
+.works li small{display:block;font-family:var(--font-latin);font-size:.82em;color:var(--dim);line-height:1.4}
+/* 右欄：作品輪播／互動示意 */
+.art{position:sticky;top:0;height:var(--ph,100%);overflow:hidden;border-left:1px solid var(--line);display:flex;flex-direction:column;background:#fff}
+.intro .art{display:block}
+.art canvas{position:absolute;inset:0;width:100%;height:100%;display:block;cursor:pointer;touch-action:manipulation}
+.art canvas:focus-visible{outline:4px solid #151515;outline-offset:-4px}
+.stage{position:relative;flex:1;min-height:0}
+.art .cap{position:absolute;left:12px;top:12px;max-width:calc(100% - 24px);font-size:.72rem;background:rgba(255,255,255,.94);color:var(--dim);padding:6px 10px;border-radius:4px;box-shadow:0 1px 4px rgba(0,0,0,.12);pointer-events:none;line-height:1.45}
+.art .cap b{display:block;color:var(--ink);font-size:.86rem}
+.playbar{flex:none;border-top:1px solid var(--line);background:#fff;padding:12px 16px 12px;display:flex;flex-direction:column;gap:8px}
+.mrow{display:flex;flex-wrap:wrap;align-items:center;gap:8px 10px}
+.mlabel{font-size:.78rem;font-weight:700;color:var(--dim);letter-spacing:.06em}
+.mchips{display:flex;flex-wrap:wrap;gap:6px}
+.mchip{font:700 .9rem var(--font-body);border:1.5px solid var(--accent);background:#fff;color:var(--ink);border-radius:999px;padding:7px 14px;cursor:pointer;min-height:38px}
+.mchip[aria-pressed="true"]{background:var(--accent);color:var(--on-accent,#fff)}
+.mhint{display:flex;align-items:center;gap:8px;font-size:.92rem;line-height:1.5}
+.mhint b{flex:none;font-size:.78rem;background:#151515;color:#fff;padding:2px 8px;border-radius:4px}
+.mhint span{flex:1}
+.reset{flex:none;font:700 .82rem var(--font-body);border:1px solid var(--line);background:var(--soft-bg);color:var(--ink);border-radius:4px;padding:6px 12px;cursor:pointer;min-height:34px}
+.mnote{font-size:.72rem;color:var(--dim)}
+.art[data-mode="work"] .playbar{display:none}
+.workview{position:absolute;inset:0;z-index:4;background:#fff;display:none;flex-direction:column;padding:clamp(56px,8vh,70px) 0 12px}
+.art[data-mode="work"] .workview{display:flex}
+.slides{flex:1;min-height:0;display:flex;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;scrollbar-width:none;overscroll-behavior-x:contain}
+.slides::-webkit-scrollbar{display:none}
+.slide{flex:0 0 100%;scroll-snap-align:center;display:flex;flex-direction:column;align-items:center;gap:12px;padding:0 clamp(16px,3vw,44px);min-width:0}
+.slide .frame{flex:1;min-height:0;width:100%;display:flex;align-items:center;justify-content:center}
+.slide img{max-width:100%;max-height:100%;object-fit:contain;box-shadow:0 6px 24px rgba(0,0,0,.14);border-radius:2px}
+.slide figcaption{align-self:stretch;border-top:1px solid var(--line);padding-top:10px;display:flex;flex-direction:column;gap:2px;text-align:center}
+.slide figcaption b{font-size:clamp(1rem,.55vw + .8vh,1.25rem);text-wrap:balance}
+.slide .who{font-size:clamp(.9rem,.45vw + .6vh,1.05rem)}
+.slide .src{font-size:.78rem;color:var(--dim)}
+.snav{flex:none;display:flex;align-items:center;justify-content:center;gap:12px;padding:10px 16px 0}
+.sbtn{width:40px;height:40px;border-radius:50%;border:1px solid var(--line);background:#fff;font:700 1.3rem/1 var(--font-body);color:var(--ink);cursor:pointer}
+.sbtn:hover{background:var(--soft-bg)}
+.sdots{display:flex;gap:6px;flex-wrap:wrap;justify-content:center}
+.sdot{width:9px;height:9px;border-radius:50%;border:0;background:#d6d6d6;padding:0;cursor:pointer}
+.sdot[aria-current="true"]{background:var(--accent);transform:scale(1.25)}
+.scount{font-family:var(--font-latin);font-weight:700;font-size:.85rem;color:var(--dim);font-variant-numeric:tabular-nums;min-width:3.2em;text-align:center}
+.workview.missing{align-items:center;justify-content:center;padding:70px 20px 20px}
+.workview.missing .ph{border:2px dashed #c9c9c9;border-radius:8px;padding:40px 24px;text-align:center;display:flex;flex-direction:column;gap:8px;background:var(--soft-bg);max-width:26em}
+.workview.missing .ph span{font-weight:700}
+.workview.missing .ph small{color:var(--dim)}
+.viewtabs{position:absolute;top:12px;right:12px;z-index:5;display:flex;background:#fff;border:1px solid var(--line);border-radius:999px;padding:3px;box-shadow:0 1px 4px rgba(0,0,0,.12)}
+.viewtabs button{font:700 .85rem var(--font-body);border:0;background:none;color:var(--dim);padding:8px 14px;border-radius:999px;cursor:pointer;min-height:36px}
+.art[data-mode="work"] .viewtabs [data-view="work"],.art[data-mode="play"] .viewtabs [data-view="play"]{background:#151515;color:#fff}
+.viewtabs button:focus-visible,.mchip:focus-visible,.reset:focus-visible,.sbtn:focus-visible,.sdot:focus-visible,.btn:focus-visible,.chip:focus-visible,.dot:focus-visible,.reveal:focus-visible,.grow:focus-visible{outline:3px solid #151515;outline-offset:2px}
+
+/* 開場與總結 */
+.intro,.outro{--accent:#151515}
+.intro .art .cap{top:12px;bottom:auto;max-width:calc(100% - 24px)}
+h1{text-wrap:balance;font-weight:900}
+.intro .info{justify-content:center}
+.intro h1{font-size:clamp(2.3rem,2.8vw + 2.4vh,4.6rem);line-height:1.12}
+.lead{font-size:clamp(1rem,.6vw + .9vh,1.35rem);color:var(--dim)}
+.q{font-weight:900;font-size:clamp(1.15rem,1vw + 1.1vh,1.9rem);border-left:6px solid #151515;padding:4px 0 4px 14px}
+.segs{display:grid;gap:10px}
+.segrow{display:grid;grid-template-columns:6.5em 1fr;gap:12px;align-items:center}
+.segrow b{font-size:clamp(.85rem,.5vw + .6vh,1.05rem)}
+.segrow b small{display:block;font-weight:500;color:var(--dim);font-size:.82em}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{border:0;cursor:pointer;font:700 clamp(.85rem,.45vw + .6vh,1.02rem) var(--font-body);padding:6px 12px;border-radius:4px;color:#111;box-shadow:inset 0 0 0 1px rgba(0,0,0,.12)}
+.chip:hover{transform:translateY(-1px)}
+.hint{font-size:.9rem;color:var(--dim)}
+.hint kbd{font-family:var(--font-body);border:1px solid #c9c9c9;border-bottom-width:2px;border-radius:4px;padding:0 6px;background:#fff;color:var(--ink)}
+
+.gantt{position:sticky;top:0;min-height:var(--ph,100%);padding:clamp(32px,6vh,64px) clamp(20px,3vw,48px);display:flex;flex-direction:column;justify-content:center;gap:10px;background:#fff;border-left:1px solid var(--line)}
+.grow{display:grid;grid-template-columns:6.2em 1fr;align-items:center;gap:10px;border:0;background:none;text-align:left;cursor:pointer;padding:3px 4px;border-radius:4px;font:inherit;color:inherit}
+.grow:hover{background:var(--soft-bg)}
+.grow .gl{font-weight:700;font-size:clamp(.85rem,.45vw + .6vh,1.02rem)}
+.gtrack{position:relative;height:clamp(18px,2.4vh,28px)}
+.gbar{position:absolute;top:0;bottom:0;border-radius:4px;box-shadow:inset 0 0 0 1px rgba(0,0,0,.15)}
+.glab{position:absolute;top:50%;transform:translateY(-50%);font-family:var(--font-latin);font-size:.78rem;font-weight:700;color:var(--dim);white-space:nowrap;font-variant-numeric:tabular-nums;padding:0 6px}
+.gwar{position:absolute;top:-4px;bottom:-4px;background:repeating-linear-gradient(135deg,rgba(0,0,0,.06) 0 4px,transparent 4px 8px)}
+.gaxis{display:grid;grid-template-columns:6.2em 1fr;gap:10px;padding:0 4px}
+.gaxis div{position:relative;height:20px;border-top:2px solid #151515}
+.gaxis b{position:absolute;top:4px;transform:translateX(-50%);font-family:var(--font-latin);font-size:.78rem;color:var(--ink);font-weight:700;font-variant-numeric:tabular-nums}
+.reveal{align-self:flex-start;font:700 1rem var(--font-body);background:#151515;color:#fff;border:0;border-radius:4px;padding:10px 18px;cursor:pointer}
+.answers{display:grid;gap:8px}
+.answers[hidden]{display:none}
+.answers div{background:var(--soft-bg);border-left:5px solid var(--c);padding:9px 12px;border-radius:4px}
+.answers b{display:block;font-size:clamp(.95rem,.5vw + .7vh,1.18rem)}
+.answers span{font-size:clamp(.85rem,.45vw + .6vh,1.02rem);color:var(--dim)}
+
+/* ---------- 導覽列 ---------- */
+.nav{background:#fff;color:var(--ink);display:flex;align-items:center;gap:12px;padding:8px 24px;border-top:1px solid var(--line)}
+.btn{font:700 .95rem var(--font-body);background:var(--soft-bg);color:var(--ink);border:1px solid var(--line);border-radius:4px;padding:8px 14px;cursor:pointer}
+.btn:hover{background:#ececec}
+.btn:disabled{opacity:.35;cursor:default}
+.dots{display:flex;gap:6px;flex:1;justify-content:center;flex-wrap:wrap}
+.dot{width:26px;height:8px;border:0;border-radius:4px;background:#dedede;cursor:pointer;padding:0}
+.dot[aria-current="true"]{background:#151515}
+.count{font-family:var(--font-latin);font-weight:700;font-variant-numeric:tabular-nums;color:var(--dim);font-size:.95rem;min-width:4.5em;text-align:right}
+
+/* ---------- 單欄閱讀版面：每一頁上下捲動 ---------- */
+.panel,.panel.intro,.panel.outro{display:block;overflow-y:auto;overflow-x:hidden}
+.wrap{max-width:960px;margin:0 auto;padding:clamp(28px,5vh,56px) clamp(20px,4vw,48px) 96px;display:flex;flex-direction:column;gap:clamp(40px,7vh,72px)}
+.phead{display:flex;flex-direction:column;gap:14px}
+.blk > h3{display:flex;align-items:center;gap:10px;font-size:.95rem;letter-spacing:.14em;color:var(--ink);margin-bottom:18px!important}
+.blk > h3::before{content:"";width:22px;height:4px;border-radius:2px;background:var(--accent)}
+.wrap p,.wrap li{font-size:clamp(1rem,.45vw + .75vh,1.2rem);line-height:1.85}
+.ctx{max-width:40em}
+.wrap .works{list-style:none;display:flex;flex-direction:column;gap:8px;margin-bottom:18px;max-width:40em}
+.wrap .works li{display:flex;justify-content:space-between;gap:16px;border-bottom:1px solid var(--line);padding-bottom:8px}
+.wrap .works li small{color:var(--dim);font-family:var(--font-latin);white-space:nowrap}
+.workview{position:relative;inset:auto;z-index:auto;display:flex;height:clamp(380px,64vh,620px);background:var(--soft-bg);border-radius:14px;padding:24px 0 14px}
+.workview.missing{height:auto;padding:28px;background:none}
+.slide img{box-shadow:0 8px 28px rgba(0,0,0,.16)}
+.feat{list-style:none;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.feat li{border:1px solid var(--line);border-radius:14px;padding:20px;display:flex;flex-direction:column;gap:10px}
+.feat .fn{font-family:var(--font-latin);font-weight:700;font-size:1.5rem;color:var(--accent);line-height:1}
+.feat p{flex:1;font-size:clamp(1rem,.4vw + .7vh,1.12rem)!important;line-height:1.7!important}
+.ftry{align-self:flex-start;font:700 .85rem var(--font-body);border:0;background:var(--soft-bg);color:var(--ink);border-radius:999px;padding:8px 14px;cursor:pointer}
+.ftry:hover{background:#ececec}
+.blk .art{position:relative;top:auto;height:auto;border:1px solid var(--line);border-radius:14px;overflow:hidden;display:flex;flex-direction:column}
+.blk .stage{flex:none;height:clamp(320px,56vh,540px)}
+.playbar{border-top:1px solid var(--line)}
+.contemp{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.ccard{border:1px solid var(--line);border-left:5px solid var(--accent);border-radius:12px;padding:18px 20px;display:flex;flex-direction:column;gap:8px}
+.ccard .cmeta{display:flex;align-items:center;gap:10px;font-size:.85rem!important;color:var(--dim);font-family:var(--font-latin)}
+.ccard .cmeta span{font-family:var(--font-body);font-weight:700;font-size:.78rem;background:var(--soft-bg);color:var(--ink);padding:2px 10px;border-radius:999px}
+.ccard h4{font-size:1.12rem;line-height:1.4}
+.ccard p{font-size:1rem!important;line-height:1.7!important}
+.ccard .cfeat{font-size:.88rem!important;color:var(--dim)}
+.ccard a{font-size:.88rem;font-weight:700;color:var(--ink);text-underline-offset:3px}
+.intro .info,.outro .info{max-width:960px;margin:0 auto;min-height:0;padding:clamp(28px,5vh,56px) clamp(20px,4vw,48px) 32px}
+.intro .art{position:relative;top:auto;height:clamp(300px,52vh,540px);max-width:calc(960px - 2*clamp(20px,4vw,48px));margin:0 auto 72px;border:1px solid var(--line);border-radius:14px}
+.outro .gantt{position:relative;top:auto;min-height:0;max-width:calc(960px - 2*clamp(20px,4vw,48px));margin:0 auto 72px;border:1px solid var(--line);border-radius:14px}
+@media (max-width:860px){
+  .top{grid-template-columns:1fr;gap:2px;padding:8px 14px 6px}
+  .brand{flex-direction:row;gap:4px 10px;align-items:baseline;flex-wrap:wrap;padding-bottom:2px;min-width:0}
+  .brand b{display:none}
+  .brand .big{font-size:1.35rem}
+  .brand #bigName{font-size:.95rem}
+  .ruler{height:118px}
+  .lanes{top:30px;height:104px;--lane:26px}
+  .bar{height:20px;line-height:20px;font-size:12px;padding-left:4px;letter-spacing:0}
+  .bar.op span{padding:0 2px;margin-left:-1px}
+  .bar.on{box-shadow:0 0 0 2px #151515}
+  .war{bottom:-20px}
+  .war em{font-size:.62rem}
+  .tick b{font-size:.68rem;top:7px}
+  .needle i{font-size:.7rem;padding:1px 6px}
+  .needle::after{width:11px;height:11px;margin-left:-5.5px}
+  .wrap{padding:22px 16px 64px;gap:44px}
+  h2 .zh{font-size:2rem}
+  .feat{grid-template-columns:1fr}
+  .contemp{grid-template-columns:1fr}
+  .workview{height:66vh;border-radius:10px}
+  .blk .stage{height:46vh}
+  .mchip{font-size:.85rem;padding:6px 12px}
+  .wrap .works li{flex-direction:column;gap:0}
+  .intro .info,.outro .info{padding:22px 16px 24px}
+  .intro .art{height:46vh;margin:0 16px 48px}
+  .outro .gantt{margin:0 16px 48px}
+  .grow,.gaxis{grid-template-columns:5em 1fr}
+  .nav{padding:6px 10px;gap:8px}
+  .dots{display:none}
+  .count{flex:1;text-align:center}
+  #pause{display:none}
+  .btn{padding:10px 14px}
+  .hint kbd{display:none}
+}
+@media (prefers-reduced-motion:reduce){
+  .needle,.bar{transition:none}
+}
+/* ---------- 翻卡牌 ---------- */
+.ptools{display:flex;flex-wrap:wrap;align-items:center;gap:10px 12px;margin-top:6px}
+.fprog{font-weight:700;font-size:.95rem;color:var(--dim);margin-right:4px}
+.fgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+.fgrid.two{grid-template-columns:repeat(2,minmax(0,1fr))}
+.fgrid .wide{grid-column:span 2}
+.fgrid.two .wide{grid-column:span 1}
+.fcard{perspective:1400px;cursor:pointer;outline:none;-webkit-tap-highlight-color:transparent}
+.fin{display:grid;min-height:200px;height:100%;transition:transform .6s cubic-bezier(.3,.7,.25,1);transform-style:preserve-3d}
+.fcard.flipped .fin{transform:rotateY(180deg)}
+.face{grid-area:1/1;backface-visibility:hidden;-webkit-backface-visibility:hidden;border-radius:16px;padding:22px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.front{background:#fff;border:1px solid var(--line);border-top:6px solid var(--accent);box-shadow:0 2px 10px rgba(0,0,0,.05);transition:box-shadow .2s,transform .2s}
+.fcard:hover .front{box-shadow:0 8px 22px rgba(0,0,0,.1)}
+.back{transform:rotateY(180deg);background:color-mix(in srgb,var(--accent) 9%,#fff);border:1px solid color-mix(in srgb,var(--accent) 35%,#fff)}
+.fcard:focus-visible .face{outline:3px solid #151515;outline-offset:3px}
+.fq{font-size:clamp(1.08rem,.5vw + .8vh,1.28rem);font-weight:900;line-height:1.45;text-wrap:balance}
+.fnum{font-family:var(--font-latin);font-weight:700;font-size:1.7rem;line-height:1;color:var(--accent)}
+.fhint{margin-top:auto;font-size:.8rem;font-weight:700;color:var(--dim)}
+.face p{font-size:1rem!important;line-height:1.75!important;max-width:none!important}
+.face .fsmall{font-size:.86rem!important;color:var(--dim);line-height:1.6!important}
+.fbig{font-family:var(--font-latin);font-size:1.8rem;font-weight:700;line-height:1.1}
+.fmotto{font-size:clamp(1.4rem,1vw + 1.2vh,2rem);font-weight:900;color:var(--ink);letter-spacing:.08em;line-height:1.4;margin:auto 0}
+.flist{list-style:none;display:flex;flex-direction:column;gap:6px}
+.flist li{font-size:1rem}
+.face a{font-size:.88rem;font-weight:700;color:var(--ink);text-underline-offset:3px;margin-top:auto}
+.tolab{font:700 .88rem var(--font-body);border:0;border-radius:999px;padding:9px 16px;cursor:pointer;background:var(--accent);color:var(--on-accent,#fff);align-self:flex-start;margin-top:auto}
+.ptools .tolab{margin-top:0}
+.wcard .fin{min-height:320px}
+.fimg{height:210px;display:flex;align-items:center;justify-content:center;background:var(--soft-bg);border-radius:10px;overflow:hidden}
+.fimg img{max-width:100%;max-height:100%;object-fit:contain}
+.cmeta{display:flex;align-items:center;gap:10px;font-size:.85rem!important;color:var(--dim);font-family:var(--font-latin)}
+.cmeta span{font-family:var(--font-body);font-weight:700;font-size:.78rem;background:var(--soft-bg);color:var(--ink);padding:2px 10px;border-radius:999px}
+.answers2 > div{display:contents}
+.fimg{position:relative}
+.upbtn{position:absolute;right:8px;bottom:8px;font:700 .78rem var(--font-body);background:var(--neu,#e0e0e0);color:#1a1a1a;border-radius:999px;padding:6px 12px;cursor:pointer;box-shadow:var(--out-s,0 1px 3px rgba(0,0,0,.2))}
+.upbtn[hidden]{display:none}
+body:not(.editimg) .fimg:not(.fimg-need) .upbtn{display:none!important}
+.editimgbtn{position:fixed;left:14px;bottom:64px;z-index:20;font:700 .8rem var(--font-body);border:0;border-radius:999px;padding:8px 14px;background:#1a1a1a;color:#fff;box-shadow:0 2px 8px rgba(0,0,0,.25);cursor:pointer}
+body.editimg .editimgbtn{background:#c0392b}
+.upbtn input{position:absolute;width:1px;height:1px;opacity:0;overflow:hidden}
+.fimg-need{flex-direction:column;text-align:center;color:#888;font-weight:700;font-size:.95rem;line-height:1.5}
+.fimg-need small{font-weight:500;font-size:.8rem}
+.fimg3{display:grid;grid-template-columns:repeat(var(--n,3),minmax(0,1fr));gap:8px;height:210px}
+.fimg3 > .fimg{height:auto;min-height:0;padding:6px!important;border-radius:14px!important}
+.fimg3 > .fimg{font-size:.78rem}
+.fimg3 > .fimg .upbtn{right:4px;bottom:4px;padding:4px 8px;font-size:.7rem}
+@media (max-width:860px){ .fimg3{height:180px} }
+/* 開場：翻卡猜風格 */
+.pickwrap{max-width:calc(960px - 2*clamp(20px,4vw,48px));margin:0 auto 72px;display:flex;flex-direction:column;gap:18px}
+.picktools{display:flex;flex-wrap:wrap;align-items:center;gap:10px 12px}
+.pickgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px}
+.pick .fin{min-height:0;aspect-ratio:4/3}
+.pick .face{padding:0!important;overflow:hidden;position:relative;gap:0}
+.pick .front canvas{position:absolute;inset:8px;width:calc(100% - 16px);height:calc(100% - 16px);border-radius:22px;display:block;pointer-events:none}
+.pick .ptag{position:absolute;left:16px;bottom:14px;right:16px;display:flex;align-items:center;gap:8px;pointer-events:none}
+.pick .ptag b{font-family:var(--font-latin);font-weight:500;font-size:.85rem;background:#1a1a1a;color:#fff;border-radius:999px;padding:3px 10px}
+.pick .ptag span{font-weight:700;font-size:.85rem;background:rgba(255,255,255,.92);color:#1a1a1a;border-radius:999px;padding:3px 10px}
+.pick .back{padding:16px 18px!important;justify-content:center;gap:6px;border-left:6px solid var(--c)}
+.pick .back .pname{font-size:clamp(1.05rem,.6vw + .8vh,1.35rem);font-weight:900;line-height:1.3}
+.pick .back .pyear{font-family:var(--font-latin);font-size:.85rem;color:var(--dim)}
+.pick .back .pmotto{font-size:.92rem!important;font-weight:700;line-height:1.5!important}
+.pick .pgo{align-self:flex-start;margin-top:6px;font-size:.85rem;padding:7px 14px}
+.pick.lucky .front{animation:lucky .7s ease}
+@keyframes lucky{0%,100%{transform:none}25%{transform:translateY(-8px) rotate(-2deg)}75%{transform:translateY(-4px) rotate(2deg)}}
+@media (max-width:860px){ .pickwrap{margin:0 16px 48px} .pickgrid{grid-template-columns:repeat(2,minmax(0,1fr));gap:14px} .pick .fin{aspect-ratio:1/1} .pick .ptag{left:12px;right:12px;bottom:10px;flex-wrap:wrap;gap:4px} .pick .ptag span{font-size:.72rem;padding:2px 8px} .pick .back{padding:14px!important;gap:4px} .pick .back .pname{font-size:1rem} .pick .back .pmotto{font-size:.8rem!important} .pick .pgo{font-size:.78rem;padding:6px 12px} }
+@media (prefers-reduced-motion:reduce){ .pick.lucky .front{animation:none} }
+@media (prefers-reduced-motion:reduce){ .fin{transition:none} }
+
+/* ---------- 模式切換與互動實驗室 ---------- */
+.vswitch{display:inline-flex;align-self:flex-start;border:1px solid var(--line);border-radius:999px;padding:3px;margin-bottom:8px;background:#fff}
+.vswitch button{font:700 .85rem var(--font-body);border:0;background:none;color:var(--dim);padding:7px 14px;border-radius:999px;cursor:pointer;white-space:nowrap}
+.vswitch button[aria-pressed="true"]{background:#151515;color:#fff}
+.vswitch button:focus-visible,.lchip:focus-visible,.tolab:focus-visible{outline:3px solid #151515;outline-offset:2px}
+.app[data-view="lab"] .track{display:none}
+.app[data-view="lab"] .dots{visibility:hidden}
+.lab:not([hidden]){grid-row:2;display:block;overflow-y:auto;background:#fff}
+.labstyles{display:flex;flex-wrap:wrap;gap:8px}
+.lchip{font:700 .92rem var(--font-body);border:2px solid var(--c);background:#fff;color:#151515;border-radius:999px;padding:8px 16px;cursor:pointer;min-height:40px}
+.lchip[aria-pressed="true"]{background:var(--c);box-shadow:0 0 0 3px #fff,0 0 0 5px #151515}
+.labart{position:relative;top:auto;height:auto;border:1px solid var(--line);border-radius:16px;overflow:hidden;display:flex;flex-direction:column}
+.labart .stage{flex:none;height:clamp(360px,62vh,640px)}
+.labback{margin-top:-24px}
+@media (max-width:860px){
+  .fgrid,.fgrid.two{grid-template-columns:1fr}
+  .fgrid .wide{grid-column:span 1}
+  .fgrid.works3{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+  .works3 .fcard.wide{grid-column:span 2}
+  .wcard .fin{min-height:250px}
+  .works3 .face{padding:12px}
+  .fimg{height:140px}
+  .works3 .fq{font-size:.95rem}
+  .fin{min-height:150px}
+  .vswitch{margin-bottom:4px}
+  .vswitch button{padding:6px 12px;font-size:.82rem}
+  .brand{align-items:center}
+  .labart .stage{height:50vh}
+  .lchip{font-size:.85rem;padding:6px 12px}
+}
+/* ---------- 新擬物（Neumorphism）風格：灰白單色、柔和凸起與內凹陰影 ---------- */
+:root{
+  --neu:#ffffff; --neu-hi:#ffffff; --neu-lo:#d2d2d2;
+  --ink:#1a1a1a; --dim:#777; --line:transparent; --soft-bg:#ffffff;
+  --out:8px 8px 18px var(--neu-lo),-8px -8px 18px var(--neu-hi);
+  --out-s:4px 4px 9px var(--neu-lo),-4px -4px 9px var(--neu-hi);
+  --in:inset 6px 6px 12px var(--neu-lo),inset -6px -6px 12px var(--neu-hi);
+  --in-s:inset 3px 3px 6px var(--neu-lo),inset -3px -3px 6px var(--neu-hi);
+  --font-latin:"Unbounded","Noto Sans TC",system-ui,sans-serif;
+}
+body,.app,.top,.nav,.track,.panel,.lab:not([hidden]),.gantt{background:var(--neu)!important}
+.top{border-bottom:0!important;box-shadow:0 10px 18px -12px var(--neu-lo);position:relative;z-index:3}
+.nav{border-top:0;box-shadow:0 -10px 18px -12px var(--neu-lo)}
+/* 年代尺 */
+.ruler{border-radius:28px;box-shadow:var(--in);padding:0 18px;margin:4px 0 6px;height:236px}
+.ruler .lanes{left:18px;right:18px}
+.ruler .axis{left:18px;right:18px;bottom:8px;border-top:2px solid #9a9a9a}
+.tick.major{background:#555}
+.tick b{color:#444;font-weight:500}
+.bar{border-radius:999px!important;box-shadow:var(--out-s)!important;color:#1a1a1a}
+.bar.dim{box-shadow:var(--out-s),inset 0 0 0 100px rgba(224,224,224,.6)!important;color:#444}
+.bar.on{box-shadow:6px 6px 14px var(--neu-lo),-6px -6px 14px var(--neu-hi),inset 0 0 0 2px rgba(255,255,255,.75)!important;transform:translateY(-2px) scale(1.06)!important;filter:saturate(1.15)}
+.bar:focus{outline:none}
+.bar:focus-visible{outline:2px dashed #888;outline-offset:3px}
+.needle{background:#1a1a1a}
+.needle::after{background:var(--neu);box-shadow:var(--out-s),inset 0 0 0 3px #1a1a1a}
+.needle i{background:#1a1a1a;border-radius:999px;padding:3px 12px}
+.war{background:repeating-linear-gradient(135deg,rgba(0,0,0,.05) 0 4px,transparent 4px 8px)}
+.brand .big{font-weight:500;letter-spacing:.02em}
+.brand #bigName::before{border-radius:50%}
+/* 切換鈕、按鈕 */
+.vswitch{background:var(--neu);border:0;box-shadow:var(--in-s);padding:5px}
+.vswitch button{color:var(--dim)}
+.vswitch button[aria-pressed="true"]{background:var(--neu);color:var(--ink);box-shadow:var(--out-s)}
+.btn,.tolab,.ftry,.reset,.mchip,.lchip,.sbtn{background:var(--neu)!important;color:var(--ink)!important;border:0!important;border-radius:999px!important;box-shadow:var(--out-s)!important;transition:box-shadow .2s}
+.btn:active,.tolab:active,.reset:active,.mchip:active,.lchip:active{box-shadow:var(--in-s)!important}
+.btn:disabled{box-shadow:none!important;opacity:.4}
+.mchip[aria-pressed="true"],.lchip[aria-pressed="true"]{box-shadow:var(--in)!important;color:var(--ink)!important;font-weight:900}
+.lchip{display:inline-flex;align-items:center;gap:8px}
+.lchip::before{content:"";width:10px;height:10px;border-radius:50%;background:var(--c);box-shadow:inset 0 0 0 1px rgba(0,0,0,.15)}
+.dot{background:var(--neu);box-shadow:var(--in-s);height:10px;border-radius:999px}
+.dot[aria-current="true"]{background:#1a1a1a;box-shadow:none}
+.count{font-weight:500}
+/* 標題區 */
+.meta .num{background:transparent;color:var(--ink);border:1.5px solid #555;border-radius:999px;padding:2px 12px;font-weight:500}
+.meta .seg{border-left:0;padding-left:0}
+.meta .seg::before{content:"";display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--accent);margin-right:8px;vertical-align:1px}
+h2 .zh{font-weight:700;letter-spacing:.04em}
+h2 .en{font-family:var(--font-latin);font-weight:400;color:#555}
+.motto{background:var(--neu)!important;color:var(--ink)!important;box-shadow:var(--in-s);border-radius:999px;padding:8px 22px 10px}
+.fprog{font-family:var(--font-body)}
+.blk > h3{color:#555;letter-spacing:.2em}
+.blk > h3::before{width:10px;height:10px;border-radius:50%;background:var(--accent)}
+/* 卡牌 */
+.face{border-radius:30px!important;padding:26px!important}
+.front{background:var(--neu)!important;border:0!important;box-shadow:var(--out)!important}
+.fcard:hover .front{box-shadow:10px 10px 22px var(--neu-lo),-10px -10px 22px var(--neu-hi)!important}
+.back{background:var(--neu)!important;border:0!important;box-shadow:var(--in)!important}
+.fnum{color:#1a1a1a;font-weight:400}
+.fbig{font-weight:400}
+.fhint{display:inline-flex;align-items:center;gap:6px;color:#888}
+.fhint::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--accent)}
+.fimg{background:var(--neu)!important;box-shadow:var(--in-s);border-radius:22px!important;padding:10px}
+.fimg img{border-radius:12px}
+.cmeta span{background:var(--neu)!important;box-shadow:var(--in-s)}
+.fgrid{gap:24px}
+/* 開場拼貼、總覽、互動實驗室 */
+.intro .art,.outro .gantt,.labart{background:var(--neu)!important;border:0!important;border-radius:36px!important;box-shadow:var(--out)!important;padding:16px}
+.intro .art canvas{inset:16px!important;width:calc(100% - 32px)!important;height:calc(100% - 32px)!important;border-radius:24px}
+.labart .stage{border-radius:24px;overflow:hidden;box-shadow:var(--in-s)}
+.labart .playbar{border-top:0!important;background:transparent!important;padding:18px 6px 6px}
+.mhint b{background:#1a1a1a;border-radius:999px;padding:3px 10px}
+.gbar{border-radius:999px!important;box-shadow:var(--out-s)!important}
+.gaxis div{border-top:2px solid #9a9a9a}
+.grow:hover{background:transparent;box-shadow:var(--in-s);border-radius:999px}
+.q{border-left:0;padding:14px 22px;border-radius:24px;box-shadow:var(--in-s)}
+.chip{border-radius:999px!important;box-shadow:var(--out-s)!important}
+.hint kbd{background:var(--neu);border:0;box-shadow:var(--out-s);border-radius:6px}
+@media (max-width:860px){
+  .ruler{height:166px;padding:0 10px;border-radius:20px}
+  .ruler .lanes,.ruler .axis{left:10px;right:10px}
+  .face{border-radius:22px!important;padding:18px!important}
+  .works3 .face{padding:12px!important}
+  .intro .art,.outro .gantt,.labart{border-radius:26px!important;padding:10px}
+  .intro .art canvas{inset:10px!important;width:calc(100% - 20px)!important;height:calc(100% - 20px)!important}
+}
+.langbtn{margin-left:8px;align-self:flex-start;font:800 .85rem var(--font-body);border:0;border-radius:999px;padding:9px 14px;background:var(--neu,#fff);color:var(--ink,#1a1a1a);box-shadow:var(--out-s);cursor:pointer}
+.langbtn:active{box-shadow:var(--in-s)}
+.pairlab{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;font-size:.82rem!important;line-height:1.4!important;margin-top:-2px}
+.pairlab span{display:flex;gap:6px;align-items:baseline;min-width:0}
+.pairlab b{flex:none;font-size:.72rem;background:#1a1a1a;color:#fff;border-radius:999px;padding:1px 8px}
+.pairback{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
+.psec{display:flex;flex-direction:column;gap:6px;min-width:0}
+.psec .fq{font-size:1rem}
+.psec a{margin-top:auto}
+@media (max-width:860px){ .pairback{grid-template-columns:1fr} }
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="top">
+    <div class="brand"><div class="vswitch" role="group" aria-label="切換模式"><button type="button" data-v="cards" aria-pressed="true">風格卡牌</button><button type="button" data-v="lab" aria-pressed="false">互動實驗室</button></div><button type="button" class="langbtn" id="langBtn" aria-label="Switch language / 切換語言">EN</button><span class="big" id="bigYear">1851–1990</span><span id="bigName">九個設計風格</span></div>
+    <div class="ruler" id="ruler" aria-label="年代尺 1850 到 2000 年">
+      <div class="lanes" id="lanes"></div>
+      <div class="axis" id="axis"></div>
+      <div class="needle hide" id="needle"><i id="needleLabel"></i></div>
+    </div>
+  </header>
+  <main class="track" id="track" tabindex="-1"></main>
+  <section class="lab" id="lab" aria-label="互動實驗室" hidden>
+    <div class="wrap">
+      <header class="phead">
+        <p class="meta"><span class="num">互動實驗室</span><span>選一個風格 → 選一個造形特徵 → 點畫面</span></p>
+        <h2><span class="zh" id="labName"></span><span class="en" id="labEn"></span></h2>
+        <p class="motto" id="labMotto"></p>
+      </header>
+      <div class="labstyles" id="labStyles" role="group" aria-label="選擇風格"></div>
+      <div class="art labart">
+        <div class="stage"><canvas id="labCanvas" data-draw="arts" role="img" aria-label="風格示意圖形"></canvas></div>
+        <div id="labBar"></div>
+      </div>
+      <p class="labback"><button type="button" class="btn" id="labBack">← 回到這個風格的卡牌</button></p>
+    </div>
+  </section>
+  <nav class="nav" aria-label="章節切換">
+    <button class="btn" id="prev" type="button">‹ 上一個</button>
+    <div class="dots" id="dots"></div>
+    <span class="count" id="count">1 / 11</span>
+    <button class="btn" id="pause" type="button" aria-pressed="false">暫停動畫</button>
+    <button class="btn" id="next" type="button">下一個 ›</button>
+  </nav>
+</div>
+
+<script src="i18n.js"></script>
+<script>
+const Y0 = 1850, Y1 = 2000;
+const pct = y => ((y - Y0) / (Y1 - Y0)) * 100;
+
+const SEGS = {
+  1: "第一段｜反工業化的回望",
+  2: "第二段｜理性與秩序",
+  3: "第三段｜反叛與趣味",
+  x: "插曲｜戰爭中的反叛"
+};
+
+const STYLES = [
+  { id:"arts", zh:"美術工藝運動", en:"Arts and Crafts Movement", short:"美術工藝", s:1860, e:1900, years:"約 1860–1900", region:"英國", seg:1,
+    bar:"#b89363", bg:"#efe6d2", ink:"#2a2620", accent:"#a33b2b", soft:"#5f6e43", enf:'"IM Fell English",serif',
+    context:"1851 年倫敦水晶宮萬國博覽會展出大量機器製造的粗糙產品，莫里斯與拉斯金認為機械雖帶來進步，卻降低了生活美感與工藝價值。",
+    features:["反對工業革命後的粗製濫造，主張回歸手工藝","圖案取材中世紀哥德風、植物花卉與鳥獸","主張「藝術與生活合一」，好設計要走進日常"],
+    works:[["威廉・莫里斯《草莓小偷》織品","1883"],["威廉・莫里斯《Pimpernel》壁紙","1876"],["菲利普・韋伯《紅屋》Red House","1859–60"]],
+    motto:"反對機械、手工回歸",
+    link:"<b>下一步：</b>「藝術生活化」的想法，被新藝術運動接手並發揚光大。",
+    event:[1851,"1851 倫敦萬國博覽會"] },
+  { id:"nouveau", zh:"新藝術運動", en:"Art Nouveau", short:"新藝術", s:1890, e:1914, years:"約 1890–1914", region:"歐洲（法國、比利時等）", seg:1,
+    bar:"#8fae58", bg:"#f4ecd8", ink:"#33301f", accent:"#7a2f3b", soft:"#4c5b2e", enf:'"Cormorant Garamond",serif',
+    context:"19 世紀末，設計界厭倦模仿古典歷史風格。受美術工藝運動與自然主義影響，設計師從花卉、藤蔓、昆蟲與女性形象找靈感。",
+    features:["大量運用植物藤蔓、花卉與女性形象","流動、不對稱的 S 形曲線與鞭線（Whiplash Curve）","裝飾融入建築、家具與平面設計，不排斥鑄鐵、玻璃等新材料"],
+    works:[["慕夏《舞蹈》The Arts: Dance","1898"],["高第《巴特婁之家》Casa Batlló","1904–06"],["霍塔《塔雪爾旅館》Hôtel Tassel","1893–94"]],
+    motto:"自然曲線、花草蔓延",
+    link:"<b>承接：</b>美術工藝運動的「藝術生活化」，但更大膽地擁抱新材料與曲線。",
+    event:[1900,"1900 巴黎萬國博覽會"] },
+  { id:"destijl", zh:"風格派", en:"De Stijl", short:"風格派", s:1917, e:1931, years:"1917–1931", region:"荷蘭", seg:2,
+    bar:"#e0342a", bg:"#ffffff", ink:"#111111", accent:"#d52b1e", soft:"#1f3f99", enf:'"Jost",sans-serif',
+    context:"一次大戰期間社會動盪，藝術家希望用理性、簡潔、人人都看得懂的視覺語言建立新秩序。1917 年杜斯伯格創辦《De Stijl》雜誌。",
+    features:["以水平線、垂直線與矩形色塊構成畫面","紅、黃、藍三原色，搭配黑、白、灰","幾何抽象、視覺平衡與簡潔秩序"],
+    works:[["蒙德里安《紅、藍、黃的構成》","1930"],["里特維德《紅藍椅》","1918"],["里特維德《施洛德住宅》","1924"]],
+    motto:"三原色彩、橫豎線條",
+    link:"<b>互相影響：</b>杜斯伯格 1921–22 年曾到威瑪講學，和包浩斯互相刺激。",
+    event:[1917,"1917《De Stijl》雜誌創刊"] },
+  { id:"bauhaus", zh:"包浩斯", en:"Bauhaus", short:"包浩斯", s:1919, e:1933, years:"1919–1933", region:"德國", seg:2,
+    bar:"#3d6fd6", bg:"#f3eee2", ink:"#141414", accent:"#1d4e9e", soft:"#b8321f", enf:'"Jost",sans-serif',
+    context:"一戰後德國需要重建，傳統工藝教育跟不上工業社會。1919 年葛羅培斯在威瑪創校，打破藝術、工藝與建築的界線。1933 年被納粹關閉。",
+    features:["幾何造形、簡潔線條與明確的功能性","整合藝術、工藝與工業技術，適合大量生產","去除不必要的裝飾；密斯名言「少即是多」"],
+    works:[["葛羅培斯《包浩斯德紹校舍》","1925–26"],["布魯爾《瓦西里椅》","1925–26"],["密斯・凡德羅《巴塞隆納椅》","1929"]],
+    motto:"功能優先、幾何極簡",
+    link:"<b>影響：</b>學校關閉後，師生移居美國等地，把理念帶向全世界的現代主義設計。",
+    event:[1919,"1919 包浩斯在威瑪創校"] },
+  { id:"deco", zh:"裝飾藝術", en:"Art Deco", short:"裝飾藝術", s:1920, e:1940, years:"約 1920–1940", region:"法國 → 歐洲、美國", seg:2,
+    bar:"#d4af5a", bg:"#101a1c", ink:"#efe6cc", accent:"#d4af5a", soft:"#9fb5b0", enf:'"Limelight",serif', onAccent:"#151515",
+    context:"一戰後都市發展、工業進步、消費文化興起，人們追求摩登又奢華的生活。1925 年巴黎「國際現代裝飾與工業藝術博覽會」讓這個風格受到矚目。",
+    features:["對稱構圖、放射狀圖案、階梯形與幾何線條","偏好金屬、玻璃、漆面等材質，營造奢華感","強調速度感、摩登風格與現代都市意象"],
+    works:[["卡桑德拉《諾曼第號》海報","1935"],["艾琳・葛雷《龍椅》","約 1917–19"],["雷蒙・胡德等《無線電城音樂廳》","1932"]],
+    motto:"幾何對稱、華麗摩登",
+    link:"<b>對照：</b>和包浩斯同一時期，一樣用幾何，但追求的是華麗，而不是功能。",
+    event:[1925,"1925 巴黎裝飾藝術博覽會"] },
+  { id:"modern", zh:"現代主義", en:"Modernism", short:"現代主義", s:1920, e:1970, years:"約 1920–1970", region:"歐洲 → 美國 → 全世界（國際風格）", seg:2,
+    bar:"#8e9aa6", bg:"#ffffff", ink:"#151515", accent:"#3b4a5a", soft:"#5b6672", enf:'"Jost",sans-serif',
+    context:"工業化帶來鋼筋混凝土、鋼構與大片玻璃等新技術，設計師相信理性與功能能讓更多人過上好生活。包浩斯關閉後，葛羅培斯、密斯等人移居美國，這套語言擴散到全世界；1932 年紐約 MoMA「現代建築：國際展」稱它為「國際風格」。",
+    features:["形隨機能：先想清楚用途，造形跟著功能走","去除裝飾、「少即是多」，以方盒子、平屋頂、水平長窗為代表","使用鋼筋混凝土、鋼與玻璃帷幕，講求標準化與大量生產"],
+    works:[["柯比意《薩伏伊別墅》Villa Savoye","1928–31"],["伊姆斯夫婦《伊姆斯躺椅》Eames Lounge Chair","1956"],["密斯・凡德羅《西格拉姆大廈》Seagram Building","1958"]],
+    motto:"形隨機能、去除裝飾",
+    link:"<b>承接與轉折：</b>延續包浩斯的理念走向全世界；到了 1960–70 年代，後現代主義開始反對它。",
+    event:[1932,"1932 MoMA「國際風格」建築展"] },
+  { id:"pop", zh:"普普藝術", en:"Pop Art", short:"普普", s:1950, e:1970, years:"約 1950–1970", region:"英國 → 美國", seg:3,
+    bar:"#ff4fa8", bg:"#fff6c2", ink:"#111111", accent:"#e5262a", soft:"#0068b5", enf:'"Bangers",cursive',
+    context:"二戰後電視、廣告與商品消費快速發展，影像成為日常生活的一部分。藝術家把漫畫、廣告、明星與包裝搬進藝術，打破藝術與大眾文化的界線。",
+    features:["鮮豔色彩、強烈對比與醒目構圖","擷取廣告、漫畫、商品包裝與明星等大眾符號","網點、重複排列與拼貼，模仿商業印刷"],
+    works:[["漢彌爾頓《究竟是什麼使今日家庭如此不同、如此吸引人？》","1956"],["安迪・沃荷《康寶濃湯罐頭》","1962"],["李奇登斯坦《溺水的女孩》","1963"]],
+    motto:"鮮豔大膽、流行翻玩",
+    link:"<b>回應：</b>藝術不必高高在上，超市裡的商品、漫畫和明星都能成為藝術。",
+    event:[1956,"1956 倫敦《This Is Tomorrow》展"] },
+  { id:"op", zh:"歐普藝術", en:"Op Art", short:"歐普", s:1960, e:1970, years:"約 1960–1970", region:"歐洲（法國、英國）→ 美國", seg:3,
+    bar:"op", bg:"#f2f2f2", ink:"#0b0b0b", accent:"#151515", soft:"#5b5b5b", enf:'"Monoton",cursive',
+    context:"延續包浩斯、風格派以來的幾何抽象，再結合視覺心理學的研究。1964 年《時代》雜誌稱它為 Op Art，1965 年紐約 MoMA「感應之眼」展讓它爆紅，很快影響時裝與平面設計。",
+    features:["黑白或高對比色彩","幾何圖形精密地重複、漸變","讓靜止的畫面看起來在閃爍、波動、凹凸"],
+    works:[["瓦沙雷利《斑馬》（被視為先驅）","1937"],["布莉姬・萊利《方塊中的運動》","1961"],["布莉姬・萊利《潮流》Current","1964"]],
+    motto:"黑白幾何、看了會動",
+    link:"<b>承接：</b>包浩斯、風格派的幾何抽象，但目標從「秩序」轉向「騙過眼睛」。",
+    event:[1965,"1965 MoMA《感應之眼》展"] },
+  { id:"post", zh:"後現代主義", en:"Postmodernism", short:"後現代", s:1970, e:1990, years:"約 1970–1990", region:"歐美 → 全世界", seg:3,
+    bar:"#2bc7b4", bg:"#fff0f3", ink:"#1c1c1c", accent:"#e84a8a", soft:"#1f8f82", enf:'"Rubik Mono One",sans-serif',
+    context:"現代主義追求理性、功能與標準化，部分設計師認為這讓設計失去情感與個性。范裘利以「少則無聊」回應「少即是多」；1981 年索特薩斯成立孟菲斯設計團體。",
+    features:["鮮豔色彩、不規則幾何與誇張裝飾","混搭歷史風格、流行文化與不同設計語彙","打破「形隨機能」，強調趣味、個性與多元"],
+    works:[["范裘利《范娜・范裘利住宅》","1964"],["索特薩斯《卡爾頓書架》","1981"],["葛瑞夫斯《9093 水壺》","1985"]],
+    motto:"打破規則、混搭有趣",
+    link:"<b>回應：</b>對包浩斯以來的現代主義說「不」，設計不只有一種正確答案。",
+    event:[1981,"1981 孟菲斯設計團體成立"] }
+];
+
+const WARS = [[1914,1918,"一戰"],[1939,1945,"二戰"]];
+const TEACH = "作品仍受著作權保護，僅供課堂教學使用";
+const PD = "公有領域";
+const WORK = {
+  arts:{ slides:[
+    { src:"img/arts.jpg", title:"《草莓小偷》Strawberry Thief", who:"威廉・莫里斯", year:"1883", note:"織品圖案｜" + PD },
+    { src:"img/arts-2.jpg", title:"《Pimpernel》", who:"威廉・莫里斯", year:"1876", note:"壁紙圖案｜" + PD },
+    { src:"img/arts-3.jpg", title:"《紅屋》Red House 外觀", who:"菲利普・韋伯", year:"1859–60", note:"建築｜" + PD },
+    { src:"img/arts-4.jpg", title:"《紅屋》室內", who:"菲利普・韋伯、威廉・莫里斯", year:"1859–60", note:"建築與織品｜" + PD },
+    { src:"img/arts-5.jpg", ref:"https://commons.wikimedia.org/wiki/File:Trellis_MET_DT255077.jpg", credit:"Morris & Co.（大都會博物館）／CC0／Wikimedia Commons", title:"《格架》Trellis 壁紙", who:"威廉・莫里斯（鳥由菲利普・韋伯繪製）", year:"1862 設計，1864 發行", note:"壁紙圖案｜" + PD },
+    { src:"img/arts-6.jpg", ref:"https://commons.wikimedia.org/wiki/File:Kelmscott_chaucer.jpg", credit:"William Morris／公有領域／Wikimedia Commons", title:"《喬叟作品集》Kelmscott Chaucer", who:"威廉・莫里斯（凱姆斯科特出版社）", year:"1896", note:"書籍設計｜" + PD }
+  ]},
+  nouveau:{ slides:[
+    { src:"img/nouveau.jpg", title:"《舞蹈》The Arts: Dance", who:"阿爾豐斯・慕夏", year:"1898", note:"彩色石版畫｜" + PD },
+    { src:"img/nouveau-2.jpg", title:"《黃道十二宮》Zodiac", who:"阿爾豐斯・慕夏", year:"1896", note:"彩色石版畫｜" + PD },
+    { src:"img/nouveau-3.jpg", title:"《巴特婁之家》Casa Batlló 外觀", who:"安東尼・高第", year:"1904–06", note:"建築｜" + PD },
+    { src:"img/nouveau-4.jpg", title:"《巴特婁之家》室內", who:"安東尼・高第", year:"1904–06", note:"建築｜" + PD },
+    { src:"img/nouveau-5.jpg", title:"《塔雪爾旅館》Hôtel Tassel 外觀", who:"維克多・霍塔", year:"1893–94", note:"建築｜" + PD },
+    { src:"img/nouveau-6.jpg", title:"《塔雪爾旅館》樓梯間", who:"維克多・霍塔", year:"1893–94", note:"建築｜" + PD }
+  ]},
+  destijl:{ slides:[
+    { src:"img/destijl.jpg", title:"《紅、藍、黃的構成》", who:"皮特・蒙德里安", year:"1930", note:"油畫｜" + PD },
+    { src:"img/destijl-2.jpg", title:"《紅藍椅》Red and Blue Chair", who:"赫里特・里特維德", year:"1918", note:"家具｜" + TEACH },
+    { src:"img/destijl-3.jpg", title:"《施洛德住宅》外觀", who:"赫里特・里特維德", year:"1924", note:"建築｜" + TEACH },
+    { src:"img/destijl-4.jpg", title:"《施洛德住宅》室內", who:"赫里特・里特維德", year:"1924", note:"建築｜" + TEACH },
+    { src:"img/destijl-5.jpg", ref:"https://commons.wikimedia.org/wiki/File:Theo_van_Doesburg_Counter-CompositionV_(1924).jpg", credit:"Theo van Doesburg／公有領域／Wikimedia Commons", title:"《反構成 V》Counter-Composition V", who:"提奧・凡・杜斯伯格", year:"1924", note:"油畫｜" + PD },
+    { src:"img/destijl-6.jpg", ref:"https://commons.wikimedia.org/wiki/File:Gerrit_rietveld,_sedia_zig-zag,_1938_ca.jpg", credit:"Sailko／CC BY 3.0／Wikimedia Commons（照片為約 1938 年製作的版本）", title:"《Z 字椅》Zig-Zag Chair", who:"赫里特・里特維德", year:"1932–34", note:"家具｜" + TEACH }
+  ]},
+  bauhaus:{ slides:[
+    { src:"img/bauhaus.jpg", title:"《瓦西里椅》Wassily Chair", who:"馬塞爾・布魯爾", year:"1925–26", note:"鋼管家具｜" + TEACH },
+    { src:"img/bauhaus-2.jpg", title:"《巴塞隆納椅》Barcelona Chair", who:"密斯・凡德羅", year:"1929", note:"家具｜" + TEACH },
+    { src:"img/bauhaus-3.jpg", title:"《包浩斯德紹校舍》", who:"華特・葛羅培斯", year:"1925–26", note:"建築｜" + TEACH },
+    { src:"img/bauhaus-4.jpg", ref:"https://commons.wikimedia.org/wiki/File:Marianne_brandt,_teiere,_1924_(cropped).JPG", credit:"Sailko／CC BY-SA 3.0／Wikimedia Commons", title:"茶壺 MT49", who:"瑪麗安・布蘭德", year:"1924", note:"金屬工坊產品｜" + TEACH },
+    { src:"img/bauhaus-5.jpg", ref:"https://commons.wikimedia.org/wiki/File:Tischlampe_di_Carl_Jakob_Jucker_(left,_1923-24)_e_di_Wilhelm_Wagenfeld_(right,_1924).JPG", credit:"Sailko／CC BY-SA 3.0／Wikimedia Commons", title:"包浩斯檯燈（照片左：容克版，右：華根菲爾德版）", who:"卡爾・雅各布・容克、威廉・華根菲爾德", year:"1923–24", note:"燈具｜" + TEACH },
+    { title:"《通用字體》Universal", who:"赫伯特・拜耳", year:"1925", note:"字體設計｜" + TEACH }
+  ]},
+  deco:{ slides:[
+    { src:"img/deco.jpg", title:"《諾曼第號》Normandie 海報", who:"A. M. 卡桑德拉", year:"1935", note:"海報｜" + TEACH },
+    { src:"img/deco-2.jpg", title:"《北方快車》Nord Express 海報", who:"A. M. 卡桑德拉", year:"1927", note:"海報｜" + TEACH },
+    { src:"img/deco-3.jpg", title:"《龍椅》Dragon Chair", who:"艾琳・葛雷", year:"約 1917–19", note:"家具｜" + TEACH },
+    { src:"img/deco-4.jpg", title:"《無線電城音樂廳》Radio City Music Hall", who:"雷蒙・胡德等", year:"1932", note:"建築｜" + TEACH },
+    { src:"img/deco-5.jpg", title:"裝飾藝術風格圖樣（扇形放射）", who:"作者未標示", year:"—", note:"圖樣參考" },
+    { src:"img/deco-6.jpg", title:"裝飾藝術風格門扇（金屬幾何）", who:"作者未標示", year:"—", note:"圖樣參考" }
+  ]},
+  modern:{ slides:[
+    { src:"img/modern-1.jpg", ref:"https://commons.wikimedia.org/wiki/File:Jfader_barca_pavillion.jpg", credit:"John Fader／CC BY-SA 3.0／Wikimedia Commons", title:"《巴塞隆納德國館》Barcelona Pavilion", who:"密斯・凡德羅", year:"1929（1986 重建）", note:"建築｜" + TEACH },
+    { src:"img/modern-2.jpg", ref:"https://commons.wikimedia.org/wiki/File:Glass_House_2006.jpg", credit:"Carol M. Highsmith／公有領域／Wikimedia Commons", title:"《玻璃屋》Glass House", who:"菲利普・強森", year:"1949", note:"建築｜" + TEACH },
+    { src:"img/modern-3.jpg", ref:"https://commons.wikimedia.org/wiki/File:Farnsworth_House_by_Mies_Van_Der_Rohe_-_exterior-8.jpg", credit:"Victor Grigas／CC BY-SA 3.0／Wikimedia Commons", title:"《范斯沃斯住宅》Farnsworth House", who:"密斯・凡德羅", year:"1951", note:"建築｜" + TEACH },
+    { src:"img/modern-4.jpg", ref:"https://commons.wikimedia.org/wiki/File:Eameslounch.jpg", credit:"Sonett72／公有領域／Wikimedia Commons", title:"《伊姆斯躺椅》Eames Lounge Chair", who:"查爾斯與蕾・伊姆斯", year:"1956", note:"家具｜" + TEACH },
+    { src:"img/modern-5.jpg", ref:"https://commons.wikimedia.org/wiki/File:Seagram_Building_(35098307116).jpg", credit:"Ken OHYAMA／CC BY-SA 2.0／Wikimedia Commons", title:"《西格拉姆大廈》Seagram Building", who:"密斯・凡德羅", year:"1958", note:"建築｜" + TEACH },
+    { src:"img/modern-6.jpg", ref:"https://commons.wikimedia.org/wiki/File:The_Egg_Chair.jpg", credit:"Scott Anderson／CC BY-SA 2.0／Wikimedia Commons", title:"《蛋椅》Egg Chair", who:"阿納・雅各布森", year:"1958", note:"家具｜" + TEACH }
+  ]},
+  pop:{ slides:[
+    { src:"img/pop.jpg", title:"《康寶濃湯罐頭》Campbell's Soup Cans", who:"安迪・沃荷", year:"1962", note:"絹印／壓克力｜" + TEACH },
+    { src:"img/pop-2.jpg", title:"《溺水的女孩》Drowning Girl", who:"羅伊・李奇登斯坦", year:"1963", note:"油畫｜" + TEACH },
+    { src:"img/pop-3.jpg", title:"《究竟是什麼使今日家庭如此不同、如此吸引人？》", who:"理查・漢彌爾頓", year:"1956", note:"拼貼｜" + TEACH },
+    { title:"《瑪麗蓮雙聯畫》Marilyn Diptych", who:"安迪・沃荷", year:"1962", note:"絹印｜" + TEACH },
+    { src:"img/pop-5.jpg", ref:"https://commons.wikimedia.org/wiki/File:%E6%84%9B%E7%9A%84%E9%9B%95%E5%A1%91%E5%9C%A8%E8%87%BA%E7%81%A3%E8%87%BA%E5%8C%97%E5%B8%82_Love_Sculpture_in_Taipei,_TAIWAN.jpg", credit:"Wen-Cheng Liu／CC BY-SA 2.0／Wikimedia Commons", title:"《LOVE》雕塑（台北 101 旁）", who:"羅伯特・印第安納", year:"原作 1970，台北版為複製版", note:"公共雕塑｜" + TEACH },
+    { title:"《轟！》Whaam!", who:"羅伊・李奇登斯坦", year:"1963", note:"壓克力與油彩｜" + TEACH }
+  ]},
+  op:{ slides:[
+    { src:"img/op-1.jpg", ref:"https://commons.wikimedia.org/wiki/File:Piso_Corredor_P%C3%BAblico.JPG", credit:"Karla Santos／CC BY-SA 3.0／Wikimedia Commons", title:"委內瑞拉邁克蒂亞機場地板《加法色彩環境》", who:"卡洛斯・克魯茲－迪耶斯", year:"1974–78", note:"公共藝術｜" + TEACH },
+    { title:"《方塊中的運動》Movement in Squares", who:"布莉姬・萊利", year:"1961", note:"繪畫｜" + TEACH },
+    { title:"《瀑布》Fall", who:"布莉姬・萊利", year:"1963", note:"繪畫｜" + TEACH },
+    { title:"《潮流》Current", who:"布莉姬・萊利", year:"1964", note:"繪畫｜" + TEACH },
+    { src:"img/op-5.jpg", ref:"https://commons.wikimedia.org/wiki/File:%22Penetrable_Amarillo%22_del_artista_venezolano_Jes%C3%BAs_Soto.JPG", credit:"TainaHijadeDios／CC BY-SA 3.0／Wikimedia Commons", title:"「可穿透」Penetrable 系列", who:"赫蘇斯・拉斐爾・索托", year:"1967 起", note:"空間裝置｜" + TEACH },
+    { src:"img/op-6.jpg", ref:"https://commons.wikimedia.org/wiki/File:Dizengoff_Square_Fountain_(123963691).jpeg", credit:"Noam R／CC BY-SA 3.0／Wikimedia Commons", title:"《火與水噴泉》Fire and Water Fountain", who:"雅科夫・阿岡", year:"1986", note:"動態歐普公共藝術｜" + TEACH }
+  ]},
+  post:{ slides:[
+    { src:"img/post.jpg", title:"《卡爾頓書架》Carlton", who:"埃托雷・索特薩斯", year:"1981", note:"孟菲斯家具｜" + TEACH },
+    { src:"img/post-2.jpg", title:"《9093 水壺》", who:"麥可・葛瑞夫斯", year:"1985", note:"產品設計｜" + TEACH },
+    { src:"img/post-3.jpg", title:"《范娜・范裘利住宅》Vanna Venturi House", who:"羅伯特・范裘利", year:"1964", note:"建築｜" + TEACH },
+    { src:"img/post-4.jpg", title:"《范娜・范裘利住宅》室內", who:"羅伯特・范裘利", year:"1964", note:"建築｜" + TEACH },
+    { src:"img/post-5.jpg", ref:"https://commons.wikimedia.org/wiki/File:Portland_Building_1982.jpg", credit:"Steve Morgan／CC BY-SA 3.0／Wikimedia Commons", title:"《波特蘭大樓》Portland Building", who:"麥可・葛瑞夫斯", year:"1982", note:"建築｜" + TEACH },
+    { src:"img/post-6.jpg", ref:"https://commons.wikimedia.org/wiki/File:Sony_Building_by_David_Shankbone_crop.jpg", credit:"David Shankbone／CC BY 2.5／Wikimedia Commons", title:"《AT&T 大樓》（今 550 Madison）", who:"菲利普・強森", year:"1984", note:"建築｜" + TEACH }
+  ]}
+};
+function workView(id){
+  const w = WORK[id];
+  if (!w) return "";
+  if (w.need) return `<figure class="workview missing"><div class="ph"><b>待補作品圖片</b><span>${w.need}</span><small>教案附圖裡沒有這件作品，上傳圖片後就能放上來。</small></div></figure>`;
+  const n = w.slides.length;
+  const slides = w.slides.map((s,i) => `
+      <figure class="slide" aria-label="第 ${i+1} 張，共 ${n} 張">
+        <div class="frame"><img src="${s.src}" alt="${s.who}${s.title}" ${i ? 'loading="lazy"' : ""}></div>
+        <figcaption><b>${s.title}</b><span class="who">${s.who}｜${s.year}</span><span class="src">${s.note}｜${s.credit ? "圖片：" + s.credit : "圖片取自教案附圖"}</span></figcaption>
+      </figure>`).join("");
+  const dots = w.slides.map((s,i) => `<button type="button" class="sdot" data-slide="${i}" aria-label="看第 ${i+1} 張：${s.title}"></button>`).join("");
+  return `<div class="workview" data-count="${n}">
+      <div class="slides">${slides}</div>
+      <div class="snav"><button type="button" class="sbtn" data-step="-1" aria-label="上一張作品">‹</button><div class="sdots">${dots}</div><span class="scount">1 / ${n}</span><button type="button" class="sbtn" data-step="1" aria-label="下一張作品">›</button></div>
+    </div>`;
+}
+/* 互動示意：每一頁三個造形特徵，各對應一種點擊互動 */
+const MODES = {
+  arts:[["植物花卉","點一下，開出一朵花"],["鳥獸","點一下，讓一隻鳥停在那裡"],["藝術生活化","點一下，換一種配色（同一圖案可以做成壁紙、布料）"]],
+  nouveau:[["植物藤蔓","點一下，長出一條藤蔓"],["S 形鞭線","點一下，甩出一條鞭線"],["建築與新材料","點一下，換一組鑄鐵拱窗的彩色玻璃"]],
+  destijl:[["三原色","點色塊，換成紅、黃、藍、黑、白"],["橫豎線條","點色塊，用一條直線或橫線把它切開"],["平衡構成","點一下，重新構成整幅畫面"]],
+  bauhaus:[["基本幾何形","點一下，輪流放上三角（黃）、方（紅）、圓（藍）"],["功能與秩序","點一下，讓圖形全部對齊網格（再點一次放開）"],["標準化量產","點一下，一次排出四個一模一樣的形"]],
+  deco:[["放射對稱","點一下，改變放射線的數量"],["奢華材質","點一下，換成金、銀或玉綠"],["階梯形","點一下，增減階梯的層數"]],
+  modern:[["方盒子大樓","點一下，蓋一棟標準化的方盒子大樓"],["去除裝飾","把房子上多餘的裝飾一個一個點掉"],["鋼與玻璃","點一下，透視大樓的鋼骨結構"]],
+  pop:[["漫畫音效字","點一下，貼上 BAM!、WOW!"],["網點印刷","點一下，換一組網點顏色"],["重複排列","點一下，把畫面複製成四格"]],
+  op:[["視覺錯覺","點一下鼓起來，同一處再點就凹下去"],["高對比色彩","點一下，換一組對比色"],["重複圖形","點一下，換成棋盤、條紋或同心圓"]],
+  post:[["孟菲斯元素","點一下，丟進一個孟菲斯造形"],["混搭歷史","點一下，放上古典柱子或山牆"],["打破規則","點一下，換一組大膽的配色"]]
+};
+function playBar(id){
+  const ms = MODES[id];
+  const chips = ms.map(([t],i) => `<button type="button" class="mchip" data-tool="${i}" aria-pressed="${i === 0}">${t}</button>`).join("");
+  return `<div class="playbar">
+      <div class="mrow"><span class="mlabel">選一個造形特徵</span><div class="mchips" role="group" aria-label="選擇造形特徵">${chips}</div></div>
+      <p class="mhint"><b>點畫面</b><span>${ms[0][1]}</span><button type="button" class="reset">重來</button></p>
+      <small class="mnote">依風格特徵繪製的示意圖形，非原作品</small>
+    </div>`;
+}
+const HINTS = { mosaic:"點任一格，直接跳到那個風格" };
+
+/* ---------- 年代尺 ---------- */
+const lanesEl = document.getElementById("lanes");
+const axisEl = document.getElementById("axis");
+const laneEnd = [];
+STYLES.forEach(st => {
+  let lane = laneEnd.findIndex(end => end <= st.s);
+  if (lane === -1) { lane = laneEnd.length; laneEnd.push(0); }
+  laneEnd[lane] = st.e;
+  st.lane = lane;
+});
+WARS.forEach(([a,b,t]) => {
+  const w = document.createElement("div");
+  w.className = "war";
+  w.style.left = pct(a) + "%"; w.style.width = (pct(b) - pct(a)) + "%";
+  w.innerHTML = `<em>${t}</em>`;
+  lanesEl.appendChild(w);
+});
+function barBg(st){
+  return st.bar === "op" ? "repeating-linear-gradient(90deg,#f4f4f4 0 5px,#111 5px 10px)" : st.bar;
+}
+STYLES.forEach((st,i) => {
+  const b = document.createElement("button");
+  b.type = "button"; b.className = "bar"; b.dataset.i = i + 1;
+  b.style.left = pct(st.s) + "%";
+  b.style.width = (pct(st.e) - pct(st.s)) + "%";
+  b.style.top = `calc(var(--lane, 22px) * ${st.lane})`;
+  if (st.bar === "op") b.classList.add("op");
+  b.style.background = barBg(st);
+  b.title = `${st.zh}（${st.years}）`;
+  b.setAttribute("aria-label", `跳到${st.zh}，${st.years}`);
+  b.innerHTML = `<span>${st.short}</span>`;
+  b.addEventListener("click", () => pickStyle(i));
+  st.barEl = b;
+  lanesEl.appendChild(b);
+});
+for (let y = Y0; y <= Y1; y += 10) {
+  const t = document.createElement("div");
+  t.className = "tick" + (y % 50 === 0 || y % 25 === 0 ? " major" : "");
+  t.style.left = pct(y) + "%";
+  if (y % 25 === 0 || y === Y0) t.innerHTML = `<b>${y}</b>`;
+  axisEl.appendChild(t);
+}
+
+/* ---------- 章節 ---------- */
+const track = document.getElementById("track");
+const segColor = st => st.bar === "op" ? "#d8d8d8" : st.bar;
+
+function introPanel(){
+  const sec = document.createElement("section");
+  sec.className = "panel intro";
+  sec.setAttribute("aria-label","開場");
+  const rows = [[1,"第一段","反工業化的回望"],[2,"第二段","理性與秩序"],[3,"第三段","反叛與趣味"]].map(([k,a,b]) => {
+    const chips = STYLES.map((st,i)=>[st,i]).filter(([st])=>st.seg===k)
+      .map(([st,i]) => `<button type="button" class="chip" data-go="${i+1}" style="background:${st.bar==="op"?"repeating-linear-gradient(90deg,#fff 0 6px,#e6e6e6 6px 12px)":st.bar}">${st.zh}<small style="font-weight:500;opacity:.75"> ${st.years.replace("約 ","")}</small></button>`).join("");
+    return `<div class="segrow"><b>${a}<small>${b}</small></b><div class="chips">${chips}</div></div>`;
+  }).join("");
+  const picks = STYLES.map((st,i) => `<div class="fcard pick" role="button" tabindex="0" aria-pressed="false" aria-label="第 ${i+1} 張卡：猜猜看是哪個風格" style="--c:${st.bar === "op" ? "#151515" : st.bar}"><div class="fin"><div class="face front"><canvas data-draw="${st.id}" data-mini="1" aria-hidden="true"></canvas><span class="ptag"><b>${String(i+1).padStart(2,"0")}</b><span>這是哪個風格？</span></span></div><div class="face back"><b class="pname">${st.zh}</b><span class="pyear">${st.years}</span><p class="pmotto">${st.motto}</p><button type="button" class="btn pgo" data-go="${i+1}">前往 →</button></div></div></div>`).join("");
+  sec.innerHTML = `
+    <div class="info">
+      <p class="meta"><span class="num">00</span><span>1851–1990｜九個設計風格</span></p>
+      <h1>設計風格，跟著時代一起流動</h1>
+      <p class="lead">從工業革命到孟菲斯，往右滑動，看每一個風格在什麼時代出現、長什麼樣子，又回應了什麼。</p>
+      <p class="q">目標思考：設計風格為什麼會一直改變？</p>
+      <div class="segs">${rows}</div>
+      <p class="hint">操作：左右滑動、按 <kbd>←</kbd> <kbd>→</kbd> 或翻頁器換風格；每一頁的資訊都是卡牌，點一下就會翻開。想動手玩，切換到上方的「互動實驗室」。</p>
+    </div>
+    <div class="pickwrap">
+      <div class="picktools"><button type="button" class="btn" id="lucky">🎲 隨機抽一張</button><button type="button" class="btn flipall">全部翻開</button></div>
+      <div class="pickgrid">${picks}</div>
+      <small class="mnote">卡牌正面是依風格特徵繪製的示意圖形，非原作品。先猜猜看是哪個風格，再翻開對答案；翻開後按「前往」就會跳到那一頁。</small>
+    </div>`;
+  return sec;
+}
+
+const CONTEMP = {
+  arts:[
+    { n:3, needImg:"H&M Morris & Co 2018 磎花洋裝的商品照", t:"H&M Morris & Co 2018 floral dress", y:"2018 秋", k:"服飾", d:"H&M 和 1861 年創立、以印花布料、壁紙和家飾起家的 Morris & Co. 聯名，把 Snakehead、Love is Enough、The Brook 三款圖案做成襯衫、洋裝、外套和下著，搭配針織毛衣或牛仔褲，走英國鄉村的田園風。", f:"植物花卉圖案／藝術生活化", u:"https://thefemin.com/2018/10/morris-co-x-hm/", s:"The Femin" },
+    { n:3, needImg:"LOEWE × William Morris 2017 系列的商品照", t:"LOEWE William Morris 2017 collection", y:"2017 冬", k:"精品時裝", d:"LOEWE 用現代手法把 4 款莫里斯的壁紙與布料圖案放到外套、牛仔褲、T 恤、長裙和配件上，搭配刷舊丹寧。整個系列都看得到動物與花草，細節用亮橘色點綴，重新詮釋 19 世紀工匠以大自然為主題的設計。", f:"植物花卉與鳥獸圖案／藝術生活化", u:"https://www.gq.com.tw/fashion/content-34158", s:"GQ Taiwan" }
+  ],
+  nouveau:[
+    { n:2, img:"img/c-nouveau-1.jpg", ref:"https://commons.wikimedia.org/wiki/File:Anna_Sui_Cosmetics_In_Tokyo_2009.jpg", cap:"圖為 ANNA SUI 彩妝專櫃（東京）", cr:"Andrea Nanni／CC BY 2.0／Wikimedia Commons", t:"ANNA SUI COSMETICS｜Lipstick（2026 春季系列）", y:"2026 春", k:"彩妝", d:"黑色口紅外殼結合立體玫瑰、藤蔓浮雕與流動曲線，呈現浪漫、華麗且具有裝飾性的視覺語言，呼應新藝術運動從自然形態汲取靈感的特色。", f:"花卉藤蔓、流動曲線", u:"https://www.beauty321.com/post/6538", s:"Beauty321" },
+    { pair:[
+      { t:"《美少女戰士》Sailor Moon｜武內直子", y:"1990 年代起｜日本漫畫、動畫視覺文化", d:"以優雅女性人物、飄逸長髮、裝飾性構圖與浪漫氛圍作為觀察入口。Wazaiii 文章指出《美少女戰士》與 CLAMP 的女性人物畫風受到慕夏影響，適合與慕夏的人物海報進行視覺比較。", rel:"慕夏視覺語彙的當代影響；並非原始新藝術運動作品，也不是特定一張海報的直接仿作", u:"https://www.wazaiii.com/articles?id=art-artist-alfons-mucha-poster", s:"Wazaiii" },
+      { t:"《致敬．慕夏貓》｜陳萍坽 Ping-Ling Chen", y:"2022｜藝術微噴印刷作品，20 × 30 cm", d:"臺灣藝術家以貓咪為主角，明確以「致敬慕夏」為創作出發點，將經典風格的裝飾性肖像意象轉換成當代動物題材。可引導學生比較人物與動物主體如何透過構圖獲得相近的藝術氛圍。", rel:"藝術家明確致敬慕夏；為當代轉譯作品", u:"https://www.tba.tw/artworks/3363", s:"作品原圖／資料" }
+    ], k:"當代轉譯", t:"慕夏的當代影響：動漫與致敬作品", y:"1990 年代 → 2022" }
+  ],
+  destijl:[
+    { n:3, t:"Nike SB Dunk Low「Piet Mondrian」", y:"2008", k:"球鞋", d:"黃色鞋頭、紅色鞋跟、藍色後跟拉環，配上黑色線條。", f:"三原色＋黑色線條", u:"https://sothebys.com/en/buy/_Nike-SB-Dunk-Low-Piet-Mondrian-or-Size-11", s:"Sotheby's" },
+    { n:2, img:"img/c-destijl-2.jpg", ref:"https://commons.wikimedia.org/wiki/File:Den_Haag_-_Gemeente_Den_Haag_(39786836592).jpg", cap:"", cr:"Fred Romero／CC BY 2.0／Wikimedia Commons", t:"海牙市政廳｜蒙德里安風格外牆改造（2017）", y:"2017", k:"建築外牆", d:"適逢風格派成立百年，海牙市政府委託荷蘭設計工作室 Studio Vollaerszwart，用薄塑料貼片在市政廳外牆貼出紅、黃、藍、黑色塊，重現蒙德里安的《Composition with Red Yellow Blue and Black》，把整棟建築變成畫布。這是為期一年的「Mondrian to Dutch Design」活動的一部分，海牙美術館也推出「The Discovery of Mondrian」特展，展出超過 300 幅作品。", f:"三原色、橫豎線條", u:"https://www.damanwoo.com/node/89442", s:"大人物", xu:"https://www.dezeen.com/?p=1049629", xs:"Dezeen" }
+  ],
+  bauhaus:[
+    { n:2, needImg:"IKEA BAGGBODA 邊桌的照片", t:"IKEA BAGGBODA 邊桌", y:"2024 再推出", k:"家具", d:"由瑞典設計師 Karin Mobring 設計，1971 年就出現在 IKEA 型錄（當時叫 CROMI），後來收進「Nytillverkad」復刻系列重新推出。鍍鉻鋼管做桌腳，搭配白色桌面，造形簡單、能大量生產，看得到包浩斯鋼管家具的影子。", f:"功能、工業材料與量產", u:"https://www.ikea.com/us/en/p/baggboda-side-table-white-20556507", s:"IKEA" },
+    { n:2, needImg:"Bauhaus Dessau × adidas 運動服的照片", t:"Bauhaus Dessau × adidas 運動服", y:"2026", k:"服飾", d:"為了包浩斯德紹校舍百年推出的聯名運動服，也提醒大家：運動曾是包浩斯校園生活的一部分。", f:"簡潔幾何、功能", u:"https://bauhaus-dessau.de/en/adidas/", s:"Bauhaus Dessau" }
+  ],
+  deco:[
+    { n:3, img:"img/c-deco-1.jpg", ref:"https://commons.wikimedia.org/wiki/File:Hayashi_Department_Store_in_Tainan,_Taiwan_(%E6%9E%97%E7%99%BE%E8%B2%A8%EF%BC%89.jpg", cap:"", cr:"Lchung9779／CC0／Wikimedia Commons", t:"台南林百貨", y:"1932", k:"台灣建築", d:"建築結合圓形窗戶、幾何線條、階梯式立面與裝飾細節，展現 1930 年代裝飾藝術的摩登美學，也見證臺灣都市與商業文化的現代化發展。", f:"幾何、階梯形與摩登感", u:"https://www.lonelyplanet.com/pois/1538160", s:"Lonely Planet" },
+    { pair:[
+      { img:"img/c-deco-2.jpg", ref:"https://commons.wikimedia.org/wiki/File:Tainan_Art_Museum_Building_1.jpg", cr:"Mint2005／CC BY-SA 4.0／Wikimedia Commons", t:"臺南市美術館 1 館", tag:"裝飾藝術 Art Deco", arch:"梅澤捨次郎", y:"1931 年落成（原臺南警察署）", d:"具有對稱構圖、幾何裝飾、圓弧形轉角與層次分明的建築立面。", u:"https://twtainan.net/en/attractions/detail/4389", s:"臺南旅遊網" },
+      { t:"臺南市美術館 2 館", tag:"當代建築", arch:"坂茂、石昭永建築團隊", y:"當代", d:"利用白色幾何量體及鳳凰花意象發展的五角形屋頂，並非 Art Deco 建築。" }
+    ], k:"台灣建築", t:"臺南市美術館：1 館 vs 2 館", y:"1931 ↔ 當代", ask:"猜猜看：左右兩棟，哪一棟才是 Art Deco？" }
+  ],
+  modern:[
+    { img:"img/c-modern-1.jpg", ref:"https://commons.wikimedia.org/wiki/File:1987_Braun_calculator_ET66_by_Dieter_Rams_(13964223413).jpg", cap:"圖為 Braun ET66 計算機", cr:"Pinot Dita／CC BY-SA 2.0／Wikimedia Commons", t:"iPhone 計算機 ↔ Braun ET66", y:"1987 → iOS", k:"3C 介面", d:"Apple 早期的 iPhone 計算機介面參考了 Dieter Rams 與 Dietrich Lubs 為 Braun 設計的 ET66（1987），簡潔、功能清楚。", f:"形隨機能、去除裝飾", u:"https://en.wikipedia.org/wiki/Dieter_Rams", s:"Wikipedia" },
+    { img:"img/c-modern-2.jpg", ref:"https://commons.wikimedia.org/wiki/File:Tunghai_University_The_Luce_Chapel_-_19454233316.jpg", cap:"", cr:"Chi-Hung Lin／CC BY-SA 2.0／Wikimedia Commons", t:"東海大學路思義教堂", y:"1963", k:"台灣建築", d:"貝聿銘與陳其寬設計，用薄殼雙曲面結構，不用柱也不用梁，外型簡潔，靠結構本身表現造形。", f:"新結構技術、去除裝飾", u:"https://www.cna.com.tw/news/acul/201905170053.aspx", s:"中央社" }
+  ],
+  pop:[
+    { t:"UNIQLO UT × Andy Warhol", y:"2026", k:"服飾", d:"把沃荷的愛心絲網印刷作品重複排列在 T 恤上，新宿店限定。", f:"重複排列、大眾符號", u:"https://www.uniqlo.com/jp/ja/special-feature/shinjuku4u", s:"UNIQLO" },
+    { t:"KAWS + Warhol UT", y:"2024", k:"服飾", d:"結合 KAWS 與沃荷的圖像，做成 T 恤、托特包與襪子。", f:"流行文化翻玩", u:"https://www.uniqlo.com/dk/en/contents/feature/kaws-warhol", s:"UNIQLO" }
+  ],
+  op:[
+    { t:"Comme des Garçons 2001 春夏「Optical Shock」", y:"2001", k:"時裝", d:"把歐普藝術的圖案印在衣服、褲子、襪子和鞋子上。", f:"高對比、重複圖形", u:"https://anothermag.com/fashion-beauty/10516/ten-times-op-art-crossed-over-into-21st-century-fashion", s:"AnOther" },
+    { t:"Marc Jacobs 2013 春夏", y:"2013", k:"時裝", d:"以 1960 年代紐約為靈感，大量使用歐普藝術的黑白條紋與格紋。", f:"黑白幾何", u:"https://anothermag.com/fashion-beauty/10516/ten-times-op-art-crossed-over-into-21st-century-fashion", s:"AnOther" }
+  ],
+  post:[
+    { img:"img/c-post-1.jpg", ref:"https://commons.wikimedia.org/wiki/File:Memphis-Milano_Design_Collection.jpg", cap:"圖為孟菲斯家具收藏（非本展現場）", cr:"Dennis Zanone／CC BY-SA 3.0／Wikimedia Commons", t:"「自由形式｜孟菲斯風格家具展」", y:"2026", k:"台灣展覽", d:"在北藝大水星藝大書店展出台灣藏家收藏的孟菲斯風格家具。", f:"鮮豔色彩、幾何拼接", u:"https://www.tatlerasia.com/homes/architecture-design/memphis-style-exhibition-2026-zh-hant", s:"Tatler Asia" },
+    { img:"img/c-post-2.jpg", ref:"https://commons.wikimedia.org/wiki/File:Camille_Walala_Mural_(51426901030).jpg", cap:"", cr:"Alex Liivet／CC0／Wikimedia Commons", t:"Camille Walala 的彩色壁畫與空間", y:"2010 年代起", k:"公共藝術", d:"年輕一代受孟菲斯影響的代表，用大膽色塊和圖案改造牆面與建築。", f:"打破規則、混搭有趣", u:"https://ribaj.com/culture/memphis-plastic-field-mk-gallery-exhibition-post-modern-design-movement-colour-fun", s:"RIBA Journal" }
+  ]
+};
+function upBtn(slot){ return `<label class="upbtn" hidden><input type="file" accept="image/*" data-up="${slot}" aria-label="上傳 ${slot} 的圖片">上傳圖片</label>`; }
+function pairCard(c, slot){
+  const slots = c.pair.map((p,k) => { const s = k ? slot + "-" + (k+1) : slot; return p.img ? `<div class="fimg" data-slot="${s}"><img src="${p.img}" alt="${p.t}" loading="lazy">${upBtn(s).replace("上傳圖片", "換圖")}</div>` : `<div class="fimg fimg-need" data-slot="${s}"><span>待補圖片 ${k+1}</span>${upBtn(s)}</div>`; }).join("");
+  const labs = c.pair.map((p,k) => `<span><b>${k ? "右" : "左"}</b>${p.t.split("｜")[0]}</span>`).join("");
+  const secs = c.pair.map((p,k) => `<div class="psec"><b class="fq">${k ? "右" : "左"}｜${p.t}</b>${p.tag ? `<p class="cmeta"><span>${p.tag}</span></p>` : ""}${p.arch ? `<p class="fsmall">建築師｜${p.arch}</p>` : ""}<p class="fsmall">${p.y}</p><p>${p.d}</p>${p.rel ? `<p class="fsmall">與派別關係｜${p.rel}</p>` : ""}${p.cr ? `<p class="fsmall" data-credit="${k ? slot + "-" + (k+1) : slot}">圖片：${p.cr}</p>` : ""}${p.u ? `<a href="${p.u}" target="_blank" rel="noopener">${p.s} ↗</a>` : ""}</div>`).join("");
+  return fcard(`<div class="fimg3" style="--n:${c.pair.length}">${slots}</div><p class="pairlab">${labs}</p><p class="cmeta"><span>${c.k}</span>${c.y}</p><b class="fq">${c.t}</b><p class="fsmall">${c.ask || "猜猜看：左右兩件作品，哪裡像慕夏？"}</p>`,
+    `<div class="pairback">${secs}</div>${c.q ? `<p class="fsmall"><b>課堂提問</b>　${c.q}</p>` : ""}`, "paircard");
+}
+function fcard(front, back, cls = ""){
+  return `<div class="fcard ${cls}" role="button" tabindex="0" aria-pressed="false"><div class="fin"><div class="face front">${front}<span class="fhint">點一下翻開 ↻</span></div><div class="face back">${back}</div></div></div>`;
+}
+function stylePanel(st,i){
+  const sec = document.createElement("section");
+  sec.className = "panel";
+  sec.id = "s-" + st.id;
+  sec.setAttribute("aria-label", st.zh);
+  sec.style.cssText = `--accent:${st.accent};--on-accent:${st.onAccent||"#fff"}`;
+  const W = WORK[st.id] || {};
+  const basics = [
+    fcard(`<b class="fq">什麼時候？在哪裡？</b>`, `<b class="fbig">${st.years}</b><p>${st.region}</p><p class="fsmall">關鍵事件：${st.event[1]}</p>`),
+    fcard(`<b class="fq">為什麼會出現？</b>`, `<p>${st.context}</p>`, "wide"),
+    fcard(`<b class="fq">記憶口訣是？</b>`, `<b class="fmotto">${st.motto}</b>`),
+    fcard(`<b class="fq">它和前後的風格有什麼關係？</b>`, `<p>${st.link}</p>`, "wide")
+  ].join("");
+  const feats = st.features.map((f,k) => fcard(
+    `<span class="fnum">${String(k+1).padStart(2,"0")}</span><b class="fq">${MODES[st.id][k][0]}</b><p class="fsmall">這個特徵是什麼意思？</p>`,
+    `<p>${f}</p><button type="button" class="tolab" data-lab="${i}" data-tool="${k}">到互動實驗室試試 →</button>`)).join("");
+  const works = W.slides
+    ? W.slides.map((w,j) => w.src
+        ? fcard(`<div class="fimg"><img src="${w.src}" alt="${w.who}${w.title}" loading="lazy"></div><b class="fq">猜猜看：這是哪件作品？</b>`,
+            `<b class="fq">${w.title}</b><p>${w.who}｜${w.year}</p><p class="fsmall">${w.note}｜${w.credit ? "圖片：" + w.credit : "圖片取自教案附圖"}</p>${w.ref ? `<a href="${w.ref}" target="_blank" rel="noopener">圖片原始檔案 ↗</a>` : ""}`, "wcard")
+        : fcard(`<div class="fimg fimg-need" data-slot="${st.id}-${j+1}"><span>待補圖片</span>${upBtn(st.id + "-" + (j+1))}</div><b class="fq">${w.title}</b><p class="fsmall">猜猜看：是誰、哪一年做的？</p>`,
+            `<b class="fq">${w.title}</b><p>${w.who}｜${w.year}</p><p class="fsmall" data-credit="${st.id}-${j+1}">${w.note}｜圖片待補</p>`, "wcard")).join("")
+    : fcard(`<b class="fq">代表作品有哪些？</b>`, `<ul class="flist">${st.works.map(([w,y]) => `<li>${w}（${y}）</li>`).join("")}</ul><p class="fsmall">待補作品圖片：${W.need || ""}</p>`, "wide");
+  const cimg = (c,slot) => c.n > 1 ? `<div class="fimg3" style="--n:${c.n}">${Array.from({length:c.n}, (_,k) => { const s = k ? slot + "-" + (k+1) : slot; return !k && c.img ? `<div class="fimg" data-slot="${s}"><img src="${c.img}" alt="${c.t}" loading="lazy">${upBtn(s).replace("上傳圖片", "換圖")}</div>` : `<div class="fimg fimg-need" data-slot="${s}"><span>待補圖片 ${k+1}</span>${upBtn(s)}</div>`; }).join("")}</div>` : c.img ? `<div class="fimg" data-slot="${slot}"><img src="${c.img}" alt="${c.t}" loading="lazy">${upBtn(slot).replace("上傳圖片", "換圖")}</div>` : `<div class="fimg fimg-need" data-slot="${slot}"><span>待補圖片<br><small>${c.needImg || c.t}</small></span>${upBtn(slot)}</div>`;
+  const cont = (CONTEMP[st.id] || []).map((c,j) => c.pair ? pairCard(c, "c-" + st.id + "-" + (j+1)) : fcard(
+    `${cimg(c, "c-" + st.id + "-" + (j+1))}<p class="cmeta"><span>${c.k}</span>${c.y}</p><b class="fq">${c.t}</b><p class="fsmall">猜猜看：它用了哪個造形特徵？</p>`,
+    `<p>${c.d}</p><p class="fsmall">對應特徵：${c.f}</p>${c.x ? `<p class="fsmall">${c.x.replace("</b>", "</b><br>")}</p>` : ""}<p class="fsmall" data-credit="c-${st.id}-${j+1}" ${c.cr ? "" : "hidden"}>${c.cr ? (c.cap ? c.cap + "。" : "") + "圖片：" + c.cr : ""}</p><a href="${c.u}" target="_blank" rel="noopener">資料來源：${c.s} ↗</a>${c.xu ? `<a href="${c.xu}" target="_blank" rel="noopener">延伸閱讀：${c.xs} ↗</a>` : ""}${c.ref ? `<a class="imgref" href="${c.ref}" target="_blank" rel="noopener">圖片原始檔案 ↗</a>` : ""}`)).join("");
+  sec.innerHTML = `
+    <div class="wrap">
+      <header class="phead">
+        <p class="meta"><span class="num">${String(i+1).padStart(2,"0")} / 09</span><span class="seg">${SEGS[st.seg]}</span></p>
+        <h2><span class="zh">${st.zh}</span><span class="en">${st.en}</span></h2>
+        <div class="ptools"><button type="button" class="btn flipall">全部翻開</button><button type="button" class="btn tolab" data-lab="${i}">到互動實驗室玩「${st.zh}」→</button></div>
+      </header>
+      <section class="blk"><h3>認識這個風格</h3><div class="fgrid">${basics}</div></section>
+      <section class="blk"><h3>造形特徵</h3><div class="fgrid">${feats}</div></section>
+      <section class="blk"><h3>作品範例</h3><div class="fgrid works3">${works}</div></section>
+      ${cont ? `<section class="blk"><h3>今天在哪裡看得到</h3><div class="fgrid two">${cont}</div></section>` : ""}
+    </div>`;
+  return sec;
+}
+
+function outroPanel(){
+  const sec = document.createElement("section");
+  sec.className = "panel outro";
+  sec.setAttribute("aria-label","總覽");
+  const axis = [1850,1875,1900,1925,1950,1975,2000].map(y=>`<b style="left:${pct(y)}%">${y}</b>`).join("");
+  const wars = WARS.map(([a,b])=>`<span class="gwar" style="left:${pct(a)}%;width:${pct(b)-pct(a)}%"></span>`).join("");
+  const rows = STYLES.map((st,i)=>`
+    <button type="button" class="grow" data-go="${i+1}" aria-label="跳到${st.zh}">
+      <span class="gl">${st.zh}</span>
+      <span class="gtrack">${wars}<span class="gbar" style="left:${pct(st.s)}%;width:${pct(st.e)-pct(st.s)}%;background:${barBg(st)}"></span><span class="glab" style="${st.e>1960?`right:${100-pct(st.s)}%`:`left:${pct(st.e)}%`}">${st.s}–${st.e}</span></span>
+    </button>`).join("");
+  const ans = [
+    ["#b89363","新技術與新材料","機器生產、鑄鐵與玻璃、鋼管、塑膠與印刷，讓新的造形變得做得出來。"],
+    ["#e0342a","社會與戰爭","兩次世界大戰前後，人們需要重建、秩序、奢華或宣洩，風格跟著轉向。"],
+    ["#3d6fd6","對上一個風格的反動","手工對抗機械、「少即是多」對上「少則無聊」，每一代都在回應上一代。"],
+    ["#ff4fa8","新的傳播媒介","博覽會、雜誌、電視與廣告，讓風格傳得更快、更廣。"]
+  ].map(([c,t,d],k)=>`<div style="--accent:${c}">${fcard(`<span class="fnum">${"①②③④"[k]}</span><b class="fq">原因 ${k+1}</b><p class="fsmall">先想一想，再翻開</p>`, `<b class="fq">${t}</b><p>${d}</p>`)}</div>`).join("");
+  sec.innerHTML = `
+    <div class="info">
+      <p class="meta"><span class="num">總覽</span><span>九個風格放在同一條時間線上</span></p>
+      <h1 style="font-size:clamp(2rem,2.3vw + 2vh,3.6rem);line-height:1.15">設計風格為什麼會一直改變？</h1>
+      <p class="lead">先和旁邊的同學說說看你的想法，再一張一張翻開對照。也觀察下方的年代圖：戰爭（斜線區）的前後，各出現了哪些風格？</p>
+      <div class="fgrid two answers2">${ans}</div>
+    </div>
+    <div class="gantt" aria-label="風格年代總覽圖">
+      <h3>年代總覽（點一下可跳回該風格）</h3>
+      ${rows}
+      <div class="gaxis"><span></span><div>${axis}</div></div>
+    </div>`;
+  return sec;
+}
+
+const panels = [introPanel(), ...STYLES.map(stylePanel), outroPanel()];
+panels.forEach(p => track.appendChild(p));
+document.querySelectorAll("[data-go]").forEach(b => b.addEventListener("click", () => go(+b.dataset.go)));
+/* ---------- 翻卡牌 ---------- */
+function syncProg(panel){
+  const all = panel.querySelectorAll(".fcard"), on = panel.querySelectorAll(".fcard.flipped");
+  const pg = panel.querySelector(".fprog"), btn = panel.querySelector(".flipall");
+  if (pg) pg.textContent = `已翻開 ${on.length} / ${all.length} 張`;
+  if (btn) btn.textContent = on.length === all.length ? "全部蓋回" : "全部翻開";
+}
+function flip(card, v){ const f = v === undefined ? !card.classList.contains("flipped") : v; card.classList.toggle("flipped", f); card.setAttribute("aria-pressed", String(f)); }
+document.addEventListener("click", e => {
+  if (e.target.closest("a, button, label, input")) return;
+  const card = e.target.closest(".fcard"); if (!card) return;
+  flip(card); syncProg(card.closest(".panel"));
+});
+document.addEventListener("keydown", e => {
+  const card = e.target.closest && e.target.closest(".fcard");
+  if (!card || e.target !== card || !(e.key === "Enter" || e.key === " ")) return;
+  e.preventDefault(); flip(card); syncProg(card.closest(".panel"));
+});
+document.querySelectorAll(".flipall").forEach(b => b.addEventListener("click", () => {
+  const panel = b.closest(".panel"), cards = [...panel.querySelectorAll(".fcard")];
+  const allOn = cards.every(c => c.classList.contains("flipped"));
+  cards.forEach((c,k) => setTimeout(() => { flip(c, !allOn); if (k === cards.length - 1) syncProg(panel); }, reduce ? 0 : k*40));
+}));
+panels.forEach(syncProg);
+document.getElementById("lucky").addEventListener("click", () => {
+  const panel = panels[0], all = [...panel.querySelectorAll(".pick")];
+  let pool = all.filter(c => !c.classList.contains("flipped"));
+  if (!pool.length) { all.forEach(c => flip(c, false)); pool = all; }
+  const card = pool[Math.floor(Math.random()*pool.length)];
+  card.classList.remove("lucky"); void card.offsetWidth; card.classList.add("lucky");
+  setTimeout(() => { flip(card, true); syncProg(panel); }, reduce ? 0 : 650);
+});
+
+/* ---------- 導覽 ---------- */
+const dotsEl = document.getElementById("dots");
+const names = ["開場", ...STYLES.map(s=>s.zh), "總覽"];
+const dots = names.map((n,i) => {
+  const d = document.createElement("button");
+  d.type = "button"; d.className = "dot"; d.title = n; d.setAttribute("aria-label", n);
+  d.addEventListener("click", () => go(i));
+  dotsEl.appendChild(d);
+  return d;
+});
+const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+let cur = 0, view = "cards", labIdx = 0;
+const appEl = document.querySelector(".app"), labEl = document.getElementById("lab");
+function setView(v){
+  view = v; appEl.dataset.view = v; labEl.hidden = v !== "lab";
+  document.querySelectorAll(".vswitch button").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.v === v)));
+  if (v === "lab") { if (cur >= 1 && cur <= STYLES.length) labIdx = cur - 1; setLab(labIdx); }
+  else requestAnimationFrame(() => track.scrollTo({ left: cur*track.clientWidth, behavior: "auto" }));
+  update();
+}
+function pickStyle(i){ view === "lab" ? setLab(i) : go(i + 1); }
+function step(d){ view === "lab" ? setLab(labIdx + d) : go(cur + d); }
+function go(i){
+  i = Math.max(0, Math.min(panels.length - 1, i));
+  track.scrollTo({ left: i * track.clientWidth, behavior: reduce ? "auto" : "smooth" });
+  if (i !== cur) { cur = i; update(); }
+}
+track.addEventListener("scroll", () => {
+  const i = Math.round(track.scrollLeft / track.clientWidth);
+  if (i !== cur) { cur = i; update(); }
+}, { passive:true });
+
+const needle = document.getElementById("needle");
+const needleLabel = document.getElementById("needleLabel");
+function update(){
+  const lab = view === "lab";
+  dots.forEach((d,i) => d.setAttribute("aria-current", String(!lab && i === cur)));
+  document.getElementById("count").textContent = lab ? `實驗室 ${labIdx + 1} / ${STYLES.length}` : `${cur + 1} / ${panels.length}`;
+  document.getElementById("prev").disabled = lab ? labIdx === 0 : cur === 0;
+  document.getElementById("next").disabled = lab ? labIdx === STYLES.length - 1 : cur === panels.length - 1;
+  const st = lab ? STYLES[labIdx] : STYLES[cur - 1];
+  STYLES.forEach(s => { s.barEl.classList.toggle("on", s === st); s.barEl.classList.toggle("dim", !!st && s !== st); });
+  const root = document.documentElement;
+  const nowColor = st ? (st.bar === "op" ? "#151515" : st.bar) : "#151515";
+  root.style.setProperty("--now", nowColor);
+  if (st) st.barEl.style.setProperty("--glow", nowColor);
+  document.getElementById("bigYear").textContent = st ? st.years.replace("約 ","") : (cur === 0 ? "1851–1990" : "總覽");
+  document.getElementById("bigName").textContent = st ? st.zh : (cur === 0 ? "九個設計風格" : "放在同一條時間線上");
+  if (st) {
+    needle.classList.remove("hide");
+    needle.style.left = pct(st.event[0]) + "%";
+    needleLabel.textContent = st.event[1];
+    const p = pct(st.event[0]);
+    needleLabel.style.transform = p < 12 ? "translateX(0)" : p > 82 ? "translateX(-100%)" : "translateX(-50%)";
+  } else {
+    needle.classList.add("hide");
+  }
+  startLoop();
+}
+
+/* 上下捲動＝閱讀該頁內容；左右滑動、方向鍵、翻頁器＝換風格 */
+
+window.addEventListener("keydown", e => {
+  if (e.target.closest && e.target.closest(".fcard")) { if (!["ArrowRight","ArrowLeft","PageDown","PageUp"].includes(e.key)) return; }
+  if (["ArrowRight","PageDown"].includes(e.key)) { e.preventDefault(); step(1); }
+  else if (["ArrowLeft","PageUp"].includes(e.key)) { e.preventDefault(); step(-1); }
+  else if (e.key === "Home") { e.preventDefault(); go(0); }
+  else if (e.key === "End") { e.preventDefault(); go(panels.length - 1); }
+});
+document.getElementById("prev").addEventListener("click", () => step(-1));
+document.getElementById("next").addEventListener("click", () => step(1));
+
+let paused = reduce;
+const pauseBtn = document.getElementById("pause");
+function syncPause(){ pauseBtn.textContent = paused ? "播放動畫" : "暫停動畫"; pauseBtn.setAttribute("aria-pressed", String(paused)); }
+pauseBtn.addEventListener("click", () => { paused = !paused; syncPause(); startLoop(); });
+syncPause();
+
+/* ---------- 圖形 ---------- */
+function rng(seed){ return function(){ seed |= 0; seed = seed + 0x6D2B79F5 | 0; let t = Math.imul(seed ^ seed >>> 15, 1 | seed); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+const seeds = { destijl:7, post:5 };
+
+/* 每張互動圖的狀態：tool 是目前選的造形特徵 */
+const INIT = {
+  arts:()=>({ tool:0, cw:0, flowers:[], birds:[] }),
+  nouveau:()=>({ tool:0, vines:[], whips:[], bugs:[], gl:0 }),
+  destijl:()=>({ tool:0, over:{}, splits:[], leaves:[], colors:[] }),
+  bauhaus:()=>({ tool:0, shapes:[], next:0, snap:false }),
+  deco:()=>({ tool:0, mat:0, flash:-1e9, rays:36, steps:5 }),
+  modern:()=>({ tool:0, blds:[], gone:[0,0,0,0], xray:false }),
+  pop:()=>({ tool:0, bursts:[], next:0, pal:0, rep:false }),
+  op:()=>({ tool:0, cx:null, cy:null, tx:0, ty:0, k:.55, tk:.55, fixed:false, pal:0, pat:0 }),
+  post:()=>({ tool:0, items:[], hist:[], bg:0 })
+};
+const S = {};
+Object.keys(INIT).forEach(k => S[k] = INIT[k]());
+const now = () => performance.now();
+const grow = (t0, dur) => paused ? 1 : Math.max(0, Math.min(1, (now() - t0) / dur));
+const easeBack = p => { const a = 1.70158, b = a + 1; return 1 + b*Math.pow(p - 1, 3) + a*Math.pow(p - 1, 2); };
+const pick = arr => arr[Math.floor(Math.random()*arr.length)];
+
+const ARTS_CW = [
+  { bg:"#22304a", stem:"#7d8f5a", la:"#6f8150", lb:"#93a36a", petal:"#b5452f", mid:"#e8c873", berry:"#c0573c", dot:"#e6dcc3", bird:"#c8b48a", wing:"#6e5f44", breast:"#efe3c4", hare:"#b9a27a" },
+  { bg:"#efe6d2", stem:"#5f6e43", la:"#7d8f5a", lb:"#a7b47c", petal:"#a33b2b", mid:"#d9a63a", berry:"#2b4a7a", dot:"#a33b2b", bird:"#6b5a3f", wing:"#2b4a7a", breast:"#d8c79e", hare:"#8a7656" },
+  { bg:"#3d4a2a", stem:"#c9b77a", la:"#8c9c63", lb:"#b7c48a", petal:"#e8c873", mid:"#a33b2b", berry:"#efe6d2", dot:"#efe6d2", bird:"#d9c38e", wing:"#8a3a2a", breast:"#efe6d2", hare:"#cdb98a" }
+];
+const DECO_M = [
+  { gold:"#d4af5a", light:"#f3dc98", dark:"#a8802e", bg:"#0e1719", shine:"250,232,170" },
+  { gold:"#c9ced6", light:"#f4f6f9", dark:"#7d8591", bg:"#121a2b", shine:"235,240,250" },
+  { gold:"#d4af5a", light:"#f3dc98", dark:"#a8802e", bg:"#0f3b34", shine:"250,232,170" }
+];
+const NOUV_GLASS = [
+  ["#c7d9b0","#e9c46a","#9fc2c7","#d98b6a","#b9c98f","#e2b4a0","#a9c6bf"],
+  ["#7fa7c9","#b7d3e8","#e9c46a","#5f8fb3","#cfe1ee","#9fc2c7","#f1dca0"],
+  ["#c25b4a","#e9a35a","#f2d07a","#8f3b3b","#e7b48a","#d98b6a","#f6e2b0"],
+  ["#8fae58","#c7d9b0","#6f8f4a","#e9c46a","#a9c6bf","#b9c98f","#dfe8c6"]
+];
+const DESTIJL_CYCLE = ["#f6f4ee","#d52b1e","#f2c200","#1f3f99","#111"];
+const POP_PALS = [
+  { bg:"#ffd400", dot:"#e5007e", circ:"#00a0e9", burst:"#e5262a" },
+  { bg:"#00a0e9", dot:"#ffd400", circ:"#e5007e", burst:"#7fd13b" },
+  { bg:"#e5007e", dot:"#00a0e9", circ:"#ffd400", burst:"#ff8a00" },
+  { bg:"#7fd13b", dot:"#111111", circ:"#ffffff", burst:"#e5262a" }
+];
+const OP_PALS = [["#f4f4f4","#0b0b0b"],["#fff3e6","#d1342f"],["#eef6ff","#1f3f99"],["#fffbe0","#1b7f5b"]];
+const POST_BGS = ["#f9c5d1","#bfe9e3","#ffe27a","#d9ccff"];
+const POST_COLS = ["#2bb3a3","#ffd23f","#3a5bd9","#e84a8a","#111","#ffffff"];
+
+function artsBird(c, s, P, x, y, dir){
+  c.save(); c.translate(x, y); c.scale(dir, 1);
+  c.strokeStyle = P.wing; c.lineWidth = s*.01; c.lineCap = "round";
+  c.beginPath(); c.moveTo(-s*.01, s*.05); c.lineTo(-s*.02, s*.09); c.moveTo(s*.03, s*.05); c.lineTo(s*.03, s*.09); c.stroke();
+  c.fillStyle = P.wing; c.beginPath(); c.moveTo(-s*.08, 0); c.lineTo(-s*.2, -s*.035); c.lineTo(-s*.19, s*.035); c.closePath(); c.fill();
+  c.fillStyle = P.bird; c.beginPath(); c.ellipse(0, 0, s*.11, s*.062, -.2, 0, Math.PI*2); c.fill();
+  c.fillStyle = P.breast; c.beginPath(); c.ellipse(s*.04, s*.015, s*.06, s*.038, -.2, 0, Math.PI*2); c.fill();
+  c.fillStyle = P.bird; c.beginPath(); c.arc(s*.095, -s*.05, s*.045, 0, Math.PI*2); c.fill();
+  c.fillStyle = P.mid; c.beginPath(); c.moveTo(s*.135, -s*.06); c.lineTo(s*.18, -s*.045); c.lineTo(s*.135, -s*.035); c.closePath(); c.fill();
+  c.fillStyle = "#1b1b1b"; c.beginPath(); c.arc(s*.105, -s*.058, s*.009, 0, Math.PI*2); c.fill();
+  c.fillStyle = P.wing; c.beginPath(); c.ellipse(-s*.02, -s*.01, s*.07, s*.034, -.35, 0, Math.PI*2); c.fill();
+  c.fillStyle = P.breast; for (const [dx,dy] of [[-.05,-.015],[-.02,-.025],[.01,-.012]]) { c.beginPath(); c.arc(s*dx, s*dy, s*.008, 0, Math.PI*2); c.fill(); }
+  c.restore();
+}
+function artsHare(c, s, P, x, y, dir){
+  c.save(); c.translate(x, y); c.scale(dir, 1);
+  c.fillStyle = P.hare;
+  c.beginPath(); c.ellipse(0, 0, s*.075, s*.05, 0, 0, Math.PI*2); c.fill();
+  c.beginPath(); c.arc(s*.07, -s*.04, s*.032, 0, Math.PI*2); c.fill();
+  c.beginPath(); c.ellipse(s*.055, -s*.1, s*.012, s*.042, -.25, 0, Math.PI*2); c.fill();
+  c.beginPath(); c.ellipse(s*.075, -s*.1, s*.012, s*.042, .1, 0, Math.PI*2); c.fill();
+  c.fillStyle = P.breast; c.beginPath(); c.arc(-s*.075, -s*.01, s*.018, 0, Math.PI*2); c.fill();
+  c.fillStyle = "#1b1b1b"; c.beginPath(); c.arc(s*.082, -s*.045, s*.007, 0, Math.PI*2); c.fill();
+  c.restore();
+}
+function vine(c, m, h, bx, amp, reach, col, sway, p, dir){
+  let px = null, py = null, ex = bx, ey = h;
+  for (let s = 0; s <= p + 1e-4; s += .01) {
+    const y = h * (1.02 - s * reach), x = bx + amp * Math.sin(s * Math.PI * 1.35 + sway) * (.35 + s);
+    if (px !== null) { c.strokeStyle = col; c.lineCap = "round"; c.lineWidth = (1 - s) * m * .022 + 1.5; c.beginPath(); c.moveTo(px,py); c.lineTo(x,y); c.stroke(); }
+    if (Math.abs(s - .55) < .005) { c.save(); c.translate(x,y); c.rotate(dir > 0 ? .5 : -.5); c.fillStyle = "#6f8150"; c.beginPath(); c.ellipse(m*.05*dir, 0, m*.055, m*.018, 0, 0, Math.PI*2); c.fill(); c.restore(); }
+    px = x; py = y; ex = x; ey = y;
+  }
+  if (p < 1) return;
+  const R = m * .045, cx = ex + dir * R, a0 = dir > 0 ? Math.PI : 0;
+  c.strokeStyle = col; c.lineWidth = 2; c.beginPath();
+  for (let a = 0; a <= Math.PI * 3.5; a += .1) { const rr = R * (1 - a / (Math.PI * 4)); const xx = cx + rr * Math.cos(a0 + dir * a), yy = ey + rr * Math.sin(a0 + dir * a); a === 0 ? c.moveTo(xx,yy) : c.lineTo(xx,yy); }
+  c.stroke();
+  c.save(); c.translate(ex, ey - m*.02);
+  for (let q = 0; q < 5; q++) { c.rotate(Math.PI*2/5); c.fillStyle = "#f6efe0"; c.strokeStyle = "#7a2f3b"; c.lineWidth = 1.5; c.beginPath(); c.ellipse(0, -m*.035, m*.018, m*.04, 0, 0, Math.PI*2); c.fill(); c.stroke(); }
+  c.fillStyle = "#c79a3b"; c.beginPath(); c.arc(0,0,m*.012,0,Math.PI*2); c.fill(); c.restore();
+}
+function whip(c, m, wp, p){
+  const L = wp.len; let px = wp.x, py = wp.y;
+  for (let s = .02; s <= p + 1e-4; s += .02) {
+    const x = wp.x + wp.dir*s*L, y = wp.y - Math.sin(s*Math.PI)*L*.32 + Math.sin(s*Math.PI*2)*L*.14;
+    c.strokeStyle = wp.col; c.lineCap = "round"; c.lineWidth = (1 - s*.85)*m*.022 + 1.2;
+    c.beginPath(); c.moveTo(px,py); c.lineTo(x,y); c.stroke(); px = x; py = y;
+  }
+  if (p < 1) return;
+  const R = m*.04; c.lineWidth = 2.2; c.beginPath();
+  for (let a = 0; a <= Math.PI*3.2; a += .12) { const rr = R*(1 - a/(Math.PI*3.6)); const xx = px + wp.dir*(R - rr*Math.cos(a)), yy = py - rr*Math.sin(a); a ? c.lineTo(xx,yy) : c.moveTo(xx,yy); }
+  c.stroke();
+}
+function dragonfly(c, m, x, y, t, rot){
+  const flap = .75 + .25*Math.sin(t*.012);
+  c.save(); c.translate(x, y); c.rotate(rot);
+  c.fillStyle = "rgba(159,194,199,.55)"; c.strokeStyle = "#4c5b2e"; c.lineWidth = 1.2;
+  for (const [ox, sy2, len] of [[-m*.005,-1,m*.09],[-m*.005,1,m*.09],[m*.02,-1,m*.075],[m*.02,1,m*.075]]) { c.save(); c.translate(ox, 0); c.rotate(sy2*(.25 + (ox > 0 ? .35 : 0))); c.beginPath(); c.ellipse(0, sy2*len*.5, m*.016, len*.5*flap, 0, 0, Math.PI*2); c.fill(); c.stroke(); c.restore(); }
+  c.strokeStyle = "#3d3a2a"; c.lineWidth = m*.011; c.lineCap = "round"; c.beginPath(); c.moveTo(m*.04, 0); c.lineTo(-m*.11, 0); c.stroke();
+  c.fillStyle = "#3d3a2a"; c.beginPath(); c.arc(m*.045, 0, m*.012, 0, Math.PI*2); c.fill();
+  c.restore();
+}
+function burst(c, x, y, ri, ro, n){
+  c.beginPath();
+  for (let i = 0; i < n*2; i++) { const a = i*Math.PI/n - Math.PI/2, rr = i%2 ? ri : ro*(i%4 ? .9 : 1); const px = x + Math.cos(a)*rr, py = y + Math.sin(a)*rr; i ? c.lineTo(px,py) : c.moveTo(px,py); }
+  c.closePath();
+}
+function popWord(c, txt, x, y, size, rot){ c.save(); c.translate(x, y); c.rotate(rot); c.font = `${size}px "Bangers",cursive`; c.textAlign = "center"; c.textBaseline = "middle"; c.lineJoin = "round"; c.lineWidth = size*.09; c.strokeStyle = "#111"; c.strokeText(txt, 0, 0); c.fillStyle = "#fff"; c.fillText(txt, 0, 0); c.restore(); }
+function popScene(c, w, h, t, P){
+  const m = Math.min(w,h);
+  c.fillStyle = P.bg; c.fillRect(0,0,w,h);
+  const sp = Math.max(9, m/26), maxd = Math.hypot(w,h);
+  c.fillStyle = P.dot;
+  for (let y = 0, row = 0; y < h + sp; y += sp*.87, row++) for (let x = (row%2)*sp/2; x < w + sp; x += sp) { const d = Math.hypot(w - x, h - y); const rr = sp*.48*(1 - d/maxd)*1.3; if (rr > .6) { c.beginPath(); c.arc(x,y,Math.min(rr, sp*.5),0,Math.PI*2); c.fill(); } }
+  c.fillStyle = P.circ; c.strokeStyle = "#111"; c.lineWidth = m*.012;
+  c.beginPath(); c.arc(w*.24, h*.26, m*.16, 0, Math.PI*2); c.fill(); c.stroke();
+  c.fillStyle = P.circ === "#ffffff" ? "#111" : "#fff"; const ds = Math.max(6, m*.022);
+  for (let y = -m*.16; y < m*.16; y += ds) for (let x = -m*.16; x < m*.16; x += ds) if (Math.hypot(x,y) < m*.14) { c.beginPath(); c.arc(w*.24 + x, h*.26 + y, ds*.24, 0, Math.PI*2); c.fill(); }
+  const pulse = 1 + .025*Math.sin(t*.004), sx = w*.56, sy = h*.55;
+  burst(c, sx, sy, m*.22*pulse, m*.38*pulse, 18);
+  c.fillStyle = P.burst; c.fill(); c.lineWidth = m*.014; c.strokeStyle = "#111"; c.stroke();
+  popWord(c, "POP!", sx, sy, m*.2, -.1);
+}
+function postShape(c, m, it, t){
+  const sc = easeBack(grow(it.t0, 500)), s = m * it.size;
+  c.save(); c.translate(it.x, it.y + Math.sin(t*.0015 + it.ph)*m*.008); c.rotate(it.rot); c.scale(sc, sc);
+  c.fillStyle = it.col; c.strokeStyle = "#111"; c.lineWidth = 3; c.lineCap = "round"; c.lineJoin = "round";
+  if (it.type === "tri") { c.beginPath(); c.moveTo(0,-s); c.lineTo(s*.95, s*.7); c.lineTo(-s*.95, s*.7); c.closePath(); c.fill(); c.stroke(); }
+  else if (it.type === "circ") { c.beginPath(); c.arc(0,0,s*.8,0,Math.PI*2); c.fill(); c.stroke(); }
+  else if (it.type === "half") { c.beginPath(); c.arc(0,0,s*.9,Math.PI,0); c.closePath(); c.fill(); c.stroke(); }
+  else if (it.type === "stripe") { c.save(); c.beginPath(); c.rect(-s,-s*.6,s*2,s*1.2); c.clip(); c.fillStyle = "#fff"; c.fillRect(-s,-s*.6,s*2,s*1.2); c.lineWidth = 5; for (let x = -s*2; x < s; x += 12) { c.beginPath(); c.moveTo(x, s*.6); c.lineTo(x + s*1.2, -s*.6); c.stroke(); } c.restore(); c.lineWidth = 3; c.strokeRect(-s,-s*.6,s*2,s*1.2); }
+  else { c.strokeStyle = it.col === "#ffffff" ? "#111" : it.col; c.lineWidth = m*.016; c.beginPath(); for (let x = -s*1.4; x <= s*1.4; x += 3) { const y = it.type === "zig" ? (Math.abs(((x/(s*.35)) % 2 + 2) % 2 - 1) - .5) * s*.6 : Math.sin(x/(s*.25)) * s*.3; x === -s*1.4 ? c.moveTo(x,y) : c.lineTo(x,y); } c.stroke(); }
+  c.restore();
+}
+function postHist(c, m, it){
+  const sc = Math.max(.01, easeBack(grow(it.t0, 500))), s = m*.085;
+  c.save(); c.translate(it.x, it.y); c.rotate(it.rot); c.scale(sc, sc);
+  c.lineWidth = 3; c.strokeStyle = "#111"; c.lineJoin = "round";
+  if (it.type === "col") {
+    c.fillStyle = it.col; c.fillRect(-s*.32, -s*1.1, s*.64, s*2.1); c.strokeRect(-s*.32, -s*1.1, s*.64, s*2.1);
+    c.lineWidth = 1.5; for (let k = -2; k <= 2; k++) { c.beginPath(); c.moveTo(k*s*.11, -s*1.05); c.lineTo(k*s*.11, s*.95); c.stroke(); }
+    c.lineWidth = 3; c.fillStyle = it.col2;
+    c.fillRect(-s*.55, -s*1.38, s*1.1, s*.28); c.strokeRect(-s*.55, -s*1.38, s*1.1, s*.28);
+    for (const sx of [-1,1]) { c.beginPath(); c.arc(sx*s*.48, -s*1.15, s*.1, 0, Math.PI*2); c.fill(); c.stroke(); }
+    c.fillRect(-s*.5, s*1, s*1, s*.22); c.strokeRect(-s*.5, s*1, s*1, s*.22);
+  } else if (it.type === "ped") {
+    c.fillStyle = it.col; c.beginPath(); c.moveTo(-s*1.3, s*.5); c.lineTo(0, -s*.8); c.lineTo(s*1.3, s*.5); c.closePath(); c.fill(); c.stroke();
+    c.fillStyle = it.col2; c.fillRect(-s*1.4, s*.5, s*2.8, s*.22); c.strokeRect(-s*1.4, s*.5, s*2.8, s*.22);
+    c.fillStyle = "#fff"; c.beginPath(); c.arc(0, -s*.02, s*.24, 0, Math.PI*2); c.fill(); c.stroke();
+  } else {
+    c.fillStyle = it.col; c.beginPath(); c.arc(0, 0, s*1.1, Math.PI, 0); c.lineTo(s*.65, 0); c.arc(0, 0, s*.65, 0, Math.PI, true); c.closePath(); c.fill(); c.stroke();
+    c.fillStyle = it.col2; c.fillRect(-s*1.1, 0, s*.45, s*1); c.strokeRect(-s*1.1, 0, s*.45, s*1); c.fillRect(s*.65, 0, s*.45, s*1); c.strokeRect(s*.65, 0, s*.45, s*1);
+  }
+  c.restore();
+}
+function modernGeo(w, h){
+  const gy = h*.84, bx = w*.08, bw = w*.5, bh = h*.15, by = gy - h*.34;
+  const rb = { x: bx + bw*.62, y: by - bh*.45, w: bw*.22, h: bh*.45 };
+  const cols = []; for (let i = 0; i < 7; i++) cols.push(bx + bw*(.06 + i*.148));
+  const orn = [
+    { x: rb.x - bw*.03, y: rb.y - h*.08, w: rb.w + bw*.06, h: h*.08 },
+    { x: bx, y: by + bh*.75, w: bw, h: bh*.6 },
+    { x: bx + bw*.12, y: by - h*.1, w: bw*.16, h: h*.1 },
+    { x: bx, y: by + bh, w: bw, h: h*.05 }
+  ];
+  return { gy, bx, bw, bh, by, rb, cols, orn };
+}
+
+const D = {
+  arts(c,w,h,t,mini){
+    const A = S.arts, P = ARTS_CW[mini ? 0 : A.cw];
+    c.fillStyle = P.bg; c.fillRect(0,0,w,h);
+    const s = Math.max(mini ? 70 : 110, Math.min(w,h) / 3.1);
+    for (let r = -1; r * s < h + s; r++) for (let k = -1; k * s < w + s; k++) {
+      const x = k * s + (Math.abs(r) % 2 ? s / 2 : 0) + s / 2, y = r * s + s / 2;
+      c.save(); c.translate(x,y);
+      c.strokeStyle = P.stem; c.lineWidth = s * .028; c.lineCap = "round";
+      c.beginPath(); c.moveTo(0, s*.46); c.bezierCurveTo(s*.12, s*.2, -s*.12, -s*.05, 0, -s*.22); c.stroke();
+      const leaf = (ly, rot, len, col) => { c.save(); c.translate(0, ly); c.rotate(rot); c.fillStyle = col; c.beginPath(); c.moveTo(0,0); c.quadraticCurveTo(len*.5, -len*.34, len, 0); c.quadraticCurveTo(len*.5, len*.34, 0, 0); c.fill(); c.strokeStyle = "rgba(20,30,20,.35)"; c.lineWidth = 1; c.beginPath(); c.moveTo(0,0); c.lineTo(len*.9,0); c.stroke(); c.restore(); };
+      leaf(s*.18, -.5, s*.3, P.la); leaf(s*.18, Math.PI + .5, s*.3, P.la);
+      leaf(s*.02, -.9, s*.24, P.lb); leaf(s*.02, Math.PI + .9, s*.24, P.lb);
+      c.save(); c.translate(0, -s*.28);
+      for (let p = 0; p < 6; p++) { c.rotate(Math.PI/3); c.fillStyle = P.petal; c.beginPath(); c.ellipse(0, -s*.07, s*.04, s*.075, 0, 0, Math.PI*2); c.fill(); }
+      c.fillStyle = P.mid; c.beginPath(); c.arc(0,0,s*.035,0,Math.PI*2); c.fill(); c.restore();
+      for (const k2 of [-1,1]) for (const [dx,dy] of [[0,0],[.05,.04],[-.03,.05]]) { c.fillStyle = P.berry; c.beginPath(); c.arc(k2*s*.32 + dx*s, s*.34 + dy*s, s*.028, 0, Math.PI*2); c.fill(); }
+      c.fillStyle = P.dot; c.beginPath(); c.arc(0, -s*.5, s*.016, 0, Math.PI*2); c.fill();
+      const odd = ((r + k) % 2 + 2) % 2;
+      artsBird(c, s, P, odd ? -s*.2 : s*.2, 0, odd ? 1 : -1);
+      if (((k - r) % 3 + 3) % 3 === 0) artsHare(c, s, P, odd ? s*.3 : -s*.3, s*.4, odd ? -1 : 1);
+      c.restore();
+    }
+    if (mini) return;
+    A.flowers.forEach(f => {
+      const p = Math.max(.01, easeBack(grow(f.t0, 700))), R = s*.2*p;
+      c.save(); c.translate(f.x, f.y); c.rotate(f.rot);
+      c.fillStyle = P.la; for (const a of [.6, 2.5, 4.2]) { c.save(); c.rotate(a); c.beginPath(); c.ellipse(R*.9, 0, R*.5, R*.18, 0, 0, Math.PI*2); c.fill(); c.restore(); }
+      for (let q = 0; q < 8; q++) { c.rotate(Math.PI/4); c.fillStyle = P.petal; c.beginPath(); c.ellipse(0, -R*.55, R*.22, R*.45, 0, 0, Math.PI*2); c.fill(); c.strokeStyle = P.mid; c.lineWidth = 1.5; c.stroke(); }
+      c.fillStyle = P.mid; c.beginPath(); c.arc(0,0,R*.26,0,Math.PI*2); c.fill();
+      c.fillStyle = P.petal; c.beginPath(); c.arc(0,0,R*.1,0,Math.PI*2); c.fill();
+      c.restore();
+    });
+    A.birds.forEach(b => { const p = Math.min(1, grow(b.t0, 600)), sc = 1.6*Math.max(.01, easeBack(p)); c.save(); c.translate(b.x, b.y - (1 - p)*s*.5); c.scale(sc, sc); artsBird(c, s, P, 0, 0, b.dir); c.restore(); });
+  },
+  nouveau(c,w,h,t,mini){
+    const m = Math.min(w,h);
+    c.fillStyle = "#efe4c9"; c.fillRect(0,0,w,h);
+    const fx = w*.07, fw = w*.86, fy = h*.04, ar = Math.min(fw/2, h*.42), acx = w/2, acy = fy + ar;
+    const arch = () => { c.beginPath(); c.moveTo(fx, h + 4); c.lineTo(fx, acy); c.arc(acx, acy, ar, Math.PI, 0); c.lineTo(fx + fw, h + 4); };
+    arch(); c.fillStyle = "#f7f0de"; c.fill();
+    const glassC = NOUV_GLASS[mini ? 0 : S.nouveau.gl], seg = 9;
+    for (let i = 0; i < seg; i++) {
+      const a0 = Math.PI + i*Math.PI/seg, a1 = a0 + Math.PI/seg;
+      c.beginPath(); c.arc(acx, acy, ar, a0, a1); c.arc(acx, acy, ar*.62, a1, a0, true); c.closePath();
+      c.fillStyle = glassC[i % glassC.length]; c.fill(); c.strokeStyle = "#3d3a2a"; c.lineWidth = 2; c.stroke();
+    }
+    arch(); c.strokeStyle = "#4c5b2e"; c.lineWidth = m*.016; c.stroke();
+    c.lineWidth = 2; c.beginPath(); c.moveTo(fx + m*.03, h + 4); c.lineTo(fx + m*.03, acy); c.arc(acx, acy, ar - m*.03, Math.PI, 0); c.lineTo(fx + fw - m*.03, h + 4); c.stroke();
+    const r = m*.085, hx = w*.47, hy = h*.44;
+    c.fillStyle = "#e3c98c"; c.beginPath(); c.arc(hx + r*.2, hy + r*.3, m*.25, 0, Math.PI*2); c.fill();
+    c.strokeStyle = "#b08d4a"; c.lineWidth = 3; c.beginPath(); c.arc(hx + r*.2, hy + r*.3, m*.275, 0, Math.PI*2); c.stroke();
+    c.lineWidth = 1.5; for (let i = 0; i < 24; i++) { const a = i*Math.PI/12; c.beginPath(); c.moveTo(hx + r*.2 + Math.cos(a)*m*.2, hy + r*.3 + Math.sin(a)*m*.2); c.lineTo(hx + r*.2 + Math.cos(a)*m*.245, hy + r*.3 + Math.sin(a)*m*.245); c.stroke(); }
+    const sway = Math.sin(t*.0008)*.25;
+    for (let i = 0; i < 9; i++) {
+      const sx = hx - r*.7, sy = hy - r*.4 + i*r*.22, col = i % 2 ? "#7a2f3b" : "#8f4a35";
+      let px = sx, py = sy;
+      for (let s = .02; s <= 1.0001; s += .02) {
+        const x = sx - s*w*(.2 + i*.012) + Math.sin(s*Math.PI*1.8 + i*.5 + sway)*m*.05*s;
+        const y = sy + s*h*(.3 + i*.015) + Math.sin(s*Math.PI*2.2 + i*.7 + sway)*m*.03;
+        c.strokeStyle = col; c.lineCap = "round"; c.lineWidth = (1 - s)*m*.024 + 1.2;
+        c.beginPath(); c.moveTo(px, py); c.lineTo(x, y); c.stroke(); px = x; py = y;
+      }
+    }
+    c.beginPath();
+    c.moveTo(hx - r*.2, hy - r);
+    c.bezierCurveTo(hx + r*.6, hy - r*1.05, hx + r*.95, hy - r*.5, hx + r*.9, hy - r*.1);
+    c.lineTo(hx + r*1.12, hy + r*.18); c.lineTo(hx + r*.92, hy + r*.3);
+    c.quadraticCurveTo(hx + r*1.02, hy + r*.42, hx + r*.9, hy + r*.52);
+    c.quadraticCurveTo(hx + r*.92, hy + r*.78, hx + r*.6, hy + r*.86);
+    c.lineTo(hx + r*.48, hy + r*1.6);
+    c.quadraticCurveTo(hx + r*1.2, hy + r*2, hx + r*1.8, hy + r*2.7);
+    c.lineTo(hx - r*1.5, hy + r*2.7);
+    c.quadraticCurveTo(hx - r*.6, hy + r*1.9, hx - r*.25, hy + r*1.4);
+    c.bezierCurveTo(hx - r*1, hy + r*.6, hx - r*1, hy - r*.6, hx - r*.2, hy - r);
+    c.closePath(); c.fillStyle = "#f4e0c6"; c.fill(); c.strokeStyle = "#6b3a2a"; c.lineWidth = 2; c.stroke();
+    c.beginPath(); c.moveTo(hx + r*.5, hy - r*.92);
+    c.bezierCurveTo(hx - r*1.2, hy - r*1.35, hx - r*1.5, hy + r*.6, hx - r*.35, hy + r*1.35);
+    c.quadraticCurveTo(hx - r*.2, hy + r*.4, hx + r*.15, hy - r*.35);
+    c.quadraticCurveTo(hx + r*.35, hy - r*.7, hx + r*.5, hy - r*.92);
+    c.fillStyle = "#7a2f3b"; c.fill();
+    c.strokeStyle = "#6b3a2a"; c.lineWidth = 1.6; c.beginPath(); c.arc(hx + r*.55, hy - r*.02, r*.12, Math.PI*.1, Math.PI*.9); c.stroke();
+    c.fillStyle = "#7d8f5a"; c.beginPath(); c.moveTo(hx - r*1.5, hy + r*2.7); c.quadraticCurveTo(hx, hy + r*1.9, hx + r*1.8, hy + r*2.7); c.quadraticCurveTo(hx, hy + r*2.35, hx - r*1.5, hy + r*2.7); c.fill();
+    for (let i = 0; i < 5; i++) { const a = Math.PI*1.05 + i*.22, fx2 = hx - r*.15 + Math.cos(a)*r*1.05, fy2 = hy - r*.15 + Math.sin(a)*r*1.05; c.save(); c.translate(fx2, fy2); for (let q = 0; q < 5; q++) { c.rotate(Math.PI*2/5); c.fillStyle = i % 2 ? "#f6efe0" : "#e9c46a"; c.beginPath(); c.ellipse(0, -r*.13, r*.065, r*.13, 0, 0, Math.PI*2); c.fill(); c.strokeStyle = "#7a2f3b"; c.lineWidth = 1; c.stroke(); } c.fillStyle = "#b5452f"; c.beginPath(); c.arc(0,0,r*.06,0,Math.PI*2); c.fill(); c.restore(); }
+    [[.15,-1,.62],[.25,1,.48],[.75,-1,.5],[.86,1,.66]].forEach(([x,dir,reach],i) => vine(c, m, h, w*x, w*.05*dir, reach, i % 2 ? "#4c5b2e" : "#6b3a2a", Math.sin(t*.0006 + i)*.18, 1, dir));
+    dragonfly(c, m, w*.88 + Math.sin(t*.0007)*m*.02, h*.1 + Math.cos(t*.0009)*m*.015, t, -.35);
+    if (mini) return;
+    const N = S.nouveau;
+    N.vines.forEach(v => vine(c, m, h, v.x, v.amp, v.reach, v.col, Math.sin(t * .0006 + v.ph) * .18, grow(v.t0, 1600), v.dir));
+    N.whips.forEach(wp => whip(c, m, wp, grow(wp.t0, 900)));
+    N.bugs.forEach(b => { const p = Math.min(1, grow(b.t0, 900)); dragonfly(c, m*.85, b.x + Math.sin(t*.001 + b.ph)*m*.06 + (1 - p)*m*.4, b.y + Math.cos(t*.0013 + b.ph)*m*.04 - (1 - p)*m*.3, t + b.ph*1000, b.rot); });
+  },
+  destijl(c,w,h,t,mini){
+    const r = rng(seeds.destijl), leaves = [];
+    (function split(x,y,ww,hh,d){
+      if (d >= 4 || (d > 1 && r() < .22) || ww < w*.13 || hh < h*.13) { leaves.push([x,y,ww,hh]); return; }
+      const vert = ww / hh > 1 ? r() < .78 : r() < .22, k = .28 + r()*.44;
+      if (vert) { split(x,y,ww*k,hh,d+1); split(x+ww*k,y,ww*(1-k),hh,d+1); }
+      else { split(x,y,ww,hh*k,d+1); split(x,y+hh*k,ww,hh*(1-k),d+1); }
+    })(0,0,w,h,0);
+    const order = leaves.map((l,i)=>[l[2]*l[3],i]).sort((a,b)=>b[0]-a[0]).map(a=>a[1]);
+    const color = leaves.map(() => "#f6f4ee");
+    const take = arr => arr.splice(Math.floor(r()*arr.length),1)[0];
+    const big = order.slice(0,3), rest = order.slice(3);
+    color[take(big)] = "#d52b1e";
+    if (rest.length) color[take(rest)] = "#1f3f99";
+    if (rest.length) color[take(rest)] = "#f2c200";
+    if (rest.length > 2 && r() < .6) color[take(rest)] = "#111";
+    if (!mini) {
+      S.destijl.splits.forEach(sp => {
+        const X = sp.fx*w, Y = sp.fy*h, i = leaves.findIndex(l => X >= l[0] && X <= l[0] + l[2] && Y >= l[1] && Y <= l[1] + l[3]);
+        if (i < 0) return;
+        const l = leaves[i];
+        if (l[2] >= l[3]) { const a = X - l[0]; if (a < 12 || l[2] - a < 12) return; leaves[i] = [l[0], l[1], a, l[3]]; leaves.push([X, l[1], l[2] - a, l[3]]); }
+        else { const a = Y - l[1]; if (a < 12 || l[3] - a < 12) return; leaves[i] = [l[0], l[1], l[2], a]; leaves.push([l[0], Y, l[2], l[3] - a]); }
+        color.push(color[i]);
+      });
+      Object.entries(S.destijl.over).forEach(([i,col]) => { if (color[i] !== undefined) color[i] = col; });
+      S.destijl.leaves = leaves; S.destijl.colors = color;
+    }
+    const lw = Math.max(mini ? 3 : 6, Math.min(w,h) * .02);
+    leaves.forEach((l,i) => { c.fillStyle = color[i]; c.fillRect(l[0],l[1],l[2],l[3]); });
+    c.strokeStyle = "#111"; c.lineWidth = lw;
+    leaves.forEach(l => c.strokeRect(l[0],l[1],l[2],l[3]));
+  },
+  bauhaus(c,w,h,t,mini){
+    const m = Math.min(w,h), g = m/8, B = S.bauhaus, snap = !mini && B.snap;
+    c.fillStyle = "#efe9dc"; c.fillRect(0,0,w,h);
+    c.strokeStyle = snap ? "#b9ab90" : "#dcd3c1"; c.lineWidth = snap ? 1.5 : 1;
+    for (let x = 0; x < w; x += g) { c.beginPath(); c.moveTo(x,0); c.lineTo(x,h); c.stroke(); }
+    for (let y = 0; y < h; y += g) { c.beginPath(); c.moveTo(0,y); c.lineTo(w,y); c.stroke(); }
+    const tri = (x,y,R,rot,col) => { c.save(); c.translate(x,y); c.rotate(rot); c.fillStyle = col; c.beginPath(); for (let k = 0; k < 3; k++) { const a = -Math.PI/2 + k*2*Math.PI/3; k ? c.lineTo(Math.cos(a)*R, Math.sin(a)*R) : c.moveTo(Math.cos(a)*R, Math.sin(a)*R); } c.closePath(); c.fill(); c.restore(); };
+    const sq = (x,y,s,rot,col) => { c.save(); c.translate(x,y); c.rotate(rot); c.fillStyle = col; c.fillRect(-s/2,-s/2,s,s); c.restore(); };
+    c.save(); c.globalCompositeOperation = "multiply";
+    sq(w*.34, h*.6, m*.34, -.12, "#d43b2a");
+    c.fillStyle = "#1d4e9e"; c.beginPath(); c.arc(w*.62, h*.42, m*.25, 0, Math.PI*2); c.fill();
+    tri(w*.3, h*.3, m*.18, t*.00015, "#f2b705");
+    if (!mini) B.shapes.forEach(it => {
+      const tx = snap ? Math.round(it.x/g)*g : it.x, ty = snap ? Math.round(it.y/g)*g : it.y, tr = snap ? 0 : it.rot, e = paused ? 1 : .18;
+      it.cx += (tx - it.cx)*e; it.cy += (ty - it.cy)*e; it.cr += (tr - it.cr)*e;
+      const sc = Math.max(.01, easeBack(grow(it.t0, 500))), s = g*.9*sc;
+      if (it.type === "tri") tri(it.cx, it.cy, s*.62, it.cr, "#f2b705");
+      else if (it.type === "sq") sq(it.cx, it.cy, s, it.cr, "#d43b2a");
+      else { c.fillStyle = "#1d4e9e"; c.beginPath(); c.arc(it.cx, it.cy, s*.5, 0, Math.PI*2); c.fill(); }
+    });
+    c.restore();
+    c.strokeStyle = "#141414"; c.lineWidth = m*.025; c.lineCap = "butt"; const a = t*.0003;
+    c.beginPath(); c.arc(w*.62, h*.42, m*.32, a, a + Math.PI*.9); c.stroke();
+    c.fillStyle = "#141414"; c.fillRect(w*.1, h*.8, w*.8, m*.03);
+    c.beginPath(); c.arc(w*.84, h*.16, m*.04, 0, Math.PI*2); c.fill();
+    c.font = `700 ${m*.085}px "Jost",sans-serif`; c.textBaseline = "alphabetic"; c.fillText("bauhaus", w*.1, h*.8 - m*.03);
+  },
+  deco(c,w,h,t,mini){
+    const Dz = S.deco, P = DECO_M[mini ? 0 : Dz.mat], n = mini ? 36 : Dz.rays, steps = mini ? 5 : Dz.steps;
+    const m = Math.min(w,h), cx = w/2, cy = h*.98, R = Math.hypot(w,h);
+    c.fillStyle = P.bg; c.fillRect(0,0,w,h);
+    const fl = mini || paused ? 0 : Math.max(0, 1 - (now() - Dz.flash) / 900);
+    c.fillStyle = P.gold; c.globalAlpha = .85;
+    for (let i = 0; i < n; i++) { const a0 = Math.PI + i*Math.PI/n, a1 = a0 + Math.PI/n*.5; c.beginPath(); c.moveTo(cx,cy); c.arc(cx,cy,R,a0,a1); c.closePath(); c.fill(); }
+    c.globalAlpha = 1;
+    if (fl > 0) { c.fillStyle = `rgba(${P.shine},${.5*fl})`; for (let i = 0; i < n; i++) { const a0 = Math.PI + (i + .5)*Math.PI/n, a1 = a0 + Math.PI/n*.5*fl; c.beginPath(); c.moveTo(cx,cy); c.arc(cx,cy,R,a0,a1); c.closePath(); c.fill(); } }
+    const ph = (t*.00012) % 1, ha = Math.PI + ph*Math.PI;
+    c.fillStyle = `rgba(${P.shine},.28)`; c.beginPath(); c.moveTo(cx,cy); c.arc(cx,cy,R,ha,ha+.2); c.closePath(); c.fill();
+    c.fillStyle = P.bg; c.beginPath(); c.arc(cx,cy,m*.42,Math.PI,0); c.fill();
+    c.strokeStyle = P.gold;
+    [.42,.36,.3].forEach((k,i) => { c.lineWidth = i ? 2 : 3; c.beginPath(); c.arc(cx,cy,m*k,Math.PI,0); c.stroke(); });
+    const g = c.createLinearGradient(0, cy - m*.24, 0, cy); g.addColorStop(0, P.light); g.addColorStop(1, P.dark);
+    c.fillStyle = g; c.beginPath(); c.arc(cx,cy,m*.24,Math.PI,0); c.fill();
+    const sh = m*.25/steps;
+    for (let k = 0; k < steps; k++) { const sw = m*(.78 - (.65/steps)*k); c.fillStyle = P.bg; c.fillRect(cx - sw/2, h - sh*(k+1), sw, sh); c.strokeStyle = P.gold; c.lineWidth = 2; c.strokeRect(cx - sw/2, h - sh*(k+1), sw, sh); }
+    c.lineWidth = 1.5;
+    for (let k = 0; k < 5; k++) { for (const x of [w*.05 + k*9, w*.95 - k*9]) { c.beginPath(); c.moveTo(x, h*.08); c.lineTo(x, h*.92); c.stroke(); } }
+    for (const sx of [1,-1]) { for (let k = 0; k < 4; k++) { const y = h*.12 + k*m*.05; c.beginPath(); c.moveTo(cx - sx*w*.36, y); c.lineTo(cx - sx*w*.3, y + m*.03); c.lineTo(cx - sx*w*.24, y); c.stroke(); } }
+  },
+  modern(c,w,h,t,mini){
+    const M = S.modern, m = Math.min(w,h), G = modernGeo(w,h), gy = G.gy, ink = "#2d3640", xray = !mini && M.xray;
+    const sky = c.createLinearGradient(0,0,0,gy); sky.addColorStop(0,"#d9e3ea"); sky.addColorStop(1,"#f4f6f8");
+    c.fillStyle = sky; c.fillRect(0,0,w,h);
+    c.strokeStyle = "rgba(45,54,64,.08)"; c.lineWidth = 1;
+    for (let x = 0; x < w; x += m/10) { c.beginPath(); c.moveTo(x,0); c.lineTo(x,gy); c.stroke(); }
+    const glass = (x, y, gw, gh, cols, rows) => {
+      if (xray) {
+        c.fillStyle = "rgba(169,188,203,.25)"; c.fillRect(x, y, gw, gh);
+        c.fillStyle = "#9c3b2e"; const cw = Math.max(4, gw*.06);
+        for (let i = 0; i <= 3; i++) c.fillRect(x + (gw - cw)*i/3, y, cw, gh);
+        for (let j = 0; j <= rows; j += 2) c.fillRect(x, y + gh*j/rows - 2, gw, 4);
+        c.strokeStyle = "rgba(156,59,46,.6)"; c.lineWidth = 2;
+        for (let j = 0; j < rows; j += 2) { c.beginPath(); c.moveTo(x, y + gh*j/rows); c.lineTo(x + gw, y + gh*(j+2)/rows); c.stroke(); }
+        return;
+      }
+      c.fillStyle = "#a9bccb"; c.fillRect(x, y, gw, gh);
+      const off = ((t*.00008) % 1.6) - .3;
+      c.save(); c.beginPath(); c.rect(x, y, gw, gh); c.clip();
+      const gr = c.createLinearGradient(x, y + gh*off, x + gw, y + gh*(off + .35));
+      gr.addColorStop(0,"rgba(255,255,255,0)"); gr.addColorStop(.5,"rgba(255,255,255,.55)"); gr.addColorStop(1,"rgba(255,255,255,0)");
+      c.fillStyle = gr; c.fillRect(x, y, gw, gh); c.restore();
+      c.strokeStyle = ink; c.lineWidth = 1.5;
+      for (let i = 0; i <= cols; i++) { c.beginPath(); c.moveTo(x + gw*i/cols, y); c.lineTo(x + gw*i/cols, y + gh); c.stroke(); }
+      for (let j = 0; j <= rows; j++) { c.beginPath(); c.moveTo(x, y + gh*j/rows); c.lineTo(x + gw, y + gh*j/rows); c.stroke(); }
+    };
+    const tw = w*.22, tx = w*.7, th = h*.74;
+    c.fillStyle = ink; c.fillRect(tx - 4, gy - th - 8, tw + 8, 8);
+    glass(tx, gy - th, tw, th, 6, 20);
+    if (!mini) M.blds.forEach(b => { const p = Math.max(.02, easeBack(grow(b.t0, 700))), bh = b.h*p; c.fillStyle = ink; c.fillRect(b.x - 3, gy - bh - 6, b.w + 6, 6); glass(b.x, gy - bh, b.w, bh, b.cols, Math.max(1, Math.round(b.rows*Math.min(1,p)))); });
+    const { bx, bw, bh, by, rb } = G;
+    c.strokeStyle = ink; c.lineWidth = 3;
+    G.cols.forEach(x => { c.beginPath(); c.moveTo(x, by + bh); c.lineTo(x, gy); c.stroke(); });
+    c.fillStyle = "#fbfbfa"; c.fillRect(bx, by, bw, bh); c.lineWidth = 2; c.strokeRect(bx, by, bw, bh);
+    c.fillStyle = ink; c.fillRect(bx + bw*.05, by + bh*.38, bw*.9, bh*.28);
+    c.fillStyle = "#fbfbfa"; c.fillRect(rb.x, rb.y, rb.w, rb.h); c.strokeRect(rb.x, rb.y, rb.w, rb.h);
+    /* 「去除裝飾」：選這個特徵時，房子會被加上多餘的古典裝飾，讓學生一個個點掉 */
+    if (!mini && M.tool === 1) {
+      const orn = G.orn, fade = i => M.gone[i] ? Math.max(0, 1 - (now() - M.gone[i]) / 400) : 1;
+      const deco = "#c8a46a", deco2 = "#a8643a";
+      c.lineWidth = 2; c.strokeStyle = deco2;
+      let a = fade(0); if (a > 0) { c.globalAlpha = a; const o = orn[0]; c.fillStyle = "#efe2c4"; c.beginPath(); c.moveTo(o.x, o.y + o.h); c.lineTo(o.x + o.w/2, o.y); c.lineTo(o.x + o.w, o.y + o.h); c.closePath(); c.fill(); c.stroke(); c.beginPath(); c.arc(o.x + o.w/2, o.y + o.h*.62, o.h*.18, 0, Math.PI*2); c.stroke(); }
+      a = fade(1); if (a > 0) { c.globalAlpha = a; const o = orn[1]; for (let k = 0; k < 4; k++) { const x0 = o.x + o.w*k/4, x1 = o.x + o.w*(k+1)/4; c.strokeStyle = "#7d8f5a"; c.lineWidth = 4; c.beginPath(); c.moveTo(x0, o.y); c.quadraticCurveTo((x0 + x1)/2, o.y + o.h*1.1, x1, o.y); c.stroke(); c.fillStyle = "#c0573c"; c.beginPath(); c.arc((x0 + x1)/2, o.y + o.h*.55, 5, 0, Math.PI*2); c.fill(); } }
+      a = fade(2); if (a > 0) { c.globalAlpha = a; const o = orn[2]; c.fillStyle = deco; c.beginPath(); c.ellipse(o.x + o.w/2, o.y + o.h*.45, o.w*.38, o.h*.32, 0, 0, Math.PI*2); c.fill(); c.strokeStyle = deco2; c.stroke(); c.fillRect(o.x + o.w*.3, o.y + o.h*.75, o.w*.4, o.h*.25); c.fillRect(o.x + o.w*.2, o.y, o.w*.6, o.h*.12); }
+      a = fade(3); if (a > 0) { c.globalAlpha = a; c.strokeStyle = deco2; c.lineWidth = 2; G.cols.forEach(x => { for (const s2 of [-1,1]) { c.beginPath(); for (let q = 0; q <= Math.PI*2.6; q += .2) { const rr = 7*(1 - q/(Math.PI*3)); const xx = x + s2*(7 - rr*Math.cos(q)), yy = by + bh + 7 - rr*Math.sin(q); q ? c.lineTo(xx,yy) : c.moveTo(xx,yy); } c.stroke(); } }); }
+      c.globalAlpha = 1;
+      if (M.gone.every(Boolean)) { c.font = `900 ${m*.05}px "Noto Sans TC",sans-serif`; c.fillStyle = "#1f7a4d"; c.textBaseline = "alphabetic"; c.fillText(typeof L === "function" ? L("✓ 少即是多") : "✓ 少即是多", bx, by - h*.14); }
+    }
+    c.fillStyle = "#cfd6dc"; c.fillRect(0, gy, w, h - gy);
+    c.fillStyle = ink; c.fillRect(0, gy, w, 3);
+    c.font = `700 ${m*.06}px "Jost",sans-serif`; c.textBaseline = "top"; c.fillText("less is more", w*.08, h*.06);
+    c.font = `500 ${m*.032}px "Jost",sans-serif`; c.fillText("form follows function", w*.08, h*.06 + m*.075);
+  },
+  pop(c,w,h,t,mini){
+    const Pp = S.pop, m = Math.min(w,h);
+    if (!mini && Pp.rep) {
+      for (let q = 0; q < 4; q++) { c.save(); c.translate((q % 2)*w/2, Math.floor(q/2)*h/2); c.beginPath(); c.rect(0,0,w/2,h/2); c.clip(); popScene(c, w/2, h/2, t, POP_PALS[(Pp.pal + q) % 4]); c.restore(); }
+      c.strokeStyle = "#111"; c.lineWidth = 5; c.beginPath(); c.moveTo(w/2,0); c.lineTo(w/2,h); c.moveTo(0,h/2); c.lineTo(w,h/2); c.stroke();
+    } else popScene(c, w, h, t, POP_PALS[mini ? 0 : Pp.pal]);
+    if (mini) return;
+    Pp.bursts.forEach(b => {
+      const sc = Math.max(.01, easeBack(grow(b.t0, 450)));
+      c.save(); c.translate(b.x, b.y); c.scale(sc, sc);
+      burst(c, 0, 0, m*.09, m*.16, 14); c.fillStyle = b.col; c.fill(); c.lineWidth = m*.01; c.strokeStyle = "#111"; c.stroke();
+      c.restore();
+      popWord(c, b.word, b.x, b.y, m*.085*sc, b.rot);
+    });
+  },
+  op(c,w,h,t,mini){
+    const O = S.op, m = Math.min(w,h), pat = mini ? 0 : O.pat, [bgc, fg] = OP_PALS[mini ? 0 : O.pal];
+    const cell = pat === 0 ? m/11 : m/16;
+    c.fillStyle = bgc; c.fillRect(0,0,w,h);
+    let cx, cy, k;
+    if (mini || !O.fixed) { cx = w/2 + w*.16*Math.sin(t*.00022); cy = h/2 + h*.1*Math.cos(t*.00017); k = .55; }
+    if (!mini) {
+      if (!O.fixed) { O.cx = cx; O.cy = cy; O.k = k; }
+      else { const e = paused ? 1 : .14; O.cx += (O.tx - O.cx)*e; O.cy += (O.ty - O.cy)*e; O.k += (O.tk - O.k)*e; cx = O.cx; cy = O.cy; k = O.k; }
+    }
+    const R = m*.4, cols = Math.ceil(w/cell) + 3, rows = Math.ceil(h/cell) + 3, P = [], ci = cols/2, cj = rows/2;
+    for (let j = 0; j < rows; j++) { P[j] = []; for (let i = 0; i < cols; i++) { const x = (i-1)*cell, y = (j-1)*cell, dx = x - cx, dy = y - cy, f = 1 + k*Math.exp(-(dx*dx + dy*dy)/(R*R)); P[j][i] = [cx + dx*f, cy + dy*f]; } }
+    const on = (i,j) => pat === 0 ? (i + j) % 2 === 0 : pat === 1 ? i % 2 === 0 : Math.floor(Math.hypot(i - ci, j - cj)*.9) % 2 === 0;
+    c.fillStyle = fg;
+    for (let j = 0; j < rows - 1; j++) for (let i = 0; i < cols - 1; i++) { if (!on(i,j)) continue; const a = P[j][i], b = P[j][i+1], d = P[j+1][i+1], e = P[j+1][i]; c.beginPath(); c.moveTo(a[0],a[1]); c.lineTo(b[0],b[1]); c.lineTo(d[0],d[1]); c.lineTo(e[0],e[1]); c.closePath(); c.fill(); }
+  },
+  post(c,w,h,t,mini){
+    const Ps = S.post, r = rng(seeds.post), m = Math.min(w,h), fl = Math.sin(t*.0012);
+    c.fillStyle = POST_BGS[mini ? 0 : Ps.bg]; c.fillRect(0,0,w,h);
+    const conf = ["#1c1c1c","#2bb3a3","#ffd23f","#3a5bd9","#ffffff"];
+    for (let i = 0; i < 110; i++) { c.save(); c.translate(r()*w, r()*h); c.rotate(r()*Math.PI); c.fillStyle = conf[Math.floor(r()*conf.length)]; const s = m*(.008 + r()*.018); if (r() < .5) c.fillRect(-s, -s/3, s*2, s*.66); else { c.beginPath(); c.moveTo(0,-s); c.lineTo(s,s); c.lineTo(-s,s); c.closePath(); c.fill(); } c.restore(); }
+    const bx = w*(.06 + r()*.08), by = h*(.08 + r()*.08), bw = w*.32, bh = h*.26;
+    c.save(); c.beginPath(); c.rect(bx,by,bw,bh); c.clip(); c.fillStyle = "#fff"; c.fillRect(bx,by,bw,bh); c.strokeStyle = "#111"; c.lineWidth = 6; for (let x = bx - bh; x < bx + bw; x += 16) { c.beginPath(); c.moveTo(x, by + bh); c.lineTo(x + bh, by); c.stroke(); } c.restore();
+    c.strokeStyle = "#111"; c.lineWidth = 3; c.strokeRect(bx,by,bw,bh);
+    c.fillStyle = "#2bb3a3"; c.beginPath(); c.arc(w*(.62 + r()*.1), h*.3 + fl*m*.015, m*.17, 0, Math.PI*2); c.fill();
+    c.save(); c.translate(w*(.26 + r()*.08), h*.68); c.rotate(.3 + fl*.05); c.fillStyle = "#ffd23f"; c.strokeStyle = "#111"; c.lineWidth = 3; c.beginPath(); c.moveTo(0,-m*.17); c.lineTo(m*.16, m*.12); c.lineTo(-m*.16, m*.12); c.closePath(); c.fill(); c.stroke(); c.restore();
+    c.fillStyle = "#3a5bd9"; c.beginPath(); c.arc(w*.78, h*.82, m*.16, Math.PI, 0); c.fill();
+    c.fillStyle = "#e84a8a"; c.fillRect(w*.7, h*.82, m*.32, m*.05);
+    c.strokeStyle = "#111"; c.lineWidth = m*.014; c.lineCap = "round";
+    for (let q = 0; q < 3; q++) { const x0 = r()*w*.6, y0 = h*(.2 + r()*.65), L = w*(.2 + r()*.2), A = m*.025; c.beginPath(); for (let x = 0; x <= L; x += 3) { const y = y0 + A*Math.sin(x/(m*.03) + t*.001 + q); x ? c.lineTo(x0 + x, y) : c.moveTo(x0 + x, y); } c.stroke(); }
+    c.fillStyle = "#111"; for (let y = 0; y < 4; y++) for (let x = 0; x < 7; x++) { c.beginPath(); c.arc(w*.55 + x*m*.04, h*.06 + y*m*.04, m*.007, 0, Math.PI*2); c.fill(); }
+    if (mini) return;
+    Ps.hist.forEach(it => postHist(c, m, it));
+    Ps.items.forEach(it => postShape(c, m, it, t));
+  },
+  mosaic(c,w,h,t){
+    const cols = 3, rows = 3, cw = w/cols, ch = h/rows;
+    STYLES.forEach((st,i) => {
+      const x = (i % cols)*cw, y = Math.floor(i / cols)*ch;
+      c.save(); c.beginPath(); c.rect(x,y,cw,ch); c.clip(); c.translate(x,y);
+      D[st.id](c,cw,ch,t,true);
+      const fs = Math.max(11, Math.min(cw,ch)*.075);
+      c.font = `700 ${fs}px "Noto Sans TC",sans-serif`;
+      const label = `${String(i+1).padStart(2,"0")} ${st.zh}`, tw = c.measureText(label).width;
+      c.fillStyle = "rgba(20,20,18,.86)"; c.fillRect(6, ch - fs*1.9 - 4, tw + 14, fs*1.7);
+      c.fillStyle = "#fff"; c.textBaseline = "middle"; c.fillText(label, 13, ch - fs*1.05 - 4);
+      c.restore();
+    });
+    c.strokeStyle = "#ffffff"; c.lineWidth = 4;
+    for (let k = 1; k < cols; k++) { c.beginPath(); c.moveTo(k*cw,0); c.lineTo(k*cw,h); c.stroke(); }
+    for (let k = 1; k < rows; k++) { c.beginPath(); c.moveTo(0,k*ch); c.lineTo(w,k*ch); c.stroke(); }
+  }
+};
+const ANIM = new Set(["arts","modern","nouveau","bauhaus","deco","pop","op","post","mosaic"]);
+
+/* 點擊互動：依照目前選的造形特徵 */
+const cap = (arr, n) => { while (arr.length > n) arr.shift(); };
+const TAP = {
+  arts(x,y){ const A = S.arts;
+    if (A.tool === 0) { A.flowers.push({ x, y, rot: Math.random(), t0: now() }); cap(A.flowers, 18); }
+    else if (A.tool === 1) { A.birds.push({ x, y, dir: Math.random() < .5 ? -1 : 1, t0: now() }); cap(A.birds, 14); }
+    else A.cw = (A.cw + 1) % ARTS_CW.length; },
+  nouveau(x,y,w,h){ const N = S.nouveau, m = Math.min(w,h);
+    if (N.tool === 0) { const dir = Math.random() < .5 ? -1 : 1; N.vines.push({ x, dir, amp: w*(.05 + Math.random()*.07)*dir, reach: Math.min(.95, Math.max(.3, 1.02 - y/h)), col: pick(["#4c5b2e","#6b3a2a","#7a2f3b"]), ph: Math.random()*6, t0: now() }); cap(N.vines, 10); }
+    else if (N.tool === 1) { const dir = x < w/2 ? 1 : -1; N.whips.push({ x, y, dir, len: m*(.28 + Math.random()*.2), col: pick(["#7a2f3b","#4c5b2e","#b08d4a"]), t0: now() }); cap(N.whips, 10); }
+    else N.gl = (N.gl + 1) % NOUV_GLASS.length; },
+  destijl(x,y,w,h){ const Q = S.destijl;
+    if (Q.tool === 0) { const i = Q.leaves.findIndex(l => x >= l[0] && x <= l[0] + l[2] && y >= l[1] && y <= l[1] + l[3]); if (i < 0) return; const k = DESTIJL_CYCLE.indexOf(Q.colors[i]); Q.over[i] = DESTIJL_CYCLE[(k + 1) % DESTIJL_CYCLE.length]; }
+    else if (Q.tool === 1) { Q.splits.push({ fx: x/w, fy: y/h }); cap(Q.splits, 30); }
+    else { seeds.destijl = Math.floor(Math.random()*1e6); Q.over = {}; Q.splits = []; } },
+  bauhaus(x,y,w,h){ const B = S.bauhaus, m = Math.min(w,h);
+    if (B.tool === 0) { const type = ["tri","sq","circ"][B.next++ % 3], rot = Math.random() - .5; B.shapes.push({ x, y, type, rot, cx: x, cy: y, cr: rot, t0: now() }); cap(B.shapes, 24); }
+    else if (B.tool === 1) B.snap = !B.snap;
+    else { const type = ["tri","sq","circ"][B.next++ % 3], gap = m/8; for (let i = 0; i < 4; i++) { const px = x + (i - 1.5)*gap; B.shapes.push({ x: px, y, type, rot: 0, cx: x, cy: y, cr: 0, t0: now() + i*90 }); } cap(B.shapes, 24); } },
+  deco(){ const Dz = S.deco;
+    if (Dz.tool === 0) { const rs = [24,36,48,60]; Dz.rays = rs[(rs.indexOf(Dz.rays) + 1) % rs.length]; }
+    else if (Dz.tool === 1) { Dz.mat = (Dz.mat + 1) % DECO_M.length; Dz.flash = now(); }
+    else Dz.steps = Dz.steps >= 8 ? 3 : Dz.steps + 1; },
+  modern(x,y,w,h){ const M = S.modern, m = Math.min(w,h);
+    if (M.tool === 0) { const cell = m/10, bw = cell*(1 + Math.floor(Math.random()*2)), rows = 6 + Math.floor(Math.random()*12); M.blds.push({ x: Math.max(0, Math.min(w - bw, x - bw/2)), w: bw, h: rows*h*.037, cols: bw > cell*1.5 ? 4 : 2, rows, t0: now() }); cap(M.blds, 12); }
+    else if (M.tool === 1) { const G = modernGeo(w,h), pad = 14; G.orn.forEach((o,i) => { if (!M.gone[i] && x >= o.x - pad && x <= o.x + o.w + pad && y >= o.y - pad && y <= o.y + o.h + pad) M.gone[i] = now(); }); }
+    else M.xray = !M.xray; },
+  pop(x,y){ const Pp = S.pop;
+    if (Pp.tool === 0) { const words = ["BAM!","WOW!","POW!","ZAP!","BOOM!"], cols = ["#00a0e9","#ffffff","#7fd13b","#ff8a00"], n = Pp.next++; Pp.bursts.push({ x, y, word: words[n % words.length], col: cols[n % cols.length], rot: Math.random()*.4 - .2, t0: now() }); cap(Pp.bursts, 8); }
+    else if (Pp.tool === 1) Pp.pal = (Pp.pal + 1) % POP_PALS.length;
+    else Pp.rep = !Pp.rep; },
+  op(x,y,w,h){ const O = S.op, m = Math.min(w,h);
+    if (O.tool === 0) { if (O.fixed && Math.hypot(x - O.tx, y - O.ty) < m*.12) O.tk = O.tk > 0 ? -.45 : .55; else { O.fixed = true; O.tx = x; O.ty = y; } }
+    else if (O.tool === 1) O.pal = (O.pal + 1) % OP_PALS.length;
+    else O.pat = (O.pat + 1) % 3; },
+  post(x,y){ const Ps = S.post;
+    if (Ps.tool === 0) { const types = ["tri","circ","half","stripe","squig","zig"]; Ps.items.push({ x, y, type: pick(types), col: pick(POST_COLS), size: .06 + Math.random()*.06, rot: Math.random()*1.4 - .7, ph: Math.random()*6, t0: now() }); cap(Ps.items, 20); }
+    else if (Ps.tool === 1) { Ps.hist.push({ x, y, type: pick(["col","ped","arch"]), col: pick(["#ffd23f","#2bb3a3","#e84a8a","#ffffff","#3a5bd9"]), col2: pick(["#111","#ffd23f","#2bb3a3","#e84a8a"]), rot: Math.random()*.5 - .25, t0: now() }); cap(Ps.hist, 10); }
+    else Ps.bg = (Ps.bg + 1) % POST_BGS.length; },
+  mosaic(x,y,w,h){ const i = Math.floor(y / (h/3))*3 + Math.floor(x / (w/3)); if (i >= 0 && i < STYLES.length) go(i + 1); }
+};
+
+function drawCanvas(cv, t){
+  const rect = cv.getBoundingClientRect();
+  if (!rect.width || !rect.height) return;
+  const dpr = Math.min(2, window.devicePixelRatio || 1);
+  const W = Math.round(rect.width*dpr), H = Math.round(rect.height*dpr);
+  if (cv.width !== W || cv.height !== H) { cv.width = W; cv.height = H; }
+  const c = cv.getContext("2d");
+  c.setTransform(dpr,0,0,dpr,0,0);
+  c.clearRect(0,0,rect.width,rect.height);
+  D[cv.dataset.draw](c, rect.width, rect.height, t, cv.dataset.mini === "1");
+}
+const labCanvas = document.getElementById("labCanvas");
+const canvases = [...document.querySelectorAll("canvas[data-draw]")];
+function drawAll(){ const t = performance.now(); canvases.forEach(cv => drawCanvas(cv, t)); }
+
+let raf = 0;
+function startLoop(){
+  cancelAnimationFrame(raf);
+  const cvs = (view === "lab" ? [labCanvas] : [...panels[cur].querySelectorAll("canvas")]).filter(cv => ANIM.has(cv.dataset.draw));
+  if (!cvs.length || paused) return;
+  let last = 0;
+  const loop = now => { if (now - last > 33) { cvs.forEach(cv => drawCanvas(cv, now)); last = now; } raf = requestAnimationFrame(loop); };
+  raf = requestAnimationFrame(loop);
+}
+
+canvases.filter(cv => cv.dataset.mini !== "1").forEach(cv => {
+  cv.tabIndex = 0;
+  const act = (x, y) => {
+    const id = cv.dataset.draw, r = cv.getBoundingClientRect();
+    TAP[id](x, y, r.width, r.height);
+    if (id === "mosaic") return;
+    drawCanvas(cv, performance.now());
+    startLoop();
+  };
+  cv.addEventListener("click", e => { const r = cv.getBoundingClientRect(); act(e.clientX - r.left, e.clientY - r.top); });
+  cv.addEventListener("keydown", e => { if (e.key === "Enter") { e.preventDefault(); e.stopPropagation(); const r = cv.getBoundingClientRect(); act(r.width*(.2 + Math.random()*.6), r.height*(.2 + Math.random()*.6)); } });
+});
+
+document.querySelectorAll(".viewtabs button").forEach(b => b.addEventListener("click", () => {
+  const art = b.closest(".art");
+  art.dataset.mode = b.dataset.view;
+  if (b.dataset.view === "play") drawCanvas(art.querySelector("canvas"), now());
+  startLoop();
+}));
+
+/* 互動示意：選特徵、重來 */
+document.querySelectorAll(".art[data-id]").forEach(art => {
+  const id = art.dataset.id, cv = art.querySelector("canvas"), hint = art.querySelector(".mhint span");
+  art.querySelectorAll(".mchip").forEach(ch => ch.addEventListener("click", () => {
+    const k = +ch.dataset.tool;
+    S[id].tool = k;
+    art.querySelectorAll(".mchip").forEach(o => o.setAttribute("aria-pressed", String(o === ch)));
+    hint.textContent = MODES[id][k][1];
+    drawCanvas(cv, now()); startLoop();
+  }));
+  const rs = art.querySelector(".reset");
+  if (rs) rs.addEventListener("click", () => { const tool = S[id].tool; S[id] = INIT[id](); S[id].tool = tool; if (id === "destijl") seeds.destijl = 7; drawCanvas(cv, now()); startLoop(); });
+});
+
+document.querySelectorAll(".ftry").forEach(b => b.addEventListener("click", () => {
+  const panel = b.closest(".panel"), art = panel.querySelector(".art[data-id]");
+  const chip = art.querySelector(`.mchip[data-tool="${b.dataset.tool}"]`);
+  if (chip) chip.click();
+  art.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "center" });
+}));
+
+/* ---------- 互動實驗室 ---------- */
+const labStyles = document.getElementById("labStyles"), labBar = document.getElementById("labBar");
+labStyles.innerHTML = STYLES.map((st,i) => `<button type="button" class="lchip" data-i="${i}" aria-pressed="false" style="--c:${st.bar === "op" ? "#151515" : st.bar}">${st.zh}</button>`).join("");
+labStyles.querySelectorAll(".lchip").forEach(b => b.addEventListener("click", () => setLab(+b.dataset.i)));
+function setLab(i){
+  labIdx = Math.max(0, Math.min(STYLES.length - 1, i));
+  const st = STYLES[labIdx], id = st.id;
+  labEl.style.setProperty("--accent", st.accent); labEl.style.setProperty("--on-accent", st.onAccent || "#fff");
+  document.getElementById("labName").textContent = st.zh;
+  document.getElementById("labEn").textContent = st.en;
+  document.getElementById("labMotto").textContent = st.motto;
+  labStyles.querySelectorAll(".lchip").forEach(b => b.setAttribute("aria-pressed", String(+b.dataset.i === labIdx)));
+  labCanvas.dataset.draw = id; labCanvas.setAttribute("aria-label", `${st.zh}風格示意圖形`);
+  labBar.innerHTML = playBar(id);
+  const hint = labBar.querySelector(".mhint span");
+  const chips = [...labBar.querySelectorAll(".mchip")];
+  const sel = k => { S[id].tool = k; chips.forEach((o,j) => o.setAttribute("aria-pressed", String(j === k))); hint.textContent = MODES[id][k][1]; };
+  chips.forEach((ch,k) => ch.addEventListener("click", () => { sel(k); drawCanvas(labCanvas, now()); startLoop(); }));
+  labBar.querySelector(".reset").addEventListener("click", () => { const tool = S[id].tool; S[id] = INIT[id](); S[id].tool = tool; if (id === "destijl") seeds.destijl = 7; drawCanvas(labCanvas, now()); startLoop(); });
+  sel(S[id].tool);
+  if (view === "lab") { drawCanvas(labCanvas, now()); update(); }
+}
+document.querySelectorAll(".vswitch button").forEach(b => b.addEventListener("click", () => setView(b.dataset.v)));
+document.getElementById("labBack").addEventListener("click", () => { cur = labIdx + 1; setView("cards"); });
+document.querySelectorAll(".tolab").forEach(b => b.addEventListener("click", e => {
+  e.stopPropagation();
+  const i = +b.dataset.lab;
+  if (b.dataset.tool !== undefined) S[STYLES[i].id].tool = +b.dataset.tool;
+  labIdx = i; cur = i + 1; setView("lab");
+}));
+
+/* 作品輪播：可滑動、可點箭頭與圓點，停在作品頁時每 6 秒自動換下一張 */
+const carousels = [...document.querySelectorAll(".workview[data-count]")].map(wv => {
+  const box = wv.querySelector(".slides"), n = +wv.dataset.count, dots = [...wv.querySelectorAll(".sdot")], count = wv.querySelector(".scount");
+  const C = { wv, box, n, idx: 0, touched: 0 };
+  const show = i => { C.idx = i; dots.forEach((d,k) => d.setAttribute("aria-current", String(k === i))); count.textContent = `${i + 1} / ${n}`; };
+  C.go = i => { i = (i + n) % n; box.scrollTo({ left: i*box.clientWidth, behavior: reduce ? "auto" : "smooth" }); show(i); };
+  box.addEventListener("scroll", () => { const i = Math.round(box.scrollLeft / box.clientWidth); if (i !== C.idx && i >= 0 && i < n) show(i); }, { passive:true });
+  ["pointerdown","touchstart","wheel"].forEach(ev => box.addEventListener(ev, () => { C.touched = now(); }, { passive:true }));
+  wv.querySelectorAll(".sbtn").forEach(b => b.addEventListener("click", () => { C.touched = now(); C.go(C.idx + +b.dataset.step); }));
+  dots.forEach(d => d.addEventListener("click", () => { C.touched = now(); C.go(+d.dataset.slide); }));
+  show(0);
+  return C;
+});
+setInterval(() => {
+  if (paused || document.hidden) return;
+  const C = carousels.find(x => panels[cur].contains(x.wv));
+  if (C && now() - C.touched > 9000) C.go(C.idx + 1);
+}, 6000);
+
+function setPH(){ track.style.setProperty("--ph", track.clientHeight + "px"); }
+setPH();
+let rt = 0;
+window.addEventListener("resize", () => {
+  clearTimeout(rt);
+  rt = setTimeout(() => { setPH(); track.scrollTo({ left: cur*track.clientWidth, behavior:"auto" }); carousels.forEach(C => C.box.scrollTo({ left: C.idx*C.box.clientWidth })); drawAll(); }, 120);
+});
+
+
+/* ---------- 作品照片：存在頁面的共用資料裡，所有人打開都看得到 ---------- */
+(async function photos(){
+  const db = window.claude ? await claude.use("db").catch(() => null) : null;
+  const who = window.claude ? await claude.use("user").catch(() => null) : null;
+  const owner = !!(who && who.isOwner && who.isOwner());
+  /* 只有頁面擁有者看得到上傳／換圖，其他人只能看 */
+  const assets = owner && window.claude ? await claude.use("assets").catch(() => null) : null;
+  const apply = (slot, d) => {
+    const src = d.url || (d.asset ? "/_blob/" + d.asset : "");
+    if (!src) return;
+    document.querySelectorAll(`.fimg[data-slot="${slot}"]`).forEach(fr => {
+      fr.classList.remove("fimg-need"); fr.dataset.slot = slot;
+      fr.innerHTML = `<img src="${src}" alt="" loading="lazy">` + (assets ? upBtn(slot).replace(" hidden", "").replace("上傳圖片", "換圖") : "");
+      bindUp(fr);
+    });
+    document.querySelectorAll(`[data-credit="${slot}"]`).forEach(p => { if (d.credit) { p.hidden = false; p.textContent = "圖片：" + d.credit; } else if (slot.startsWith("c-")) { p.hidden = true; const a = p.parentElement.querySelector("a.imgref"); if (a) a.hidden = true; } });
+  };
+  function bindUp(root){
+    root.querySelectorAll("input[data-up]").forEach(inp => {
+      if (inp.dataset.bound) return; inp.dataset.bound = "1";
+      inp.addEventListener("change", async () => {
+        const f = inp.files && inp.files[0]; if (!f || !assets || !db) return;
+        const lab = inp.closest(".upbtn"); if (lab) lab.lastChild.textContent = "上傳中…";
+        try {
+          const r = await assets.upload(f);
+          const slot = inp.dataset.up;
+          await db.collection("photos").doc(slot).set({ asset: r.id, url: r.url });
+          apply(slot, { asset: r.id, url: r.url });
+        } catch (e) { if (lab) lab.lastChild.textContent = "上傳失敗，再試一次"; }
+      });
+    });
+  }
+  async function put(slot, f, lab){
+    if (!f || !assets || !db) return;
+    if (lab) lab.lastChild.textContent = "上傳中…";
+    try {
+      const r = await assets.upload(f);
+      await db.collection("photos").doc(slot).set({ asset: r.id, url: r.url });
+      apply(slot, { asset: r.id, url: r.url });
+    } catch (e) { if (lab) lab.lastChild.textContent = "上傳失敗，再試一次"; }
+  }
+  window.__putPhoto = put;
+  if (assets && db) {
+    const eb = document.createElement("button");
+    eb.type = "button"; eb.className = "editimgbtn"; eb.textContent = "✎ 換圖（只有你看得到）";
+    eb.addEventListener("click", () => { const on = document.body.classList.toggle("editimg"); eb.textContent = on ? "✓ 完成換圖" : "✎ 換圖（只有你看得到）"; });
+    document.body.appendChild(eb);
+    document.querySelectorAll(".upbtn").forEach(l => l.hidden = false); bindUp(document);
+    document.addEventListener("dragover", e => { if (e.target.closest && e.target.closest(".fimg[data-slot]")) e.preventDefault(); });
+    document.addEventListener("drop", e => {
+      const fr = e.target.closest && e.target.closest(".fimg[data-slot]"); if (!fr || (!fr.classList.contains("fimg-need") && !document.body.classList.contains("editimg"))) return;
+      e.preventDefault(); const f = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
+      put(fr.dataset.slot, f, fr.querySelector(".upbtn"));
+    });
+  }
+  if (db) {
+    try { db.collection("photos").onSnapshot(snap => { (snap.docs || snap).forEach(doc => { const d = typeof doc.data === "function" ? doc.data() : doc.data; apply(doc.id, d || {}); }); }); } catch (e) {}
+  }
+})();
+
+update();
+drawAll();
+if (document.fonts && document.fonts.ready) document.fonts.ready.then(drawAll);
+</script>
+</body>
+</html>
+
+</body></html>
