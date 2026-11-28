@@ -499,7 +499,7 @@ body.en .card h2 .tt{grid-row:2;font-size:.78rem!important;font-weight:400!impor
   var TONES=[COL.grey,COL.teal,COL.pink,COL.gold];
   var W=1080,H=1920,PW=930,PH=758;
   var BOX=220,TONEW=60,TG=10,CG=30,VG=14,LABH=70,COLW=BOX+TG+TONEW,LW=PW,LH=PH;
-  var STYLES=[['簡約白','Minimal white'],['墨色','Ink'],['畫框','Gallery'],['紙卡','Paper card'],['置中','Centred'],['雙色','Duotone'],['拼貼','Collage']];
+  var STYLES=[['簡約白','Minimal white'],['墨色','Ink'],['畫框','Gallery'],['置中','Centred'],['拼貼','Collage']];
   var reduce=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   var GL='ㄅㄆㄇㄈㄉㄊㄋㄌㄍㄎㄏㄐㄑㄒㄓㄔㄕㄖㄗㄘㄙㄧㄨㄩㄚㄛㄜㄝㄞㄟㄠㄡㄢㄣㄤㄥㄦ';
 
@@ -794,7 +794,7 @@ body.en .card h2 .tt{grid-row:2;font-size:.78rem!important;font-weight:400!impor
     txt(x,'我的名字，用注音寫','700 40px '+ZH,COL.ink,W/2,1112,'center');ls(x,'3px');txt(x,'MY NAME IN ZHUYIN','400 20px '+EN,COL.grey,W/2,1166,'center');ls(x,'0px');
     nameAt(x,M,1210,W-2*M,1690-1210,1,false);foot(x,false,true);
   }
-  var DRAW=[sty0,sty1,sty2,sty3,sty4,sty5,sty6];
+  var DRAW=[sty0,sty1,sty2,sty4,sty6];   // 紙卡 (sty3) and 雙色 (sty5) retired
   function render(){var c=$('story'),x=c.getContext('2d');x.save();x.clearRect(0,0,W,H);DRAW[styleIdx](x);x.restore();}
   if(document.fonts&&document.fonts.load){Promise.all([document.fonts.load('900 54px "Noto Sans TC"'),document.fonts.load('700 100px Poppins'),document.fonts.load('500 38px "Noto Sans TC"')]).then(render,render);}
   render();
